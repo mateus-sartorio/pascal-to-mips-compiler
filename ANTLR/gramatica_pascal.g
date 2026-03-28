@@ -60,10 +60,10 @@ WHILE: 'while';
 WITH: 'with';
 
 // 6.1.3. Identifiers 
-ID: [a-zA-Z] [a-zA-Z0-9]*;
+ID: [a-zA-Z][a-zA-Z0-9]*;
 
 // 6.1.4. Directives 
-DIRECTIVE: [a-zA-Z] [a-zA-Z0-9]*;
+DIRECTIVE: [a-zA-Z][a-zA-Z0-9]*;
 
 // 6.1.5. Numbers
 fragment DIGIT: [0-9];
