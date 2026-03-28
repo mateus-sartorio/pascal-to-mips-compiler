@@ -9,6 +9,7 @@ CASE        : 'case';
 CONST       : 'const';
 DIV         : 'div';
 DOWNTO      : 'downto';
+DO          : 'do';
 ELSE        : 'else';
 END         : 'end';
 FILE        : 'file';
