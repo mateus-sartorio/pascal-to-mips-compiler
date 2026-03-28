@@ -16,7 +16,7 @@ public class gramatica_pascal extends Lexer {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		AND=1, ARRAY=2, BEGIN=3, CASE=4, CONST=5, DIV=6, DOWNTO=7, DO=8, ELSE=9, 
+		AND=1, ARRAY=2, BEGIN=3, CASE=4, CONST=5, DIV=6, DO=7, DOWNTO=8, ELSE=9, 
 		END=10, FILE=11, FOR=12, FUNCTION=13, GOTO=14, IF=15, IN=16, LABEL=17, 
 		MOD=18, NIL=19, NOT=20, OF=21, OR=22, PACKED=23, PROCEDURE=24, PROGRAM=25, 
 		RECORD=26, REPEAT=27, SET=28, THEN=29, TO=30, TYPE=31, UNTIL=32, VAR=33, 
@@ -35,7 +35,7 @@ public class gramatica_pascal extends Lexer {
 
 	private static String[] makeRuleNames() {
 		return new String[] {
-			"AND", "ARRAY", "BEGIN", "CASE", "CONST", "DIV", "DOWNTO", "DO", "ELSE", 
+			"AND", "ARRAY", "BEGIN", "CASE", "CONST", "DIV", "DO", "DOWNTO", "ELSE", 
 			"END", "FILE", "FOR", "FUNCTION", "GOTO", "IF", "IN", "LABEL", "MOD", 
 			"NIL", "NOT", "OF", "OR", "PACKED", "PROCEDURE", "PROGRAM", "RECORD", 
 			"REPEAT", "SET", "THEN", "TO", "TYPE", "UNTIL", "VAR", "WHILE", "WITH", 
@@ -51,8 +51,8 @@ public class gramatica_pascal extends Lexer {
 
 	private static String[] makeLiteralNames() {
 		return new String[] {
-			null, "'and'", "'array'", "'begin'", "'case'", "'const'", "'div'", "'downto'", 
-			"'do'", "'else'", "'end'", "'file'", "'for'", "'function'", "'goto'", 
+			null, "'and'", "'array'", "'begin'", "'case'", "'const'", "'div'", "'do'", 
+			"'downto'", "'else'", "'end'", "'file'", "'for'", "'function'", "'goto'", 
 			"'if'", "'in'", "'label'", "'mod'", "'nil'", "'not'", "'of'", "'or'", 
 			"'packed'", "'procedure'", "'program'", "'record'", "'repeat'", "'set'", 
 			"'then'", "'to'", "'type'", "'until'", "'var'", "'while'", "'with'", 
@@ -63,7 +63,7 @@ public class gramatica_pascal extends Lexer {
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
 	private static String[] makeSymbolicNames() {
 		return new String[] {
-			null, "AND", "ARRAY", "BEGIN", "CASE", "CONST", "DIV", "DOWNTO", "DO", 
+			null, "AND", "ARRAY", "BEGIN", "CASE", "CONST", "DIV", "DO", "DOWNTO", 
 			"ELSE", "END", "FILE", "FOR", "FUNCTION", "GOTO", "IF", "IN", "LABEL", 
 			"MOD", "NIL", "NOT", "OF", "OR", "PACKED", "PROCEDURE", "PROGRAM", "RECORD", 
 			"REPEAT", "SET", "THEN", "TO", "TYPE", "UNTIL", "VAR", "WHILE", "WITH", 
@@ -155,7 +155,7 @@ public class gramatica_pascal extends Lexer {
 		"\u0002\u0001\u0003\u0001\u0003\u0001\u0003\u0001\u0003\u0001\u0003\u0001"+
 		"\u0004\u0001\u0004\u0001\u0004\u0001\u0004\u0001\u0004\u0001\u0004\u0001"+
 		"\u0005\u0001\u0005\u0001\u0005\u0001\u0005\u0001\u0006\u0001\u0006\u0001"+
-		"\u0006\u0001\u0006\u0001\u0006\u0001\u0006\u0001\u0006\u0001\u0007\u0001"+
+		"\u0006\u0001\u0007\u0001\u0007\u0001\u0007\u0001\u0007\u0001\u0007\u0001"+
 		"\u0007\u0001\u0007\u0001\b\u0001\b\u0001\b\u0001\b\u0001\b\u0001\t\u0001"+
 		"\t\u0001\t\u0001\t\u0001\n\u0001\n\u0001\n\u0001\n\u0001\n\u0001\u000b"+
 		"\u0001\u000b\u0001\u000b\u0001\u000b\u0001\f\u0001\f\u0001\f\u0001\f\u0001"+
@@ -224,7 +224,7 @@ public class gramatica_pascal extends Lexer {
 		"\u0000\u0000\u0003\u0089\u0001\u0000\u0000\u0000\u0005\u008f\u0001\u0000"+
 		"\u0000\u0000\u0007\u0095\u0001\u0000\u0000\u0000\t\u009a\u0001\u0000\u0000"+
 		"\u0000\u000b\u00a0\u0001\u0000\u0000\u0000\r\u00a4\u0001\u0000\u0000\u0000"+
-		"\u000f\u00ab\u0001\u0000\u0000\u0000\u0011\u00ae\u0001\u0000\u0000\u0000"+
+		"\u000f\u00a7\u0001\u0000\u0000\u0000\u0011\u00ae\u0001\u0000\u0000\u0000"+
 		"\u0013\u00b3\u0001\u0000\u0000\u0000\u0015\u00b7\u0001\u0000\u0000\u0000"+
 		"\u0017\u00bc\u0001\u0000\u0000\u0000\u0019\u00c0\u0001\u0000\u0000\u0000"+
 		"\u001b\u00c9\u0001\u0000\u0000\u0000\u001d\u00ce\u0001\u0000\u0000\u0000"+
@@ -264,24 +264,24 @@ public class gramatica_pascal extends Lexer {
 		"\u0000\u009e\u009f\u0005t\u0000\u0000\u009f\n\u0001\u0000\u0000\u0000"+
 		"\u00a0\u00a1\u0005d\u0000\u0000\u00a1\u00a2\u0005i\u0000\u0000\u00a2\u00a3"+
 		"\u0005v\u0000\u0000\u00a3\f\u0001\u0000\u0000\u0000\u00a4\u00a5\u0005"+
-		"d\u0000\u0000\u00a5\u00a6\u0005o\u0000\u0000\u00a6\u00a7\u0005w\u0000"+
-		"\u0000\u00a7\u00a8\u0005n\u0000\u0000\u00a8\u00a9\u0005t\u0000\u0000\u00a9"+
-		"\u00aa\u0005o\u0000\u0000\u00aa\u000e\u0001\u0000\u0000\u0000\u00ab\u00ac"+
-		"\u0005d\u0000\u0000\u00ac\u00ad\u0005o\u0000\u0000\u00ad\u0010\u0001\u0000"+
-		"\u0000\u0000\u00ae\u00af\u0005e\u0000\u0000\u00af\u00b0\u0005l\u0000\u0000"+
-		"\u00b0\u00b1\u0005s\u0000\u0000\u00b1\u00b2\u0005e\u0000\u0000\u00b2\u0012"+
-		"\u0001\u0000\u0000\u0000\u00b3\u00b4\u0005e\u0000\u0000\u00b4\u00b5\u0005"+
-		"n\u0000\u0000\u00b5\u00b6\u0005d\u0000\u0000\u00b6\u0014\u0001\u0000\u0000"+
-		"\u0000\u00b7\u00b8\u0005f\u0000\u0000\u00b8\u00b9\u0005i\u0000\u0000\u00b9"+
-		"\u00ba\u0005l\u0000\u0000\u00ba\u00bb\u0005e\u0000\u0000\u00bb\u0016\u0001"+
-		"\u0000\u0000\u0000\u00bc\u00bd\u0005f\u0000\u0000\u00bd\u00be\u0005o\u0000"+
-		"\u0000\u00be\u00bf\u0005r\u0000\u0000\u00bf\u0018\u0001\u0000\u0000\u0000"+
-		"\u00c0\u00c1\u0005f\u0000\u0000\u00c1\u00c2\u0005u\u0000\u0000\u00c2\u00c3"+
-		"\u0005n\u0000\u0000\u00c3\u00c4\u0005c\u0000\u0000\u00c4\u00c5\u0005t"+
-		"\u0000\u0000\u00c5\u00c6\u0005i\u0000\u0000\u00c6\u00c7\u0005o\u0000\u0000"+
-		"\u00c7\u00c8\u0005n\u0000\u0000\u00c8\u001a\u0001\u0000\u0000\u0000\u00c9"+
-		"\u00ca\u0005g\u0000\u0000\u00ca\u00cb\u0005o\u0000\u0000\u00cb\u00cc\u0005"+
-		"t\u0000\u0000\u00cc\u00cd\u0005o\u0000\u0000\u00cd\u001c\u0001\u0000\u0000"+
+		"d\u0000\u0000\u00a5\u00a6\u0005o\u0000\u0000\u00a6\u000e\u0001\u0000\u0000"+
+		"\u0000\u00a7\u00a8\u0005d\u0000\u0000\u00a8\u00a9\u0005o\u0000\u0000\u00a9"+
+		"\u00aa\u0005w\u0000\u0000\u00aa\u00ab\u0005n\u0000\u0000\u00ab\u00ac\u0005"+
+		"t\u0000\u0000\u00ac\u00ad\u0005o\u0000\u0000\u00ad\u0010\u0001\u0000\u0000"+
+		"\u0000\u00ae\u00af\u0005e\u0000\u0000\u00af\u00b0\u0005l\u0000\u0000\u00b0"+
+		"\u00b1\u0005s\u0000\u0000\u00b1\u00b2\u0005e\u0000\u0000\u00b2\u0012\u0001"+
+		"\u0000\u0000\u0000\u00b3\u00b4\u0005e\u0000\u0000\u00b4\u00b5\u0005n\u0000"+
+		"\u0000\u00b5\u00b6\u0005d\u0000\u0000\u00b6\u0014\u0001\u0000\u0000\u0000"+
+		"\u00b7\u00b8\u0005f\u0000\u0000\u00b8\u00b9\u0005i\u0000\u0000\u00b9\u00ba"+
+		"\u0005l\u0000\u0000\u00ba\u00bb\u0005e\u0000\u0000\u00bb\u0016\u0001\u0000"+
+		"\u0000\u0000\u00bc\u00bd\u0005f\u0000\u0000\u00bd\u00be\u0005o\u0000\u0000"+
+		"\u00be\u00bf\u0005r\u0000\u0000\u00bf\u0018\u0001\u0000\u0000\u0000\u00c0"+
+		"\u00c1\u0005f\u0000\u0000\u00c1\u00c2\u0005u\u0000\u0000\u00c2\u00c3\u0005"+
+		"n\u0000\u0000\u00c3\u00c4\u0005c\u0000\u0000\u00c4\u00c5\u0005t\u0000"+
+		"\u0000\u00c5\u00c6\u0005i\u0000\u0000\u00c6\u00c7\u0005o\u0000\u0000\u00c7"+
+		"\u00c8\u0005n\u0000\u0000\u00c8\u001a\u0001\u0000\u0000\u0000\u00c9\u00ca"+
+		"\u0005g\u0000\u0000\u00ca\u00cb\u0005o\u0000\u0000\u00cb\u00cc\u0005t"+
+		"\u0000\u0000\u00cc\u00cd\u0005o\u0000\u0000\u00cd\u001c\u0001\u0000\u0000"+
 		"\u0000\u00ce\u00cf\u0005i\u0000\u0000\u00cf\u00d0\u0005f\u0000\u0000\u00d0"+
 		"\u001e\u0001\u0000\u0000\u0000\u00d1\u00d2\u0005i\u0000\u0000\u00d2\u00d3"+
 		"\u0005n\u0000\u0000\u00d3 \u0001\u0000\u0000\u0000\u00d4\u00d5\u0005l"+
