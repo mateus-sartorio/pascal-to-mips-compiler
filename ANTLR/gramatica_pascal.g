@@ -1,26 +1,26 @@
 lexer grammar gramatica_pascal;
 
 // 6.1.2. Special symbols
-ATRIBUITION: ':=';
-NOTEQUALTO: '<>';
-LESSTHENEQTO: '<=';
-GRETERTHENEQTO: '>=';
+ASSIGNMENT: ':=';
+NOT_EQUAL_TO: '<>';
+LESS_THAN_OR_EQUAL_TO: '<=';
+GREATER_THAN_OR_EQUAL_TO: '>=';
 RANGE: '..';
-ADD: '+';
-SUB: '-';
-EQUAL: '=';
-VERSUS: '*';
-DIVISOR: '/';
-LESSTHEN: '<';
-MORETHEN: '>';
-OPBRACKET: '[';
-CLBRACKET: ']';
-DOT: '.';
-COMMAN: ',';
+ADDITION: '+';
+SUBTRACTION: '-';
+EQUAL_TO: '=';
+MULTIPLICATION: '*';
+DIVISION: '/';
+LESS_THAN: '<';
+GREATER_THAN: '>';
+OPEN_BRACKET: '[';
+CLOSE_BRACKET: ']';
+PERIOD: '.';
+COMMA: ',';
 COLON: ':';
 SEMICOLON: ';';
-OPPARENTHESES: '(';
-CLPARENTHESES: ')';
+OPEN_PARENTHESIS: '(';
+CLOSE_PARENTHESIS: ')';
 
 // Word-symbols
 AND: 'and';
