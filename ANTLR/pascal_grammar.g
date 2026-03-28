@@ -1,4 +1,4 @@
-lexer grammar gramatica_pascal;
+lexer grammar pascal_grammar;
 
 // 6.1.2. Special symbols
 ASSIGNMENT: ':=';
