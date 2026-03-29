@@ -91,7 +91,8 @@ fragment STRING_ELEMENT: APOSTROPHE_IMAGE | STRING_CHARACTER;
 CHARACTER_STRING : '\'' STRING_ELEMENT+ '\'';
 
 // 6.1.8 Token separators
-// TODO: Não entendi por enquanto
+// TODO: Não entendi 100% por enquanto
+WS: [ \t\r\n]+ -> skip;
 
 // 6.1.9 Lexical alternatives
 // Was not implemented because we either don't support the reference token or the alternative token is not commonly used

@@ -25,7 +25,7 @@ public class pascal_grammar extends Lexer {
 		LABEL=37, MOD=38, NIL=39, NOT=40, OF=41, OR=42, PACKED=43, PROCEDURE=44, 
 		PROGRAM=45, RECORD=46, REPEAT=47, SET=48, THEN=49, TO=50, TYPE=51, UNTIL=52, 
 		VAR=53, WHILE=54, WITH=55, ID=56, DIRECTIVE=57, UNSIGNED_NUMBER=58, SIGNED_NUMBER=59, 
-		LABEL_TOKEN=60, CHARACTER_STRING=61, WHITESPACE=62;
+		LABEL_TOKEN=60, CHARACTER_STRING=61, WS=62;
 	public static String[] channelNames = {
 		"DEFAULT_TOKEN_CHANNEL", "HIDDEN"
 	};
@@ -47,7 +47,7 @@ public class pascal_grammar extends Lexer {
 			"ID", "DIRECTIVE", "DIGIT", "DIGIT_SEQUENCE", "SIGN", "SCALE_FACTOR", 
 			"FRACTIONAL_PART", "UNSIGNED_INTEGER", "UNSIGNED_REAL", "SIGNED_INTEGER", 
 			"SIGNED_REAL", "UNSIGNED_NUMBER", "SIGNED_NUMBER", "LABEL_TOKEN", "APOSTROPHE_IMAGE", 
-			"STRING_CHARACTER", "STRING_ELEMENT", "CHARACTER_STRING", "WHITESPACE"
+			"STRING_CHARACTER", "STRING_ELEMENT", "CHARACTER_STRING", "WS"
 		};
 	}
 	public static final String[] ruleNames = makeRuleNames();
@@ -75,7 +75,7 @@ public class pascal_grammar extends Lexer {
 			"NIL", "NOT", "OF", "OR", "PACKED", "PROCEDURE", "PROGRAM", "RECORD", 
 			"REPEAT", "SET", "THEN", "TO", "TYPE", "UNTIL", "VAR", "WHILE", "WITH", 
 			"ID", "DIRECTIVE", "UNSIGNED_NUMBER", "SIGNED_NUMBER", "LABEL_TOKEN", 
-			"CHARACTER_STRING", "WHITESPACE"
+			"CHARACTER_STRING", "WS"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -202,7 +202,7 @@ public class pascal_grammar extends Lexer {
 		"\u0000}\u0000\u007f\u0000\u0081\u0000\u0083\u0000\u0085:\u0087;\u0089"+
 		"<\u008b\u0000\u008d\u0000\u008f\u0000\u0091=\u0093>\u0001\u0000\u0006"+
 		"\u0002\u0000AZaz\u0003\u000009AZaz\u0001\u000009\u0002\u0000++--\u0003"+
-		"\u0000\n\n\r\r\'\'\u0003\u0000\t\n\f\r  \u01cf\u0000\u0001\u0001\u0000"+
+		"\u0000\n\n\r\r\'\'\u0003\u0000\t\n\r\r  \u01cf\u0000\u0001\u0001\u0000"+
 		"\u0000\u0000\u0000\u0003\u0001\u0000\u0000\u0000\u0000\u0005\u0001\u0000"+
 		"\u0000\u0000\u0000\u0007\u0001\u0000\u0000\u0000\u0000\t\u0001\u0000\u0000"+
 		"\u0000\u0000\u000b\u0001\u0000\u0000\u0000\u0000\r\u0001\u0000\u0000\u0000"+

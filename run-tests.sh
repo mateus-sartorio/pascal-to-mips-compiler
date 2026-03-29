@@ -1,32 +1,45 @@
 #!/bin/bash
 
-set -euo pipefail
+SRC_DIR=src
+TESTS_DIR=tests
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$SCRIPT_DIR"
-SRC_DIR="$PROJECT_ROOT/src"
-TESTS_DIR="$PROJECT_ROOT/tests"
+clean_only=false
+if [ "$1" = "--clean" ]; then
+    clean_only=true
+fi
 
-make -C "$SRC_DIR"
+if [ "$clean_only" = false ]; then
+    make
+fi
 
 for infile in "$TESTS_DIR"/*/source.pas; do
-    [ -e "$infile" ] || continue
     case_dir="$(dirname "$infile")"
     case_name="$(basename "$case_dir")"
+    
     lexer_dir="$case_dir/lexer"
+    
     expected_file="$lexer_dir/expected_result.txt"
     actual_file="$lexer_dir/actual_result.txt"
     diff_file="$lexer_dir/diff.txt"
 
+    # Ensure lexer directory exists and clean previous results
+    mkdir -p "$lexer_dir"
+    rm -f "$actual_file" "$diff_file"
+
+    # If we're only cleaning, skip the test execution
+    if [ "$clean_only" = true ]; then
+        printf 'Cleaned %s\n' "$case_name"
+        continue
+    fi
+
+    # Run the test and capture output
+
     printf 'Running tests for %s\n' "$case_name"
 
-    mkdir -p "$lexer_dir"
-    make -s -C "$SRC_DIR" run FILE="$infile" > "$actual_file" 2>&1
+    make -s run FILE="$infile" > "$actual_file"
 
     if [ -f "$expected_file" ]; then
-        diff -u "$expected_file" "$actual_file" > "$diff_file" || true
-    else
-        printf 'Missing expected result file: %s\n' "$expected_file" > "$diff_file"
+        diff -u "$expected_file" "$actual_file" > "$diff_file"
     fi
 
     if [ -s "$diff_file" ]; then
