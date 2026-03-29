@@ -1,0 +1,5 @@
+.vscode/
+
+# Result files from test runs
+tests/**/lexer/actual_result.txt
+tests/**/lexer/diff.txt
