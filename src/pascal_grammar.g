@@ -1,5 +1,7 @@
 lexer grammar pascal_grammar;
 
+// -------------------- 6.1. Lexical Tokens --------------------
+
 // 6.1.2. Special symbols
 ASSIGNMENT: ':=';
 NOT_EQUAL_TO: '<>';
@@ -87,3 +89,13 @@ fragment APOSTROPHE_IMAGE : '\'\'';
 fragment STRING_CHARACTER: ~['\r\n];
 fragment STRING_ELEMENT: APOSTROPHE_IMAGE | STRING_CHARACTER;
 CHARACTER_STRING : '\'' STRING_ELEMENT+ '\'';
+
+// 6.1.8 Token separators
+// TODO: Não entendi por enquanto
+
+// 6.1.9 Lexical alternatives
+// Was not implemented because we either don't support the reference token or the alternative token is not commonly used
+
+// -------------------- 6.2. Lexical Tokens --------------------
+
+// Para ser continuado (ou não, não sei se o 6.2 entra nessa atividade)
