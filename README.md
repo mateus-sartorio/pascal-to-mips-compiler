@@ -1,31 +1,64 @@
-# Pascal to MIPS compiler
+# Pascal to MIPS Compiler
 
-## Powered by hope
+## Prerequisites
 
-## How to run
+- JDK installed (Java compiler and runtime).
 
-### Prerequisites
+> [!TIP]
+> When setting up Java for this project, it is recommended to use JDK 25 (or newer) with SDKMAN.
+>
+> To install SDKMAN:
+> `curl -s "https://get.sdkman.io" | bash`
+>
+> Then open a new terminal and check the active Java version:
+> `java --version`
+>
+> To list available Java versions in SDKMAN:
+> `sdk list java`
+>
+> To install a version (example):
+> `sdk install java 25-oracle`
+>
+> To select the installed version for the current session:
+> `sdk use java 25-oracle`
+>
+> To set it as the default version:
+> `sdk default java 25-oracle`
 
-- You must have a JDK installed.
-- Preferably use JDK 25 or newer.
-- ANTLR JAR is expected at `/usr/local/lib/antlr-4.13.2-complete.jar` (as configured in `src/Makefile`).
+ANTLR is bundled in this repository at `libs/antlr-4.13.2-complete.jar` and is already configured in the root `Makefile`.
 
-Tip: You can use jdkman (SDKMAN) to install and switch between JDK versions easily.
+## Commands
+
+Run all commands from the repository root.
 
 ### Build
 
-From the project source folder:
-
 ```bash
-cd src
 make
 ```
 
-### Run lexer test
+Generates lexer files and compiles Java sources.
+
+### Clean generated files
 
 ```bash
-cd src
-make run FILE=path/to/your_test_file.pas
+make clean
 ```
 
-This runs the lexer and prints recognized tokens.
+Removes generated lexer files.
+
+### Run tests
+
+```bash
+make test
+```
+
+Executes the automated test suite.
+
+### Clean test results
+
+```bash
+make test-clean
+```
+
+Removes generated test result files.
