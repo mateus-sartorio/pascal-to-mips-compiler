@@ -17,13 +17,13 @@
 > `sdk list java`
 >
 > To install a version (example):
-> `sdk install java 25-oracle`
+> `sdk install java 25.0.2-tem`
 >
 > To select the installed version for the current session:
-> `sdk use java 25-oracle`
+> `sdk use java 25.0.2-tem`
 >
 > To set it as the default version:
-> `sdk default java 25-oracle`
+> `sdk default java 25.0.2-tem`
 
 ANTLR is bundled in this repository at `libs/antlr-4.13.2-complete.jar` and is already configured in the root `Makefile`.
 
