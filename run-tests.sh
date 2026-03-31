@@ -20,7 +20,7 @@ for infile in "$TESTS_DIR"/*/source.pas; do
     
     expected_file="$lexer_dir/expected_result.txt"
     actual_file="$lexer_dir/actual_result.txt"
-    diff_file="$lexer_dir/diff.txt"
+    diff_file="$lexer_dir/diff.diff"
 
     # Ensure lexer directory exists and clean previous results
     mkdir -p "$lexer_dir"
