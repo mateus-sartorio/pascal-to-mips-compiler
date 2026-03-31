@@ -93,7 +93,7 @@ CHARACTER_STRING : '\'' STRING_ELEMENT+ '\'';
 // 6.1.8 Token separators
 // TODO: Não entendi 100% por enquanto
 WS: [ \t\r\n]+ -> skip;
-COMMENTARY : '{' | '(*' ~['}' | '*)']* '}' | '*)';
+COMMENTARY : (('{' .*? '}') | ('(*' .*? '*)')) -> skip;
 
 
 // 6.1.9 Lexical alternatives
