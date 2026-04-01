@@ -1,5 +1,7 @@
 # Pascal to MIPS Compiler
 
+## Powered by hope and coffee ☕
+
 ## Prerequisites
 
 - JDK installed (Java compiler and runtime).
@@ -26,6 +28,12 @@
 > `sdk default java 25.0.2-tem`
 
 ANTLR is bundled in this repository at `libs/antlr-4.13.2-complete.jar` and is already configured in the root `Makefile`.
+
+## Recommended Extensions
+
+If you are using **Visual Studio Code**, it is highly recommended to install the following extension to assist with lexer and parser development:
+
+* **[ANTLR4 support](https://marketplace.visualstudio.com/items?itemName=mike-lischke.vscode-antlr4)**: Provides syntax highlighting, code completion, and grammar diagrams for `.g4` files.
 
 ## Commands
 
