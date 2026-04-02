@@ -96,5 +96,5 @@ COMMENTARY : (('{' .*? '}') | ('(*' .*? '*)')) -> skip;
 // 6.1.9 Lexical alternatives
 // Was not implemented because we either don't support the reference token or the alternative token is not commonly used
 
-// Ignore spaces
+// Ignore separator characters
 WS: [ \t\r\n]+ -> skip;
