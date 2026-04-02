@@ -1,5 +1,8 @@
 .vscode/
 
+# ANTLR generated code 
+src/lexer
+
 # Result files from test runs
 tests/**/lexer/actual_result.txt
 tests/**/lexer/diff.diff
