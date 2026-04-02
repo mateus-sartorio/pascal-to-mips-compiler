@@ -33,7 +33,7 @@ ANTLR is bundled in this repository at `libs/antlr-4.13.2-complete.jar` and is a
 
 If you are using **Visual Studio Code**, it is highly recommended to install the following extension to assist with lexer and parser development:
 
-* **[ANTLR4 support](https://marketplace.visualstudio.com/items?itemName=mike-lischke.vscode-antlr4)**: Provides syntax highlighting, code completion, and grammar diagrams for `.g4` files.
+* **[ANTLR4 support](https://marketplace.visualstudio.com/items?itemName=mike-lischke.vscode-antlr4)**: Provides syntax highlighting, code completion, and grammar diagrams for `.g` files.
 
 ## Commands
 
