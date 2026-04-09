@@ -61,8 +61,6 @@ VAR: 'var';
 WHILE: 'while';
 WITH: 'with';
 
-// 6.1.3. Identifiers 
-ID: [a-zA-Z][a-zA-Z0-9]*;
 
 // 6.1.4. Directives 
 DIRECTIVE: [a-zA-Z][a-zA-Z0-9]*;
@@ -100,6 +98,9 @@ STRING_TYPE: CHARACTER_STRING;
 
 // 6.1.8 Token separators
 COMMENTARY: (('{' .*? '}') | ('(*' .*? '*)')) -> skip;
+
+// 6.1.3. Identifiers (Fora da ordem da ISO para não pegar componentes de outros tokens)
+ID: [a-zA-Z][a-zA-Z0-9]*;
 
 // 6.1.9 Lexical alternatives Was not implemented because we either don't support the reference
 // token or the alternative token is not commonly used
