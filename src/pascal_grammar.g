@@ -61,9 +61,9 @@ VAR: 'var';
 WHILE: 'while';
 WITH: 'with';
 
-
-// 6.1.4. Directives 
-DIRECTIVE: [a-zA-Z][a-zA-Z0-9]*;
+// 6.1.4. Directives (Retirei elas por enquanto, como elas são exatamente iguais a identificadores,
+// elas acabam pegando tokens que deveriam ser identificadores. Isso parece ser melhor na parte do
+// Parser, não temos contexto para isso no lexer) DIRECTIVE: [a-zA-Z][a-zA-Z0-9]*;
 
 // 6.1.5. Numbers
 fragment DIGIT: [0-9];
@@ -79,7 +79,7 @@ fragment UNSIGNED_REAL: (
 fragment SIGNED_INTEGER: SIGN? UNSIGNED_INTEGER;
 fragment SIGNED_REAL: SIGN? UNSIGNED_REAL;
 
-// TYPES
+// Number Types
 UNSIGNED_INTEGER_TYPE: UNSIGNED_INTEGER;
 SIGNED_INTEGER_TYPE: SIGNED_INTEGER;
 UNSIGNED_REAL_TYPE: UNSIGNED_REAL;
