@@ -65,6 +65,16 @@ WITH: 'with';
 // elas acabam pegando tokens que deveriam ser identificadores. Isso parece ser melhor na parte do
 // Parser, não temos contexto para isso no lexer) DIRECTIVE: [a-zA-Z][a-zA-Z0-9]*;
 
+// Types identifiers
+INTEGER_TYPE: 'Integer';
+REAL_TYPE: 'Real';
+BOOLEAN_TYPE: 'Boolean';
+CHARACTER_TYPE: 'Char';
+STRING_TYPE: 'String';
+ARRAY_TYPE: 'Array';
+RECORD_TYPE: 'Record';
+FILE_TYPE: 'File';
+
 // 6.1.5. Numbers
 fragment DIGIT: [0-9];
 fragment DIGIT_SEQUENCE: DIGIT+;
