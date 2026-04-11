@@ -54,6 +54,10 @@ clean:
 test:
 	@./run-tests.sh
 
+# Run automated negative tests
+negative_test:
+	@./run-negative-tests.sh
+
 # Clean test result files
 test-clean:
 	@./run-tests.sh --clean
