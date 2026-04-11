@@ -66,11 +66,11 @@ WITH: 'with';
 // Parser, não temos contexto para isso no lexer) DIRECTIVE: [a-zA-Z][a-zA-Z0-9]*;
 
 // Types identifiers
-INTEGER_TYPE: 'integer';
-REAL_TYPE: 'real';
-BOOLEAN_TYPE: 'boolean';
-CHARACTER_TYPE: 'char';
-STRING_TYPE: 'string';
+INTEGER: [iI][nN][tT][eE][gG][eE][rR];
+REAL: [rR][eE][aA][lL];
+BOOLEAN: [bB][oO][oO][lL][eE][aA][nN];
+CHAR: [cC][hH][aA][rR];
+STRING: [sS][tT][rR][iI][nN][gG];
 
 // 6.1.5. Numbers
 fragment DIGIT: [0-9];
