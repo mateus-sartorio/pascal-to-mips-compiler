@@ -17,7 +17,7 @@ ANTLR4=$(JAVA) -jar $(ANTLR_PATH)
 GRUN=$(JAVA) $(CLASS_PATH_OPTION) org.antlr.v4.gui.TestRig
 
 # Grammar name
-GRAMMAR_NAME=pascal_grammar
+GRAMMAR_NAME=PascalLexer
 
 # Project paths (Makefile now at repository root)
 SRC_DIR=src

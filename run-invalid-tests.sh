@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configurações
-GRAMMAR_NAME="pascal_grammar"
+GRAMMAR_NAME="PascalLexer"
 GEN_PATH="src/lexer"
 INVALID_TESTS_DIR="tests/invalid"
 ANTLR_JAR="../../libs/antlr-4.13.2-complete.jar"
