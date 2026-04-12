@@ -2,7 +2,8 @@
 
 # ANTLR generated code 
 src/lexer
+src/.antlr
 
 # Result files from test runs
-tests/**/lexer/actual_result.txt
-tests/**/lexer/diff.diff
+tests/**/**/lexer/actual_result.txt
+tests/**/**/lexer/diff.diff

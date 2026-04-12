@@ -50,10 +50,18 @@ run:
 clean:
 	@rm -rf $(GEN_PATH)
 
-# Run automated tests
 test:
-	@./run-tests.sh
+	@./test.sh
+
+# Run automated tests
+valid-tests:
+	@./run-valid-tests.sh
+
+# Run automated negative tests
+invalid-tests:
+	@./run-invalid-tests.sh
 
 # Clean test result files
 test-clean:
-	@./run-tests.sh --clean
+	@./run-valid-tests.sh --clean
+	@./run-invalid-tests.sh --clean

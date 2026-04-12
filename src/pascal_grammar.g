@@ -61,11 +61,16 @@ VAR: 'var';
 WHILE: 'while';
 WITH: 'with';
 
-// 6.1.3. Identifiers 
-ID: [a-zA-Z][a-zA-Z0-9]*;
+// 6.1.4. Directives
+// TODO: (Retirei elas por enquanto, como elas são exatamente iguais a identificadores, elas acabam pegando tokens que deveriam ser identificadores. Isso parece ser melhor na parte do parser, não temos contexto para isso no lexer)
+// DIRECTIVE: [a-zA-Z][a-zA-Z0-9]*;
 
-// 6.1.4. Directives 
-DIRECTIVE: [a-zA-Z][a-zA-Z0-9]*;
+// Types identifiers
+INTEGER: 'integer';
+REAL: 'real';
+BOOLEAN: 'boolean';
+CHAR: 'char';
+STRING: 'string';
 
 // 6.1.5. Numbers
 fragment DIGIT: [0-9];
@@ -73,28 +78,30 @@ fragment DIGIT_SEQUENCE: DIGIT+;
 fragment SIGN: [+-];
 fragment SCALE_FACTOR: SIGN? DIGIT_SEQUENCE;
 fragment FRACTIONAL_PART: DIGIT_SEQUENCE;
-fragment UNSIGNED_INTEGER: DIGIT_SEQUENCE;
-fragment UNSIGNED_REAL: (DIGIT_SEQUENCE '.' FRACTIONAL_PART ('e' SCALE_FACTOR)?) | (DIGIT_SEQUENCE 'e' SCALE_FACTOR);
-fragment SIGNED_INTEGER: SIGN? UNSIGNED_INTEGER;
-fragment SIGNED_REAL: SIGN? UNSIGNED_REAL;
 
-UNSIGNED_NUMBER: UNSIGNED_INTEGER | UNSIGNED_REAL;
-SIGNED_NUMBER: SIGNED_INTEGER | SIGNED_REAL;
+UNSIGNED_INTEGER: DIGIT_SEQUENCE;
+SIGNED_INTEGER: SIGN? UNSIGNED_INTEGER;
+
+UNSIGNED_REAL: (DIGIT_SEQUENCE '.' FRACTIONAL_PART ('e' SCALE_FACTOR)?) | (DIGIT_SEQUENCE 'e' SCALE_FACTOR);
+SIGNED_REAL: SIGN? UNSIGNED_REAL;
 
 // 6.1.6 Labels
 LABEL_TOKEN: DIGIT_SEQUENCE;
 
 // 6.1.7. String literals
-fragment APOSTROPHE_IMAGE : '\'\'';
+fragment APOSTROPHE_IMAGE: '\'\'';
 fragment STRING_CHARACTER: ~['\r\n];
 fragment STRING_ELEMENT: APOSTROPHE_IMAGE | STRING_CHARACTER;
-CHARACTER_STRING : '\'' STRING_ELEMENT+ '\'';
+CHARACTER_STRING: '\'' STRING_ELEMENT+ '\'';
 
 // 6.1.8 Token separators
-COMMENTARY : (('{' .*? '}') | ('(*' .*? '*)')) -> skip;
+COMMENTARY: (('{' .*? '}') | ('(*' .*? '*)')) -> skip;
 
-// 6.1.9 Lexical alternatives
-// Was not implemented because we either don't support the reference token or the alternative token is not commonly used
+// 6.1.3. Identifiers (Fora da ordem da ISO para não pegar componentes de outros tokens)
+ID: [a-zA-Z][a-zA-Z0-9]*;
+
+// 6.1.9 Lexical alternatives Was not implemented because we either don't support the reference
+// token or the alternative token is not commonly used
 
 // Ignore separator characters
 WS: [ \t\r\n]+ -> skip;
