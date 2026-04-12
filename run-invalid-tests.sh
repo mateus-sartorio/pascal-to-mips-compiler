@@ -3,11 +3,12 @@
 # Configurações
 GRAMMAR_NAME="pascal_grammar"
 GEN_PATH="src/lexer"
-TEST_DIR="tests"
+INVALID_TESTS_DIR="tests/invalid"
 ANTLR_JAR="../../libs/antlr-4.13.2-complete.jar"
+failed_tests=0
 
-# Procura por todas as pastas dentro de tests/ que começam com "err_"
-for test_case in $TEST_DIR/err_*; do
+# Procura por todas as pastas dentro de INVALID_TESTS_DIR
+for test_case in $INVALID_TESTS_DIR/*; do
     if [ -d "$test_case" ]; then
         TEST_NAME=$(basename "$test_case")
         echo -n "Testando [$TEST_NAME]... "
@@ -36,9 +37,16 @@ for test_case in $TEST_DIR/err_*; do
 
         if [ -s "$DIFF_FILE" ]; then
             echo "❌ FALHOU (Saída diferente do esperado. Veja $DIFF_FILE)"
+            failed_tests=$((failed_tests + 1))
         else
             echo "✅ PASSOU"
             rm -f "$DIFF_FILE" # Limpa o diff se passou
         fi
     fi
 done
+
+if [ "$failed_tests" -gt 0 ]; then
+    exit 1
+fi
+
+exit 0

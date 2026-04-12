@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SRC_DIR=src
-TESTS_DIR=tests
+VALID_TESTS_DIR=tests/valid
 
 clean_only=false
 if [ "$1" = "--clean" ]; then
@@ -14,7 +14,7 @@ fi
 
 failed_tests=0
 
-for infile in "$TESTS_DIR"/*/source.pas; do
+for infile in "$VALID_TESTS_DIR"/*/source.pas; do
     case_dir="$(dirname "$infile")"
     case_name="$(basename "$case_dir")"
     
