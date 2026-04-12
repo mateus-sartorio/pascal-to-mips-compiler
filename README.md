@@ -1,6 +1,6 @@
 # Pascal to MIPS Compiler
 
-## Powered by hope and coffee ☕
+### Powered by hope and coffee ☕
 
 ## Prerequisites
 

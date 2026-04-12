@@ -1,4 +1,4 @@
-lexer grammar pascal_grammar;
+lexer grammar PascalLexer;
 
 // -------------------- 6.1. Lexical Tokens --------------------
 
@@ -75,9 +75,10 @@ STRING: 'string';
 // 6.1.5. Numbers
 fragment DIGIT: [0-9];
 fragment DIGIT_SEQUENCE: DIGIT+;
-fragment SIGN: [+-];
 fragment SCALE_FACTOR: SIGN? DIGIT_SEQUENCE;
 fragment FRACTIONAL_PART: DIGIT_SEQUENCE;
+
+SIGN: [+-];
 
 UNSIGNED_INTEGER: DIGIT_SEQUENCE;
 SIGNED_INTEGER: SIGN? UNSIGNED_INTEGER;
@@ -98,10 +99,9 @@ CHARACTER_STRING: '\'' STRING_ELEMENT+ '\'';
 COMMENTARY: (('{' .*? '}') | ('(*' .*? '*)')) -> skip;
 
 // 6.1.3. Identifiers (Fora da ordem da ISO para não pegar componentes de outros tokens)
-ID: [a-zA-Z][a-zA-Z0-9]*;
+IDENTIFIER: [a-zA-Z][a-zA-Z0-9]*;
 
-// 6.1.9 Lexical alternatives Was not implemented because we either don't support the reference
-// token or the alternative token is not commonly used
+// 6.1.9 Lexical alternatives Was not implemented because we either don't support the reference token or the alternative token is not commonly used
 
 // Ignore separator characters
 WS: [ \t\r\n]+ -> skip;
