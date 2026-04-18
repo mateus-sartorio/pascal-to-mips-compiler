@@ -4,7 +4,7 @@ options {
     tokenVocab = PascalLexer;
 }
 
-// Fix isso porque não definimos DIRECTIVE no lexer
+// Fix this because we did not define DIRECTIVE in the lexer.
 directive : IDENTIFIER ;
 
 // -------------------- 6.2 Blocks, scopes, and activations --------------------
@@ -21,7 +21,7 @@ statement_part : compound_statement ;
 
 // -------------------- 6.3 Constant-definitions --------------------
 
-// Não vamos implementar
+// Will not be implemented
 
 
 // -------------------- 6.4 Type-definitions --------------------
@@ -29,9 +29,6 @@ statement_part : compound_statement ;
 type_definition : IDENTIFIER EQUAL_TO type_denoter ;
 type_denoter : type_identifier | new_type ;
 
-// Não vamos implementar new_pointer_type
-// new_type : new_ordinal_type | new_structured_type | new_pointer_type ;
-// new_type : new_ordinal_type | new_structured_type ;
 new_type : new_structured_type ;
 
 simple_type_identifier : type_identifier ;
@@ -41,24 +38,20 @@ type_identifier : IDENTIFIER ;
 
 // 6.4.2 Simple-types
 simple_type : ordinal_type | real_type_identifier ;
-// ordinal_type : new_ordinal_type | ordinal_type_identifier ;
 ordinal_type : ordinal_type_identifier ;
-// new_ordinal_type : enumerated_type | subrange_type ;
-// new_ordinal_type : enumerated_type ;
 ordinal_type_identifier : type_identifier ;
 real_type_identifier : type_identifier ;
 
 // 6.4.2.3 Enumerated-types
-// Não vamos implementar
 identifier_list : IDENTIFIER ( COMMA IDENTIFIER )* ;
+// The rest will not be implemented
 
 // 6.4.2.4 Subrange-types
-// Não vamos implementar
+// Will not be implemented
 
 // 6.4.3 Structured-types
 structured_type : new_structured_type | structured_type_identifier ;
 new_structured_type : ( PACKED )? unpacked_structured_type ;
-// unpacked_structured_type : array_type | record_type | set_type | file_type ;
 unpacked_structured_type : array_type ;
 
 // 6.4.3.2 Array-types
@@ -67,16 +60,16 @@ index_type : ordinal_type ;
 component_type : type_denoter ;
 
 // 6.4.3.3 Record-types
-// Não vamos implementar
+// Will not be implemented
 
 // 6.4.3.4 Set-types
-// Não vamos implementar
+// Will not be implemented
 
 // 6.4.3.5 File-types
-// Não vamos implementar
+// Will not be implemented
 
 // 6.4.4 Pointer-types
-// Não vamos implementar
+// Will not be implemented
 
 
 // -------------------- 6.5 Declarations and denotations of variables --------------------
@@ -84,8 +77,6 @@ component_type : type_denoter ;
 // 6.5.1 Variable-declarations
 variable_declaration : identifier_list COLON type_denoter ;
 
-// Não vamos implementar identified_variable e buffer_variable 
-// variable_access : entire_variable | component_variable | identified_variable | buffer_variable ;
 variable_access : entire_variable | component_variable ;
 
 // 6.5.2 Entire-variables
@@ -93,7 +84,6 @@ entire_variable : variable_identifier ;
 variable_identifier : IDENTIFIER ;
 
 // 6.5.3 Component-variables
-// component_variable : indexed_variable | field_designator ;
 component_variable : indexed_variable ;
 
 // 6.5.3.2 Indexed-variables
@@ -102,11 +92,11 @@ array_variable : variable_access ;
 index_expression : expression ;
 
 // 6.5.3.3 Field-designators
-// Não vamos implementar
+// Will not be implemented
 
 // 6.5.5 Buffer-variables
 // Will not be implemented
-// file_variable : variable_access ;
+
 
 // -------------------- 6.6 Procedure and function declarations --------------------
 
@@ -131,8 +121,6 @@ function_heading : FUNCTION IDENTIFIER ( formal_parameter_list )? COLON result_t
 function_identification : FUNCTION function_identifier ;
 function_identifier : IDENTIFIER ;
 
-// pointer_type_identifier não será implementado
-// result_type : simple_type_identifier | pointer_type_identifier;
 result_type : simple_type_identifier;
 function_block : block ;
 
@@ -152,7 +140,7 @@ procedural_parameter_specification : procedure_heading ;
 functional_parameter_specification : function_heading ;
 
 // 6.6.3.7 Conformant array parameters
-// TODO : Pulei essa seção
+// Will not be implemented
 
 // -------------------- 6.7 Expressions --------------------
 
@@ -161,14 +149,6 @@ functional_parameter_specification : function_heading ;
 expression : simple_expression ( relational_operator simple_expression )? ;
 simple_expression : ( SIGN )? term ( adding_operator term )* ;
 term : factor ( multiplying_operator factor )* ;
-
-// factor : variable_access
-//         | unsigned_constant
-//         | function_designator
-//         | set_constructor
-//         | OPEN_PARENTHESIS expression CLOSE_PARENTHESIS
-//         | NOT factor ;
-
     
 factor : variable_access
         | unsigned_constant
@@ -176,19 +156,15 @@ factor : variable_access
         | OPEN_PARENTHESIS expression CLOSE_PARENTHESIS
         | NOT factor ;
 
-// unsigned_constant : UNSIGNED_INTEGER | UNSIGNED_REAL | CHARACTER_STRING | constant_identifier | NIL;
 unsigned_constant : UNSIGNED_INTEGER | UNSIGNED_REAL | CHARACTER_STRING | NIL;
-// set_constructor : OPEN_BRACKET ( member_designator ( COMMA member_designator )* )? CLOSE_BRACKET ;
 member_designator : expression | ( RANGE expression )? ;
 
 // 6.7.2 Operators
 
 // 6.7.2.1 General
 
-// multiplying_operator : MULTIPLICATION | DIVISION | DIV | MOD | AND ;
 multiplying_operator : MULTIPLICATION | AND ;
 adding_operator : ADDITION | SUBTRACTION | OR ;
-// relational_operator : EQUAL_TO | NOT_EQUAL_TO | LESS_THAN | LESS_THAN_OR_EQUAL_TO | GREATER_THAN | GREATER_THAN_OR_EQUAL_TO | IN ;
 relational_operator : EQUAL_TO | NOT_EQUAL_TO | LESS_THAN | LESS_THAN_OR_EQUAL_TO | GREATER_THAN | GREATER_THAN_OR_EQUAL_TO ;
 
 // 6.7.2.3 Boolean operators
@@ -210,51 +186,26 @@ statement : ( IDENTIFIER COLON )? ( simple_statement | structured_statement ) ;
 
 // 6.8.2.1 General
 
-// Não vamos implementar goto_statement
-// simple_statement : empty_statement 
-//                   | assignment_statement
-//                   | procedure_statement
-//                   | goto_statement
-//                  ;
-
-// simple_statement : empty_statement 
-                //   | assignment_statement
-                //   | procedure_statement
-                //  ;
-
-simple_statement :  assignment_statement
+simple_statement :  empty_statement
+                  | assignment_statement
                   | procedure_statement
                  ;
 
-// empty_statement : /* empty */ ;
+empty_statement : /* empty */ ;
 
 // 6.8.2.2 Assignment-statements
-// assignment_statement : ( variable_access | function_identifier ) ASSIGNMENT expression ;
 assignment_statement : variable_access ASSIGNMENT expression ;
 
 // 6.8.2.3 Procedure-statements
-// procedure_statement : procedure_identifier ( actual_parameter_list )?
-//                     | read_parameter_list
-//                     | readln_parameter_list
-//                     | write_parameter_list
-//                     | writeln_parameter_list
-//                     ;
 
 procedure_statement : procedure_identifier ( actual_parameter_list )? ;
 
 // 6.8.2.4 Goto-statements
-// Não vamos implementar
-
+// Will not be implemented
 
 // 6.8.3 Structured-statements
 
 // 6.8.3.1 General
-
-// structured_statement : compound_statement
-//                      | conditional_statement
-//                      | repetitive_statement
-//                      | with_statement
-//                      ;
 
 structured_statement : compound_statement
                      | conditional_statement
@@ -267,7 +218,6 @@ statement_sequence : statement ( SEMICOLON statement )* ;
 compound_statement : BEGIN statement_sequence END ;
 
 // 6.8.3.3 Conditional-statements
-// conditional_statement : if_statement | case_statement ;
 conditional_statement : if_statement ;
 
 // 6 .8 .3 .4 If-statements
@@ -275,17 +225,16 @@ if_statement : IF boolean_expression THEN statement ( else_part )? ;
 else_part : ELSE statement ;
 
 // 6.8.3.5 Case-statements
-// Não vamos implementar
+// Will not be implemented
 
 // 6.8.3.6 Repetitive-statements
-// repetitive_statement : repeat_statement | while_statement | for_statement ;
 repetitive_statement : for_statement ;
 
 // 6.8.3.7 Repeat-statements
-// Não vamos implementar
+// Will not be implemented
 
 // 6.8.3.8 While-statements
-// Não vamos implementar
+// Will not be implemented
 
 // 6.8.3.9 For-statements
 for_statement : FOR control_variable ASSIGNMENT initial_value ( TO | DOWNTO ) final_value DO statement ;
@@ -294,11 +243,12 @@ initial_value : expression ;
 final_value : expression ;
 
 // 6.8.3.10 With-statements
-// Não vamos implementar
+// Will not be implemented
+
 
 // -------------------- 6.9 Input and output --------------------
 
-// Não vamos implementar
+// Will not be implemented
 
 
 // -------------------- 6.10 Programs --------------------
