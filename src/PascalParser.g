@@ -21,8 +21,9 @@ procedure_and_function_declaration_part : ( ( procedure_declaration | function_d
 
 // -------------------- 6.4 Type-definitions --------------------
 
+primitive_type : INTEGER | REAL | BOOLEAN | CHAR | STRING ;
 type_definition : IDENTIFIER EQUAL_TO type_denoter ;
-type_denoter : IDENTIFIER | new_structured_type ;
+type_denoter : primitive_type | array_type ;
 
 
 // 6.4.2 Simple-types
@@ -36,11 +37,10 @@ identifier_list : IDENTIFIER ( COMMA IDENTIFIER )* ;
 // Will not be implemented
 
 // 6.4.3 Structured-types
-structured_type : new_structured_type | IDENTIFIER ;
-new_structured_type : ( PACKED )? array_type ;
+// Not needed
 
 // 6.4.3.2 Array-types
-array_type : ARRAY OPEN_BRACKET IDENTIFIER ( COMMA IDENTIFIER )* CLOSE_BRACKET OF type_denoter ;
+array_type : ( PACKED )? ARRAY OPEN_BRACKET IDENTIFIER ( COMMA IDENTIFIER )* CLOSE_BRACKET OF type_denoter ;
 
 // 6.4.3.3 Record-types
 // Will not be implemented
