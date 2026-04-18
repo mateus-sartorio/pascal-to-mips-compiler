@@ -12,7 +12,6 @@ ADDITION: '+';
 SUBTRACTION: '-';
 EQUAL_TO: '=';
 MULTIPLICATION: '*';
-DIVISION: '/';
 LESS_THAN: '<';
 GREATER_THAN: '>';
 OPEN_BRACKET: '[' | '(.';
@@ -28,21 +27,14 @@ CLOSE_PARENTHESIS: ')';
 AND: 'and';
 ARRAY: 'array';
 BEGIN: 'begin';
-CASE: 'case';
-CONST: 'const';
-DIV: 'div';
 DO: 'do';
 DOWNTO: 'downto';
 ELSE: 'else';
 END: 'end';
-FILE: 'file';
 FOR: 'for';
 FUNCTION: 'function';
-GOTO: 'goto';
 IF: 'if';
-IN: 'in';
 LABEL: 'label';
-MOD: 'mod';
 NIL: 'nil';
 NOT: 'not';
 OF: 'of';
@@ -50,20 +42,13 @@ OR: 'or';
 PACKED: 'packed';
 PROCEDURE: 'procedure';
 PROGRAM: 'program';
-RECORD: 'record';
-REPEAT: 'repeat';
-SET: 'set';
 THEN: 'then';
 TO: 'to';
 TYPE: 'type';
-UNTIL: 'until';
 VAR: 'var';
-WHILE: 'while';
-WITH: 'with';
 
 // 6.1.4. Directives
-// TODO: (Retirei elas por enquanto, como elas são exatamente iguais a identificadores, elas acabam pegando tokens que deveriam ser identificadores. Isso parece ser melhor na parte do parser, não temos contexto para isso no lexer)
-// DIRECTIVE: [a-zA-Z][a-zA-Z0-9]*;
+// Not needed
 
 // Types identifiers
 INTEGER: 'integer';
@@ -81,13 +66,11 @@ fragment FRACTIONAL_PART: DIGIT_SEQUENCE;
 SIGN: [+-];
 
 UNSIGNED_INTEGER: DIGIT_SEQUENCE;
-SIGNED_INTEGER: SIGN? UNSIGNED_INTEGER;
 
 UNSIGNED_REAL: (DIGIT_SEQUENCE '.' FRACTIONAL_PART ('e' SCALE_FACTOR)?) | (DIGIT_SEQUENCE 'e' SCALE_FACTOR);
-SIGNED_REAL: SIGN? UNSIGNED_REAL;
 
 // 6.1.6 Labels
-LABEL_TOKEN: DIGIT_SEQUENCE;
+// Not used
 
 // 6.1.7. String literals
 fragment APOSTROPHE_IMAGE: '\'\'';
