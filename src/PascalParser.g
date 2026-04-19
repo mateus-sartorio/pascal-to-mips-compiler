@@ -123,13 +123,14 @@ simple_expression : ( SIGN )? term ( adding_operator term )* ;
 term : factor ( multiplying_operator factor )* ;
     
 factor : variable_access
+        | signed_constant
         | unsigned_constant
         | function_designator
         | OPEN_PARENTHESIS expression CLOSE_PARENTHESIS
         | NOT factor ;
 
 unsigned_constant : UNSIGNED_INTEGER | UNSIGNED_REAL | CHARACTER_STRING | NIL;
-member_designator : expression | ( RANGE expression )? ;
+signed_constant : SIGNED_INTEGER | SIGNED_REAL;
 
 // 6.7.2 Operators
 

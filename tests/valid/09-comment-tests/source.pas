@@ -6,7 +6,7 @@ program TesteComentarios;
 var
   a: integer; (* Comentario estilo antigo (parenteses e asterisco) *)
 begin
-  a := 10; // Comentario de linha unica (estilo Delphi/Moderno)
+  a := 10;
   
   { Teste de comentario "misturado" (* com outro simbolo dentro *) }
   

@@ -1,9 +1,9 @@
 .vscode/
 
 # ANTLR generated code 
-src/lexer
 src/.antlr
+src/target
 
 # Result files from test runs
-tests/**/**/lexer/actual_result.txt
-tests/**/**/lexer/diff.diff
+tests/**/**/**/actual_result.txt
+tests/**/**/**/diff.diff

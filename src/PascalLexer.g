@@ -66,8 +66,10 @@ fragment FRACTIONAL_PART: DIGIT_SEQUENCE;
 SIGN: [+-];
 
 UNSIGNED_INTEGER: DIGIT_SEQUENCE;
+SIGNED_INTEGER: SIGN? UNSIGNED_INTEGER;
 
 UNSIGNED_REAL: (DIGIT_SEQUENCE '.' FRACTIONAL_PART ('e' SCALE_FACTOR)?) | (DIGIT_SEQUENCE 'e' SCALE_FACTOR);
+SIGNED_REAL: SIGN? UNSIGNED_REAL;
 
 // 6.1.6 Labels
 // Not used
@@ -81,7 +83,7 @@ CHARACTER_STRING: '\'' STRING_ELEMENT+ '\'';
 // 6.1.8 Token separators
 COMMENTARY: (('{' .*? '}') | ('(*' .*? '*)')) -> skip;
 
-// 6.1.3. Identifiers (Fora da ordem da ISO para não pegar componentes de outros tokens)
+// 6.1.3. Identifiers (Outside the ISO order so it doesn’t pick up parts of other tokens)
 IDENTIFIER: [a-zA-Z][a-zA-Z0-9]*;
 
 // 6.1.9 Lexical alternatives Was not implemented because we either don't support the reference token or the alternative token is not commonly used
