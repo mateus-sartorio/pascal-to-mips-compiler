@@ -1,7 +1,7 @@
 parser grammar PascalParser;
 
 options {
-    tokenVocab = PascalLexer;
+  tokenVocab = PascalLexer;
 }
 
 // -------------------- 6.2 Blocks, scopes, and activations --------------------
@@ -10,13 +10,14 @@ block : label_declaration_part type_definition_part variable_declaration_part pr
 
 label_declaration_part : ( LABEL IDENTIFIER ( COMMA LABEL )* SEMICOLON )? ;
 type_definition_part : ( TYPE type_definition COMMA ( type_definition SEMICOLON )* )? ;
-variable_declaration_part : ( VAR variable_declaration COMMA ( variable_declaration SEMICOLON )* )? ;
+variable_declaration_part : ( VAR variable_declaration ( SEMICOLON variable_declaration )* SEMICOLON )* ;
 procedure_and_function_declaration_part : ( ( procedure_declaration | function_declaration ) SEMICOLON )* ;
 
 
 // -------------------- 6.3 Constant-definitions --------------------
 
-// Will not be implemented
+constant_deifinition : IDENTIFIER EQUAL_TO constant ;
+constant : ( ( PLUS | MINUS )? UNSIGNED_INTEGER | UNSIGNED_REAL ) | CHARACTER_STRING ;
 
 
 // -------------------- 6.4 Type-definitions --------------------
@@ -34,13 +35,13 @@ identifier_list : IDENTIFIER ( COMMA IDENTIFIER )* ;
 // The rest will not be implemented
 
 // 6.4.2.4 Subrange-types
-// Will not be implemented
+subrange_type : constant RANGE constant ;
 
 // 6.4.3 Structured-types
 // Not needed
 
 // 6.4.3.2 Array-types
-array_type : ( PACKED )? ARRAY OPEN_BRACKET IDENTIFIER ( COMMA IDENTIFIER )* CLOSE_BRACKET OF type_denoter ;
+array_type : ( PACKED )? ARRAY OPEN_BRACKET subrange_type ( COMMA subrange_type )* CLOSE_BRACKET OF type_denoter ;
 
 // 6.4.3.3 Record-types
 // Will not be implemented
@@ -82,34 +83,28 @@ indexed_variable : IDENTIFIER OPEN_BRACKET ( expression  ( COMMA expression )* )
 
 // 6.6.1 Procedure-declarations
 
-procedure_declaration : procedure_heading SEMICOLON IDENTIFIER
-                        | procedure_identification SEMICOLON block
-                        | procedure_heading SEMICOLON block ;
+procedure_declaration : procedure_heading SEMICOLON compound_statement ;
 
 procedure_heading : PROCEDURE IDENTIFIER ( formal_parameter_list )? ;
-procedure_identification : PROCEDURE IDENTIFIER ;
 
 // 6.6.2 Function-declarations
 
-function_declaration : function_heading SEMICOLON IDENTIFIER
-                        | function_identification SEMICOLON block
-                        | function_heading SEMICOLON block ;
+function_declaration : function_heading SEMICOLON compound_statement ;
 
-function_heading : FUNCTION IDENTIFIER ( formal_parameter_list )? COLON IDENTIFIER ;
-function_identification : FUNCTION IDENTIFIER ;
+function_heading : FUNCTION IDENTIFIER ( formal_parameter_list )? COLON type_denoter ;
 
 // 6.6.3 Parameters
 
 // 6.6.3.1 General
 
-formal_parameter_list : OPEN_BRACKET formal_parameter_section ( SEMICOLON formal_parameter_section )* CLOSE_BRACKET ;
+formal_parameter_list : OPEN_PARENTHESIS formal_parameter_section ( SEMICOLON formal_parameter_section )* CLOSE_PARENTHESIS ;
 formal_parameter_section : value_parameter_speficiation
                         | variable_parameter_specification
                         | procedure_heading
                         | function_heading ;
 
-value_parameter_speficiation : identifier_list COLON IDENTIFIER ;
-variable_parameter_specification : VAR identifier_list COLON IDENTIFIER ;
+value_parameter_speficiation : identifier_list COLON type_denoter ;
+variable_parameter_specification : VAR identifier_list COLON type_denoter ;
 
 // 6.6.3.7 Conformant array parameters
 // Will not be implemented
@@ -119,25 +114,23 @@ variable_parameter_specification : VAR identifier_list COLON IDENTIFIER ;
 // 6.7.1 General
 
 expression : simple_expression ( relational_operator simple_expression )? ;
-simple_expression : ( SIGN )? term ( adding_operator term )* ;
+simple_expression : ( PLUS | MINUS )? term ( adding_operator term )* ;
 term : factor ( multiplying_operator factor )* ;
     
 factor : variable_access
-        | signed_constant
         | unsigned_constant
         | function_designator
         | OPEN_PARENTHESIS expression CLOSE_PARENTHESIS
         | NOT factor ;
 
-unsigned_constant : UNSIGNED_INTEGER | UNSIGNED_REAL | CHARACTER_STRING | NIL;
-signed_constant : SIGNED_INTEGER | SIGNED_REAL;
+unsigned_constant : UNSIGNED_INTEGER | UNSIGNED_REAL | CHARACTER_STRING;
 
 // 6.7.2 Operators
 
 // 6.7.2.1 General
 
-multiplying_operator : MULTIPLICATION | AND ;
-adding_operator : ADDITION | SUBTRACTION | OR ;
+multiplying_operator : MULTIPLICATION | DIVISION | AND ;
+adding_operator : PLUS | MINUS | OR ;
 relational_operator : EQUAL_TO | NOT_EQUAL_TO | LESS_THAN | LESS_THAN_OR_EQUAL_TO | GREATER_THAN | GREATER_THAN_OR_EQUAL_TO ;
 
 // 6.7.2.3 Boolean operators

@@ -1,18 +1,18 @@
-program TesteComentarios;
+program p9;
 { 
-  Comentario de multiplas linhas 
-  usando chaves.
+  Multi-line comment
+  using braces.
 }
 var
-  a: integer; (* Comentario estilo antigo (parenteses e asterisco) *)
+  a: integer; (* Old-style comment (parentheses and asterisk) *)
 begin
   a := 10;
   
-  { Teste de comentario "misturado" (* com outro simbolo dentro *) }
+  { "Mixed" comment test (* with another symbol inside *) }
   
-  (* Teste de codigo "comentado"
+  (* "Commented out" code test
      a := 20; 
   *)
 
-  writeln('O valor de a e: ', a); { Comentario no fim da linha }
+  writeln('The value of a is: ', a); { Comment at the end of the line }
 end.

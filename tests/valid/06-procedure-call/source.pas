@@ -1,10 +1,20 @@
-program p8;
+program p6;
+
+var x: integer;
+
 procedure inc2(var a: integer);
 begin
-a:=a+2;
+  a := a + 2;
 end;
-var x: integer;
+
+function inc3(var a: integer) : integer;
 begin
-x:=1;
-inc2(x);
+  a := a + 2;
+  inc3 := a;
+end;
+
+begin
+  x := 1;
+  inc2(x);
+  x := inc3(x);
 end.

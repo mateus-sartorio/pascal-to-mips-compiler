@@ -1,4 +1,4 @@
-program p6;
+program p5;
 var i: integer;
 begin
 for i:=10 downto 1 do i:=i-1;

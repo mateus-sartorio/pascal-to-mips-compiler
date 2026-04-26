@@ -1,14 +1,16 @@
-program ExemploTipos;
+program p10;
+
 var
-  idade: integer;
-  preco: real;
-  inicial: char;
-  nome: string;
-  ativo: boolean;
+  age: integer;
+  price: real;
+  initial: char;
+  name: string;
+  active: boolean;
+
 begin
-  idade = 30;
-  preco = 19.99;
-  inicial = 'J';
-  nome = 'Joao';
-  ativo = true;
+  age := 30;
+  price := 19.99;
+  initial := 'J';
+  name := 'John';
+  active := true;
 end.
