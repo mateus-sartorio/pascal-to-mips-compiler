@@ -8,8 +8,8 @@ NOT_EQUAL_TO: '<>';
 LESS_THAN_OR_EQUAL_TO: '<=';
 GREATER_THAN_OR_EQUAL_TO: '>=';
 RANGE: '..';
-ADDITION: '+';
-SUBTRACTION: '-';
+PLUS: '+';
+MINUS: '-';
 EQUAL_TO: '=';
 MULTIPLICATION: '*';
 DIVISION: '/';
@@ -28,42 +28,27 @@ CLOSE_PARENTHESIS: ')';
 AND: 'and';
 ARRAY: 'array';
 BEGIN: 'begin';
-CASE: 'case';
-CONST: 'const';
-DIV: 'div';
 DO: 'do';
 DOWNTO: 'downto';
 ELSE: 'else';
 END: 'end';
-FILE: 'file';
 FOR: 'for';
 FUNCTION: 'function';
-GOTO: 'goto';
 IF: 'if';
-IN: 'in';
 LABEL: 'label';
-MOD: 'mod';
-NIL: 'nil';
 NOT: 'not';
 OF: 'of';
 OR: 'or';
 PACKED: 'packed';
 PROCEDURE: 'procedure';
 PROGRAM: 'program';
-RECORD: 'record';
-REPEAT: 'repeat';
-SET: 'set';
 THEN: 'then';
 TO: 'to';
 TYPE: 'type';
-UNTIL: 'until';
 VAR: 'var';
-WHILE: 'while';
-WITH: 'with';
 
 // 6.1.4. Directives
-// TODO: (Retirei elas por enquanto, como elas são exatamente iguais a identificadores, elas acabam pegando tokens que deveriam ser identificadores. Isso parece ser melhor na parte do parser, não temos contexto para isso no lexer)
-// DIRECTIVE: [a-zA-Z][a-zA-Z0-9]*;
+// Not needed
 
 // Types identifiers
 INTEGER: 'integer';
@@ -75,19 +60,15 @@ STRING: 'string';
 // 6.1.5. Numbers
 fragment DIGIT: [0-9];
 fragment DIGIT_SEQUENCE: DIGIT+;
-fragment SCALE_FACTOR: SIGN? DIGIT_SEQUENCE;
+fragment SCALE_FACTOR: (PLUS | MINUS)? DIGIT_SEQUENCE;
 fragment FRACTIONAL_PART: DIGIT_SEQUENCE;
 
-SIGN: [+-];
-
 UNSIGNED_INTEGER: DIGIT_SEQUENCE;
-SIGNED_INTEGER: SIGN? UNSIGNED_INTEGER;
 
 UNSIGNED_REAL: (DIGIT_SEQUENCE '.' FRACTIONAL_PART ('e' SCALE_FACTOR)?) | (DIGIT_SEQUENCE 'e' SCALE_FACTOR);
-SIGNED_REAL: SIGN? UNSIGNED_REAL;
 
 // 6.1.6 Labels
-LABEL_TOKEN: DIGIT_SEQUENCE;
+// Not used
 
 // 6.1.7. String literals
 fragment APOSTROPHE_IMAGE: '\'\'';
@@ -98,7 +79,7 @@ CHARACTER_STRING: '\'' STRING_ELEMENT+ '\'';
 // 6.1.8 Token separators
 COMMENTARY: (('{' .*? '}') | ('(*' .*? '*)')) -> skip;
 
-// 6.1.3. Identifiers (Fora da ordem da ISO para não pegar componentes de outros tokens)
+// 6.1.3. Identifiers (Outside the ISO order so it doesn’t pick up parts of other tokens)
 IDENTIFIER: [a-zA-Z][a-zA-Z0-9]*;
 
 // 6.1.9 Lexical alternatives Was not implemented because we either don't support the reference token or the alternative token is not commonly used
