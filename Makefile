@@ -66,7 +66,8 @@ run-parser-gui:
 
 # Run all automated tests
 test:
-	@./test.sh
+	@chmod +x test.sh
+	@./test.sh $(ARGS)
 
 # Clean automated tests results
 test-clean:
