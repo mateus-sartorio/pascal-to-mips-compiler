@@ -8,7 +8,7 @@ options {
 
 block : type_definition_part variable_declaration_part procedure_and_function_declaration_part compound_statement ;
 
-type_definition_part : ( TYPE type_definition COMMA ( type_definition SEMICOLON )* )? ;
+type_definition_part : ( TYPE type_definition SEMICOLON (type_definition SEMICOLON)*)? ;
 variable_declaration_part : ( VAR variable_declaration ( SEMICOLON variable_declaration )* SEMICOLON )* ;
 procedure_and_function_declaration_part : ( ( procedure_declaration | function_declaration ) SEMICOLON )* ;
 
@@ -23,7 +23,7 @@ constant : ( ( PLUS | MINUS )? UNSIGNED_INTEGER | UNSIGNED_REAL ) | CHARACTER_ST
 
 primitive_type : INTEGER | REAL | BOOLEAN | CHAR | STRING ;
 type_definition : IDENTIFIER EQUAL_TO type_denoter ;
-type_denoter : primitive_type | array_type ;
+type_denoter : primitive_type | array_type | IDENTIFIER ;
 
 
 // 6.4.2 Simple-types
