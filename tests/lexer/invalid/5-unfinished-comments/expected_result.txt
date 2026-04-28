@@ -1,0 +1,6 @@
+line 3:2 token recognition error at: '{ Comentário esquecido...\n  writeln('Isso nunca será lido');\nend.'
+[@0,0:6='program',<'program'>,1:0]
+[@1,8:21='ErroComentario',<IDENTIFIER>,1:8]
+[@2,22:22=';',<';'>,1:22]
+[@3,24:28='begin',<'begin'>,2:0]
+[@4,97:96='<EOF>',<EOF>,5:4]
