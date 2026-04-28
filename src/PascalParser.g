@@ -6,9 +6,8 @@ options {
 
 // -------------------- 6.2 Blocks, scopes, and activations --------------------
 
-block : label_declaration_part type_definition_part variable_declaration_part procedure_and_function_declaration_part compound_statement ;
+block : type_definition_part variable_declaration_part procedure_and_function_declaration_part compound_statement ;
 
-label_declaration_part : ( LABEL IDENTIFIER ( COMMA LABEL )* SEMICOLON )? ;
 type_definition_part : ( TYPE type_definition COMMA ( type_definition SEMICOLON )* )? ;
 variable_declaration_part : ( VAR variable_declaration ( SEMICOLON variable_declaration )* SEMICOLON )* ;
 procedure_and_function_declaration_part : ( ( procedure_declaration | function_declaration ) SEMICOLON )* ;
