@@ -7,11 +7,6 @@ type
   arrayOfBoolean = array [1..15] of boolean;
   arrayOfString = array [1..25] of string;
 
-var
-  array1, array2, array3: arrayOfBoolean;
-  array4: arrayOfInteger;
-  array5: char;
-
 begin
     writeln('Type definition part test passed!');
 end.
