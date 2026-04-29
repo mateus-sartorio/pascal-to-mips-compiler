@@ -5,3 +5,6 @@ src/target
 # Result files from test runs
 tests/**/**/**/actual_result.txt
 tests/**/**/**/diff.diff
+
+# Compiled binaries
+bin/**/*
