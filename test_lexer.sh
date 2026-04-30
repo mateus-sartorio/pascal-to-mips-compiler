@@ -3,6 +3,7 @@
 # Cores
 RED='\033[0;31m'
 GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 PURPLE='\033[0;35m'
 NC='\033[0m'
@@ -11,8 +12,8 @@ run_module() {
     local module=$1
     local dir="tests/$module"
     
-    # Se a pasta não existir ou estiver vazia, não imprime nada e sai
-    if [ ! -d "$dir" ] || [ -z "$(ls -A "$dir" 2>/dev/null)" ]; then return; fi
+    # Se a pasta não existir, sai silenciosamente
+    if [ ! -d "$dir" ]; then return; fi
 
     echo -e "${BLUE}=== RODANDO TESTES DO ${module^^} ===${NC}"
     
@@ -40,21 +41,20 @@ run_module() {
     done
 }
 
-# Removemos o "make -s" daqui de dentro pois o Makefile já faz isso
 case "$1" in
+    "--clean")
+        find tests -name "actual_result.txt" -delete
+        find tests -name "diff.diff" -delete
+        echo -e "${YELLOW}Logs limpos.${NC}"
+        ;;
     "--lexer")
         run_module "lexer"
         ;;
     "--parser")
         run_module "parser"
         ;;
-    "--clean")
-        find tests -name "actual_result.txt" -delete
-        find tests -name "diff.diff" -delete
-        echo -e "${YELLOW}Logs limpos.${NC}"
-        ;;
     *)
-        # Execução padrão (sem duplicar echo)
+        # Só cai aqui se você rodar "make test" sem ARGS
         run_module "lexer"
         run_module "parser"
         ;;

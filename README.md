@@ -61,6 +61,18 @@ Removes generated lexer files.
 make test
 ```
 
+Tests can be executed independently. You can do this by passing an argument as shown below:
+
+```bash
+make test ARGS="--lexer" 
+```
+
+or
+
+```bash
+make test ARGS="--parser" 
+```
+
 Executes the automated test suite.
 
 ### Clean test results

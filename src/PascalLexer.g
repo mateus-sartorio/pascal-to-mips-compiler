@@ -35,7 +35,6 @@ END: 'end';
 FOR: 'for';
 FUNCTION: 'function';
 IF: 'if';
-LABEL: 'label';
 NOT: 'not';
 OF: 'of';
 OR: 'or';

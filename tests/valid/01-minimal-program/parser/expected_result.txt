@@ -1,1 +1,0 @@
-(program (program_heading program p1) ; (block label_declaration_part type_definition_part variable_declaration_part procedure_and_function_declaration_part (compound_statement begin (statement_sequence (statement (simple_statement empty_statement))) end)) .)
