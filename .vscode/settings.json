@@ -1,5 +1,8 @@
 {
   "editor.insertSpaces": true,
   "editor.tabSize": 2,
-  "editor.detectIndentation": false
+  "editor.detectIndentation": false,
+  "java.project.referencedLibraries": [
+    "libs/antlr-4.13.2-complete.jar"
+  ]
 }
