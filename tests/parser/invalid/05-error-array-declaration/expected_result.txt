@@ -1,0 +1,4 @@
+line 1:13 token recognition error at: '_'
+line 1:19 token recognition error at: '_'
+line 1:14 mismatched input 'array' expecting {OPEN_BRACKET, ';'}
+(program (program_heading program error) array declaration ; type arrayOfInteger = array [ 1 .. ] of integer ; begin end .)

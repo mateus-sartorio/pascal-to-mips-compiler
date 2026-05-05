@@ -1,0 +1,2 @@
+line 3:10 missing IDENTIFIER at ':'
+(program (program_heading program ErrorComma) ; (block type_definition_part (variable_declaration_part var (variable_declaration (identifier_list x , y , <missing IDENTIFIER>) : (type_denoter (primitive_type integer))) ;) procedure_and_function_declaration_part (compound_statement begin (statement_sequence (statement (simple_statement (assignment_statement (variable_access x) := (expression (simple_expression (term (factor (unsigned_constant 1)))))))) ; (statement (simple_statement empty_statement))) end)) .)
