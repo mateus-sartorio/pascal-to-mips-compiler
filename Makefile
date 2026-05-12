@@ -68,6 +68,9 @@ run-parser:
 run-parser-gui:
 	cd $(TARGET_PATH) && $(GRUN) $(GRAMAR_NAME) program $(RUN_FILE) -gui
 
+# Run the pasrser with visitor
+run-parser-visitor:
+	cd $(TARGET_PATH) && $(GRUN) $(GRAMAR_NAME) program $(RUN_FILE) -visitor
 
 # Run all automated tests
 test:
