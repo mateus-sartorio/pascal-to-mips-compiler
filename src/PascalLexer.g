@@ -1,5 +1,9 @@
 lexer grammar PascalLexer;
 
+@header {
+  package parser;
+}
+
 // -------------------- 6.1. Lexical Tokens --------------------
 
 // 6.1.2. Special symbols
@@ -46,8 +50,7 @@ TO: 'to';
 TYPE: 'type';
 VAR: 'var';
 
-// 6.1.4. Directives
-// Not needed
+// 6.1.4. Directives Not needed
 
 // Types identifiers
 INTEGER: 'integer';
@@ -64,10 +67,12 @@ fragment FRACTIONAL_PART: DIGIT_SEQUENCE;
 
 UNSIGNED_INTEGER: DIGIT_SEQUENCE;
 
-UNSIGNED_REAL: (DIGIT_SEQUENCE '.' FRACTIONAL_PART ('e' SCALE_FACTOR)?) | (DIGIT_SEQUENCE 'e' SCALE_FACTOR);
+UNSIGNED_REAL: (
+		DIGIT_SEQUENCE '.' FRACTIONAL_PART ('e' SCALE_FACTOR)?
+	)
+	| (DIGIT_SEQUENCE 'e' SCALE_FACTOR);
 
-// 6.1.6 Labels
-// Not used
+// 6.1.6 Labels Not used
 
 // 6.1.7. String literals
 fragment APOSTROPHE_IMAGE: '\'\'';
