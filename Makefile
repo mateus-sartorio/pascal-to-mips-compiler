@@ -42,7 +42,9 @@ all: antlr javac
 
 # Run ANTLR to compile the grammar
 antlr: $(LEXER_FILE) $(PARSER_FILE)
-	$(ANTLR4) -no-listener -visitor -o $(TARGET_PATH) $(LEXER_FILE) $(PARSER_FILE)
+	@mkdir -p $(TARGET_PATH)
+	$(ANTLR4) -Xexact-output-dir -no-listener -visitor -o $(TARGET_PATH) $(LEXER_FILE) 
+	$(ANTLR4) -Xexact-output-dir	-no-listener -visitor -o $(TARGET_PATH) $(PARSER_FILE)
 
 # Run javac to compile generated files
 javac:

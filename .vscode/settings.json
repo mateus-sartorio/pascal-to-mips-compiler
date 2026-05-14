@@ -4,5 +4,10 @@
   "editor.detectIndentation": false,
   "java.project.referencedLibraries": [
     "libs/antlr-4.13.2-complete.jar"
-  ]
+  ],
+  "antlr4.generation": {
+    "mode": "none"
+  }
 }
+
+

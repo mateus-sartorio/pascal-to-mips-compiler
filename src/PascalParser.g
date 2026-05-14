@@ -4,9 +4,6 @@ options {
 	tokenVocab = PascalLexer;
 }
 
-@header {
-  package parser;
-}
 
 // -------------------- 6.2 Blocks, scopes, and activations --------------------
 

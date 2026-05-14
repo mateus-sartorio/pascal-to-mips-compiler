@@ -1,8 +1,5 @@
 lexer grammar PascalLexer;
 
-@header {
-  package parser;
-}
 
 // -------------------- 6.1. Lexical Tokens --------------------
 
