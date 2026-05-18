@@ -25,7 +25,8 @@ public class App {
       // Iniciando o processo de parsing (criando a parser tree)
       ParseTree tree = parser.program();
 
-      System.out.println("Arvore de parsing: " + tree.toStringTree(parser));
+      // Imprimindo a parser tree (opcional, para debug)
+      // System.out.println("Arvore de parsing: " + tree.toStringTree(parser));
 
       if (parser.getNumberOfSyntaxErrors() == 0) {
 
@@ -34,9 +35,9 @@ public class App {
         SemanticChecker visitor = new SemanticChecker();
         visitor.visit(tree);
 
-        System.out.println("Análise semântica concluída com sucesso!");
-        System.out.println("Strings table: " + visitor.printStringsTable());
-        System.out.println("Symbols table: " + visitor.printSymbolsTable());
+        System.out.println("Análise semântica concluída com sucesso!\n");
+        System.out.println("Strings table: \n" + visitor.printStringsTable());
+        System.out.println("Symbols table: \n" + visitor.printSymbolsTable());
       }
 
     } catch (Exception e) {
