@@ -1,6 +1,5 @@
 lexer grammar PascalLexer;
 
-
 // -------------------- 6.1. Lexical Tokens --------------------
 
 // 6.1.2. Special symbols

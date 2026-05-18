@@ -4,7 +4,6 @@ options {
 	tokenVocab = PascalLexer;
 }
 
-
 // -------------------- 6.2 Blocks, scopes, and activations --------------------
 
 block:
