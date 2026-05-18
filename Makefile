@@ -72,7 +72,7 @@ run-parser-gui:
 
 # Run the semantic checker
 run-semantic-checker:
-	@$(JAVA) $(CLASS_PATH_OPTION) Main $(RUN_FILE)
+	@$(JAVA) $(CLASS_PATH_OPTION) App $(RUN_FILE)
 
 # Run all automated tests
 test:
