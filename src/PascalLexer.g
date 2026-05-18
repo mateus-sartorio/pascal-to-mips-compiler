@@ -1,5 +1,9 @@
 lexer grammar PascalLexer;
 
+@header {
+package parser;
+}
+
 // -------------------- 6.1. Lexical Tokens --------------------
 
 // 6.1.2. Special symbols

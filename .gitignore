@@ -1,6 +1,5 @@
 # ANTLR generated code 
 src/.antlr
-src/parser
 java_bin/**/*
 
 # Result files from test runs
@@ -9,3 +8,4 @@ tests/**/**/**/diff.diff
 
 # Compiled binaries
 bin/**/*
+src/target

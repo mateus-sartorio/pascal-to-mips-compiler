@@ -1,148 +1,149 @@
 package checker;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import parser.PascalParser;
+import parser.PascalParser.ConstantContext;
+import parser.PascalParser.For_statementContext;
+import parser.PascalParser.Identifier_listContext;
+import parser.PascalParser.Indexed_variableContext;
+import parser.PascalParser.Unsigned_constantContext;
+import parser.PascalParser.Value_parameter_speficiationContext;
+import parser.PascalParser.Variable_accessContext;
+import parser.PascalParser.Variable_declarationContext;
+import parser.PascalParser.Variable_parameter_specificationContext;
 import parser.PascalParserBaseVisitor;
+import tables.StringLiteralsTable;
+import tables.VariablesTable;
+import types.PrimitiveType;
 
-public class SemanticChecker extends PascalParserBaseVisitor<Void> {
-
-  private static class Entry {
-    public String varID;
-    public String varType;
-    public int line;
-  }
+public class SemanticChecker extends PascalParserBaseVisitor<Void> {  
+  // Tabela de literais para armazenar as strings literais encontradas no código
+  private final StringLiteralsTable stringLiteralsTable = new StringLiteralsTable();
 
   // Tabela de símbolos para armazenar as variáveis declaradas no código
-  private Map<String, Entry> symbolsTable = new LinkedHashMap<>();
+  private final VariablesTable variablesTable = new VariablesTable();
 
-  public String printSymbolsTable() {
-    StringBuilder sb = new StringBuilder();
-    
-    sb.append(String.format("%-15s %-15s %s\n", "ID", "TYPE", "LINE"));
-    
-    for (Entry entry : symbolsTable.values()) {
-        sb.append(String.format("%-15s %-15s %d\n", entry.varID, entry.varType, entry.line));
-    }
-    
-    return sb.toString();
-}
-
-  // Tabela de strings para armazenar as strings literais encontradas no código
-  private Set<String> stringsTable = new LinkedHashSet<>();
-
-  public String printStringsTable() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("STRINGS\n");
-    for (String str : stringsTable) {
-      sb.append(str).append("\n");
-    }
-    return sb.toString();
+  public void printLiteralsTable() {
+    System.out.println(stringLiteralsTable);
   }
 
-  // Método auxiliar para verificar se uma variável foi declarada antes de ser
-  // usada
-  private void checkVar(Token token) {
+  public void printSymbolsTable() {
+    System.out.println(variablesTable);
+  }
+
+  // Método auxiliar para verificar se uma variável foi declarada antes de ser usada
+  private void checkVariable(Token token) {
     String varID = token.getText();
-    if (!symbolsTable.containsKey(varID)) {
+
+    if (variablesTable.lookupVariable(varID) == -1) {
       System.out.printf("SEMANTIC ERROR (%d): Variable '%s' was not declared.", token.getLine(), varID);
-      System.exit(1);
+      return;
     }
   }
 
   // Auxiliar reutilizável para cadastrar variáveis na tabela e checar duplicados
-  private void registerVariables(PascalParser.Identifier_listContext idListCtx, String varType) {
-    if (idListCtx != null) {
-      for (TerminalNode idNode : idListCtx.IDENTIFIER()) {
-        Token token = idNode.getSymbol();
-        String varID = token.getText();
+  private void registerVariables(Identifier_listContext ctx, String lexerTokenType) {
+    for (TerminalNode identifierNode : ctx.IDENTIFIER()) {
+      Token token = identifierNode.getSymbol();
+      String variableId = token.getText();
 
-        // Validação de duplicidade de declaração de variável
-        if (symbolsTable.containsKey(varID)) {
-          System.err.printf("SEMANTIC ERROR (%d): Variable '%s' already declared at line %d.\n",
-              token.getLine(), varID, symbolsTable.get(varID).line);
-          System.exit(1);
-        }
+      var i = variablesTable.lookupVariable(variableId);
 
-        Entry entry = new Entry();
-        entry.varID = varID;
-        entry.varType = varType;
-        entry.line = token.getLine();
-
-        symbolsTable.put(varID, entry);
+      // Validação de duplicidade de declaração de variável
+      if (i != -1) {
+        System.err.printf("SEMANTIC ERROR (%d): Variable '%s' already declared at line %d.\n", token.getLine(), variableId, variablesTable.getLine(i));
+        System.exit(1);
       }
+
+      var varLine = token.getLine();
+      var varType = PrimitiveType.getVarType(lexerTokenType);
+
+      variablesTable.addVariable(variableId, varLine, varType);
     }
   }
+
 
   // ------------------ VISITORS DE DECLARAÇÃO -----------------------
 
   @Override
-  public Void visitVariable_declaration(PascalParser.Variable_declarationContext ctx) {
+  public Void visitVariable_declaration(Variable_declarationContext ctx) {
     if (ctx.type_denoter() != null) {
       registerVariables(ctx.identifier_list(), ctx.type_denoter().getText());
     }
+
     return visitChildren(ctx);
   }
 
   @Override
-  public Void visitValue_parameter_speficiation(PascalParser.Value_parameter_speficiationContext ctx) {
+  public Void visitValue_parameter_speficiation(Value_parameter_speficiationContext ctx) {
     if (ctx.type_denoter() != null) {
       registerVariables(ctx.identifier_list(), ctx.type_denoter().getText());
     }
+
     return visitChildren(ctx);
   }
 
   @Override
-  public Void visitVariable_parameter_specification(PascalParser.Variable_parameter_specificationContext ctx) {
+  public Void visitVariable_parameter_specification(Variable_parameter_specificationContext ctx) {
     if (ctx.type_denoter() != null) {
       registerVariables(ctx.identifier_list(), ctx.type_denoter().getText());
     }
+
     return visitChildren(ctx);
   }
+
 
   // ------------------- CHECAGEM DE USO DE VARIÁVEIS ------------------
 
   @Override
-  public Void visitVariable_access(PascalParser.Variable_accessContext ctx) {
+  public Void visitVariable_access(Variable_accessContext ctx) {
     if (ctx.IDENTIFIER() != null) {
-      checkVar(ctx.IDENTIFIER().getSymbol());
+      checkVariable(ctx.IDENTIFIER().getSymbol());
     }
     return visitChildren(ctx);
   }
 
   @Override
-  public Void visitIndexed_variable(PascalParser.Indexed_variableContext ctx) {
+  public Void visitIndexed_variable(Indexed_variableContext ctx) {
     if (ctx.IDENTIFIER() != null) {
-      checkVar(ctx.IDENTIFIER().getSymbol());
+      checkVariable(ctx.IDENTIFIER().getSymbol());
     }
     return visitChildren(ctx);
   }
 
   @Override
-  public Void visitFor_statement(PascalParser.For_statementContext ctx) {
+  public Void visitFor_statement(For_statementContext ctx) {
     if (ctx.IDENTIFIER() != null) {
-      checkVar(ctx.IDENTIFIER().getSymbol());
+      checkVariable(ctx.IDENTIFIER().getSymbol());
     }
     return visitChildren(ctx);
   }
 
-  // ------------------- CHECAGEM DE USO DE STRINGS ------------------
+
+  // ------------------- CHECAGEM DE USO DE LITERAIS ------------------
 
   @Override
-  public Void visitUnsigned_constant(PascalParser.Unsigned_constantContext ctx) {
+  public Void visitConstant(ConstantContext ctx) {
     // Como unsigned_constant aceita números, precisamos isolar apenas a String
     if (ctx.CHARACTER_STRING() != null) {
       String strVal = ctx.CHARACTER_STRING().getText();
       // Remove as aspas simples de início e fim ('texto' -> texto)
-      stringsTable.add(strVal.substring(1, strVal.length() - 1));
+      stringLiteralsTable.add(strVal.substring(1, strVal.length() - 1));
     }
-    return visitChildren(ctx);
+
+    return null;
   }
 
+  @Override
+  public Void visitUnsigned_constant(Unsigned_constantContext ctx) {
+    // Como unsigned_constant aceita números, precisamos isolar apenas a String
+    if (ctx.CHARACTER_STRING() != null) {
+      String strVal = ctx.CHARACTER_STRING().getText();
+      // Remove as aspas simples de início e fim ('texto' -> texto)
+      stringLiteralsTable.add(strVal.substring(1, strVal.length() - 1));
+    }
+    
+    return null;
+  }
 }
