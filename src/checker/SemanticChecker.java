@@ -5,8 +5,10 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import parser.PascalParser.ConstantContext;
 import parser.PascalParser.For_statementContext;
+import parser.PascalParser.Formal_parameter_listContext;
 import parser.PascalParser.Identifier_listContext;
 import parser.PascalParser.Indexed_variableContext;
+import parser.PascalParser.Procedure_headingContext;
 import parser.PascalParser.Unsigned_constantContext;
 import parser.PascalParser.Value_parameter_speficiationContext;
 import parser.PascalParser.Variable_accessContext;
@@ -15,6 +17,7 @@ import parser.PascalParser.Variable_parameter_specificationContext;
 import parser.PascalParserBaseVisitor;
 import tables.StringLiteralsTable;
 import tables.VariablesTable;
+import tables.ProceduresAndFunctionsTable;
 import types.PrimitiveType;
 
 public class SemanticChecker extends PascalParserBaseVisitor<Void> {  
@@ -23,6 +26,8 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
 
   // Tabela de símbolos para armazenar as variáveis declaradas no código
   private final VariablesTable variablesTable = new VariablesTable();
+
+  private final ProceduresAndFunctionsTable proceduresAndFunctionsTable = new ProceduresAndFunctionsTable();
 
   public void printLiteralsTable() {
     System.out.println(stringLiteralsTable);
@@ -63,6 +68,16 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
     }
   }
 
+  private void registerProceduresAndFunctions(String procedureOrFunctionName, Formal_parameter_listContext ctx) {
+    int i = proceduresAndFunctionsTable.lookupVariable(procedureOrFunctionName);
+    
+    if(i != -1) {
+      // TODO: see what to do here
+      return;
+    }
+
+    proceduresAndFunctionsTable.addVariable(procedureOrFunctionName, i, null, null);
+  }
 
   // ------------------ VISITORS DE DECLARAÇÃO -----------------------
 
@@ -75,20 +90,27 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
     return visitChildren(ctx);
   }
 
-  @Override
-  public Void visitValue_parameter_speficiation(Value_parameter_speficiationContext ctx) {
-    if (ctx.type_denoter() != null) {
-      registerVariables(ctx.identifier_list(), ctx.type_denoter().getText());
-    }
+  // @Override
+  // public Void visitValue_parameter_speficiation(Value_parameter_speficiationContext ctx) {
+  //   if (ctx.type_denoter() != null) {
+  //     registerVariables(ctx.identifier_list(), ctx.type_denoter().getText());
+  //   }
 
-    return visitChildren(ctx);
-  }
+  //   return visitChildren(ctx);
+  // }
+
+  // @Override
+  // public Void visitVariable_parameter_specification(Variable_parameter_specificationContext ctx) {
+  //   if (ctx.type_denoter() != null) {
+  //     registerVariables(ctx.identifier_list(), ctx.type_denoter().getText());
+  //   }
+
+  //   return visitChildren(ctx);
+  // }
 
   @Override
-  public Void visitVariable_parameter_specification(Variable_parameter_specificationContext ctx) {
-    if (ctx.type_denoter() != null) {
-      registerVariables(ctx.identifier_list(), ctx.type_denoter().getText());
-    }
+  public Void visitProcedure_heading(Procedure_headingContext ctx) {
+    ctx.IDENTIFIER();
 
     return visitChildren(ctx);
   }
@@ -104,21 +126,21 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
     return visitChildren(ctx);
   }
 
-  @Override
-  public Void visitIndexed_variable(Indexed_variableContext ctx) {
-    if (ctx.IDENTIFIER() != null) {
-      checkVariable(ctx.IDENTIFIER().getSymbol());
-    }
-    return visitChildren(ctx);
-  }
+  // @Override
+  // public Void visitIndexed_variable(Indexed_variableContext ctx) {
+  //   if (ctx.IDENTIFIER() != null) {
+  //     checkVariable(ctx.IDENTIFIER().getSymbol());
+  //   }
+  //   return visitChildren(ctx);
+  // }
 
-  @Override
-  public Void visitFor_statement(For_statementContext ctx) {
-    if (ctx.IDENTIFIER() != null) {
-      checkVariable(ctx.IDENTIFIER().getSymbol());
-    }
-    return visitChildren(ctx);
-  }
+  // @Override
+  // public Void visitFor_statement(For_statementContext ctx) {
+  //   if (ctx.IDENTIFIER() != null) {
+  //     checkVariable(ctx.IDENTIFIER().getSymbol());
+  //   }
+  //   return visitChildren(ctx);
+  // }
 
 
   // ------------------- CHECAGEM DE USO DE LITERAIS ------------------
