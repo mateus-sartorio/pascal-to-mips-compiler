@@ -131,7 +131,7 @@ factor:
 unsigned_constant:
 	UNSIGNED_INTEGER
 	| UNSIGNED_REAL
-	| CHARACTER_STRING;
+	| CHARACTER_STRING; 
 
 // 6.7.2 Operators
 
