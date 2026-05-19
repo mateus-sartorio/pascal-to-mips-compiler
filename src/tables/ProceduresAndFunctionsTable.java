@@ -8,11 +8,19 @@ import types.PrimitiveType;
 
 
 public final class ProceduresAndFunctionsTable {
+  private enum Type {
+    PROCEDURE,
+    FUNCTION
+  }
+
   private static final class Entry {
     private final String name;
     private final int line;
+    private final Type type;
     private final PrimitiveType returnType;
-    private final List<PrimitiveType> argTypes;
+    private final List<TypesTable> parameters;
+    private final List<TypesTable> localVariables;
+
 
     Entry(String name, int line, PrimitiveType returnType, List<PrimitiveType> argTypes) {
       this.name = name;

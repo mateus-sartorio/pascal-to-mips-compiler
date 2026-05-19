@@ -8,10 +8,17 @@ import types.PrimitiveType;
 
 
 public final class VariablesTable {
+  private final class Type {
+    private final boolean isPrimitive;
+    private final PrimitiveType primitiveType;
+    private final int startIndex;
+    private final int endIndex;
+  }
+  
   private static final class Entry {
     private final String name;
     private final int line;
-    private final PrimitiveType type;
+    private final Type type;
 
     Entry(String name, int line, PrimitiveType type) {
       this.name = name;
