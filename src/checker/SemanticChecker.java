@@ -16,7 +16,7 @@ import parser.PascalParser.Variable_declarationContext;
 import parser.PascalParser.Variable_parameter_specificationContext;
 import parser.PascalParserBaseVisitor;
 import tables.StringLiteralsTable;
-import tables.VariablesTable;
+import tables.TypesTable;
 import tables.ProceduresAndFunctionsTable;
 import types.PrimitiveType;
 
@@ -25,7 +25,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
   private final StringLiteralsTable stringLiteralsTable = new StringLiteralsTable();
 
   // Tabela de símbolos para armazenar as variáveis declaradas no código
-  private final VariablesTable variablesTable = new VariablesTable();
+  private final TypesTable variablesTable = new TypesTable();
 
   private final ProceduresAndFunctionsTable proceduresAndFunctionsTable = new ProceduresAndFunctionsTable();
 
