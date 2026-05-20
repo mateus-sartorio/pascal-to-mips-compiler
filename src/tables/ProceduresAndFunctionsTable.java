@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
 
+import tables.VariablesTable.VariableType;
 import types.PrimitiveType;
 
 
@@ -64,9 +65,42 @@ public final class ProceduresAndFunctionsTable {
     table.add(entry);
   }
 
-  public void addProcedlureOrFunctionParameter(String procedureOrFunctionName, String parameterName, int line, VariablesTable.Type type) {
-    Entry entry = null;
-    entry.parameters.addVariable(parameterName, line, type);
+  public void addProcedlureOrFunctionParameter(
+    String procedureOrFunctionName,
+    String parameterName,
+    int line,
+    VariableType type
+  ) {
+    
+    int index = -1;
+    for (int i = 0; i < table.size(); i++) {
+      if (table.get(i).name.equals(procedureOrFunctionName)) {
+        index = i;
+        break;
+      }
+    }
+
+    VariablesTable parameters = getParameters(index);
+    parameters.addVariable(parameterName, line, type);
+  }
+
+  public void addProcedlureOrFunctionVariable(
+    String procedureOrFunctionIdentifier,
+    String variableIdentifier,
+    int line,
+    VariableType type
+  ) {
+    
+    int index = -1;
+    for (int i = 0; i < table.size(); i++) {
+      if (table.get(i).name.equals(procedureOrFunctionIdentifier)) {
+        index = i;
+        break;
+      }
+    }
+
+    VariablesTable locVariablesTable = getLocalVariables(index);
+    locVariablesTable.addVariable(variableIdentifier, line, type);
   }
 
   public int lookupVariable(String symbol, String procedureOrFunctionIdentifier) {
@@ -99,6 +133,14 @@ public final class ProceduresAndFunctionsTable {
 
   public PrimitiveType getReturnType(int i) {
     return table.get(i).returnType;
+  }
+
+  public VariablesTable getParameters(int i) {
+    return table.get(i).parameters;
+  }
+
+  public VariablesTable getLocalVariables(int i) {
+    return table.get(i).localVariables;
   }
 
   public String toString() {
