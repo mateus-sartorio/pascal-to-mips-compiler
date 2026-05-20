@@ -11,9 +11,8 @@ options {
 
 // -------------------- 6.2 Blocks, scopes, and activations --------------------
 
-block: type_definition_part variable_declaration_part procedure_and_function_declaration_part compound_statement ;
+block: variable_declaration_part procedure_and_function_declaration_part compound_statement ;
 
-type_definition_part: ( TYPE ( type_definition SEMICOLON )+ )?;
 variable_declaration_part: ( VAR variable_declaration ( SEMICOLON variable_declaration )* SEMICOLON )*;
 procedure_and_function_declaration_part: ( ( procedure_declaration | function_declaration ) SEMICOLON )* ;
 
@@ -50,47 +49,37 @@ variable_declaration: identifier_list COLON type_denoter;
 variable_access: IDENTIFIER | indexed_variable;
 
 // 6.5.3.2 Indexed-variables
-indexed_variable: IDENTIFIER OPEN_BRACKET (expression ( COMMA expression)* ) CLOSE_BRACKET ;
+indexed_variable: IDENTIFIER OPEN_BRACKET ( expression ( COMMA expression )* ) CLOSE_BRACKET ;
 
 
 // -------------------- 6.6 Procedure and function declarations --------------------
 
 // 6.6.1 Procedure-declarations
 
-procedure_declaration: procedure_heading SEMICOLON compound_statement ;
+procedure_declaration: procedure_heading compound_statement ;
 
-procedure_heading: PROCEDURE IDENTIFIER ( formal_parameter_list )? ;
+procedure_heading: PROCEDURE IDENTIFIER ( formal_parameter_list )? SEMICOLON variable_declaration_part ;
 
 // 6.6.2 Function-declarations
 
-function_declaration: function_heading SEMICOLON compound_statement ;
+function_declaration: function_heading compound_statement ;
 
-function_heading: FUNCTION IDENTIFIER (formal_parameter_list)? COLON type_denoter ;
+function_heading: FUNCTION IDENTIFIER ( formal_parameter_list )? COLON type_denoter SEMICOLON variable_declaration_part ;
 
 // 6.6.3 Parameters
 
 // 6.6.3.1 General
 
-formal_parameter_list: OPEN_PARENTHESIS formal_parameter_section ( SEMICOLON formal_parameter_section )* CLOSE_PARENTHESIS ;
-
-formal_parameter_section:
-	value_parameter_speficiation
-	| variable_parameter_specification
-	| procedure_heading
-	| function_heading
-  ;
+formal_parameter_list: OPEN_PARENTHESIS ( value_parameter_speficiation ( SEMICOLON value_parameter_speficiation )* )? CLOSE_PARENTHESIS ;
 
 value_parameter_speficiation: identifier_list COLON type_denoter ;
-
-variable_parameter_specification: VAR identifier_list COLON type_denoter ;
-
 
 // -------------------- 6.7 Expressions --------------------
 
 // 6.7.1 General
 
-expression: simple_expression (relational_operator simple_expression)? ;
-simple_expression: ( PLUS | MINUS)? term ( adding_operator term)* ;
+expression: simple_expression ( relational_operator simple_expression )? ;
+simple_expression: ( PLUS | MINUS )? term ( adding_operator term )* ;
 term: factor ( multiplying_operator factor)* ;
 
 factor:

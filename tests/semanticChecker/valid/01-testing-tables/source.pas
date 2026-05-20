@@ -5,10 +5,24 @@ var
     salario : real;
     nome : string;
 
-procedure Inicializar(var texto : string; valor : real);
+procedure Inicializar(texto : string; valor : real);
+var
+    x, y : integer;
+    z : real;
+    w : string;
 begin
     texto := 'Iniciando o programa';
     salario := valor
+end;
+
+function F(a : string; b : real) : real;
+var
+    c, d : integer;
+    e : real;
+    f : string;
+begin
+    f := 'Iniciando o programa';
+    c := b
 end;
 
 begin
