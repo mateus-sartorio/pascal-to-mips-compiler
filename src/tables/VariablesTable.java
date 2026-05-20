@@ -1,89 +1,54 @@
 package tables;
 
-import java.util.ArrayList;
 import java.util.Formatter;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-import types.PrimitiveType;
+import types.VariableType;
 
 
 public final class VariablesTable {
-  public static final class VariableType {
-    private final boolean isPrimitive;
-    private final PrimitiveType primitiveType;
-    private final int startIndex;
-    private final int endIndex;
+  public static final class VariableTableEntry {
+    public final String name;
+    public final int line;
+    public final VariableType type;
 
-    public VariableType(
-      boolean isPrimitive,
-      PrimitiveType primitiveType,
-      int startIndex,
-      int endIndex
-    ) {
-      this.isPrimitive = isPrimitive;
-      this.primitiveType = primitiveType;
-      this.startIndex = startIndex;
-      this.endIndex = endIndex;
-    }
-
-    public VariableType(PrimitiveType primitiveType) {
-      this.isPrimitive = true;
-      this.primitiveType = primitiveType;
-      this.startIndex = 0;
-      this.endIndex = 0;
-    }
-  }
-  
-  private static final class Entry {
-    private final String name;
-    private final int line;
-    private final VariableType type;
-
-    Entry(String name, int line, VariableType type) {
+    VariableTableEntry(String name, int line, VariableType type) {
       this.name = name;
       this.line = line;
       this.type = type;
     }
   }
 
-  private List<Entry> table = new ArrayList<Entry>();
+  private Map<String, VariableTableEntry> table = new LinkedHashMap<>();
 
-  public int lookupVariable(String symbol) {
-    for (int i = 0; i < table.size(); i++) {
-      if (table.get(i).name.equals(symbol)) {
-        return i;
-      }
-    }
-
-    return -1;
+  public boolean lookupVariable(String identifier) {
+    return table.containsKey(identifier);
   }
 
-  public int addVariable(String s, int line, VariableType type) {
-    Entry entry = new Entry(s, line, type);
-    int indexAdded = table.size();
-    table.add(entry);
-    return indexAdded;
+  public void addVariable(String identifier, int line, VariableType type) {
+    VariableTableEntry entry = new VariableTableEntry(identifier, line, type);
+    table.put(identifier, entry);
   }
 
-  public String getName(int i) {
-    return table.get(i).name;
-  }
-
-  public int getLine(int i) {
-    return table.get(i).line;
-  }
-
-  public VariableType getType(int i) {
-    return table.get(i).type;
+  public VariableTableEntry get(String identifier) {
+    return table.get(identifier);
   }
 
   public String toString() {
     StringBuilder sb = new StringBuilder();
     Formatter f = new Formatter(sb);
     
-    f.format("Variables table:\n");
-    for (int i = 0; i < table.size(); i++) {
-      f.format("Entry %d -- name: %s, line: %d, type: %s\n", i, getName(i), getLine(i), getType(i).toString());
+    int i = 0;
+    for (VariableTableEntry entry : table.values()) {
+      f.format(
+        "Entry %d -- name: %s, line: %d, type: %s\n",
+        i,
+        entry.name,
+        entry.line,
+        entry.type.toString()
+      );
+      i++;
     }
     f.close();
     

@@ -1,32 +1,27 @@
 package tables;
 
-import java.util.ArrayList;
 import java.util.Formatter;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-import tables.VariablesTable.VariableType;
 import types.PrimitiveType;
+import types.ProcedureOrFunctionEnum;
+import types.VariableType;
 
 
 public final class ProceduresAndFunctionsTable {
-  private enum ProcedureOrFunctionType {
-    PROCEDURE,
-    FUNCTION
-  }
-
-  private static final class Entry {
-    private final String name;
-    private final int line;
-    private final ProcedureOrFunctionType type;
-    private final PrimitiveType returnType;
+  public static final class ProceduresAndFunctionsEntry {
+    public final String name;
+    public final int line;
+    public final ProcedureOrFunctionEnum type;
+    public final PrimitiveType returnType;
     public final VariablesTable parameters;
     public final VariablesTable localVariables;
 
-
-    Entry(
+    ProceduresAndFunctionsEntry(
       String name,
       int line,
-      ProcedureOrFunctionType type,
+      ProcedureOrFunctionEnum type,
       PrimitiveType returnType,
       VariablesTable parameters,
       VariablesTable localVariables
@@ -40,48 +35,67 @@ public final class ProceduresAndFunctionsTable {
     }
   }
 
-  private List<Entry> table = new ArrayList<Entry>();
+  private Map<String, ProceduresAndFunctionsEntry> table = new LinkedHashMap<>();
 
-  public int lookProcedureOrFunction(String procedureOrFunctionIdentifier) {
-    for (int i = 0; i < table.size(); i++) {
-      if (table.get(i).name.equals(procedureOrFunctionIdentifier)) {
-        return i;
-      }
-    }
-
-    return -1;
+  public boolean lookProcedureOrFunction(String identifier) {
+    return table.containsKey(identifier);
   }
 
-  public void addProcedure(String procedureName, int line) {
-    Entry entry = new Entry(
-      procedureName,
+  public boolean lookupProcedureOrFunctionLocalVariable(
+    String procedureOrFunctionIdentifier,
+    String localVariableIdentifier
+  ) {
+    assert table.containsKey(procedureOrFunctionIdentifier);
+
+    ProceduresAndFunctionsEntry entry = table.get(procedureOrFunctionIdentifier);
+
+    VariablesTable localVariables = entry.localVariables;
+
+    return localVariables.lookupVariable(localVariableIdentifier);
+  }
+
+  public void addProcedure(String identifier, int line) {
+    ProceduresAndFunctionsEntry entry = new ProceduresAndFunctionsEntry(
+      identifier,
       line,
-      ProcedureOrFunctionType.PROCEDURE,
+      ProcedureOrFunctionEnum.PROCEDURE,
       null,
-      null,
-      null
+      new VariablesTable(),
+      new VariablesTable()
     );
 
-    table.add(entry);
+    table.put(identifier, entry);
+  }
+
+  public void addFunction(String identifier, int line, PrimitiveType type) {
+    ProceduresAndFunctionsEntry entry = new ProceduresAndFunctionsEntry(
+      identifier,
+      line,
+      ProcedureOrFunctionEnum.FUNCTION,
+      type,
+      new VariablesTable(),
+      new VariablesTable()
+    );
+
+    table.put(identifier, entry);
   }
 
   public void addProcedlureOrFunctionParameter(
-    String procedureOrFunctionName,
-    String parameterName,
+    String procedureOrFunctionIdentifier,
+    String parameterIdentifier,
     int line,
     VariableType type
   ) {
     
-    int index = -1;
-    for (int i = 0; i < table.size(); i++) {
-      if (table.get(i).name.equals(procedureOrFunctionName)) {
-        index = i;
-        break;
-      }
-    }
+    ProceduresAndFunctionsEntry entry = table.get(procedureOrFunctionIdentifier);
 
-    VariablesTable parameters = getParameters(index);
-    parameters.addVariable(parameterName, line, type);
+    assert entry != null;
+
+    VariablesTable parameters = entry.parameters;
+
+    assert !(parameters.lookupVariable(parameterIdentifier));
+
+    parameters.addVariable(parameterIdentifier, line, type);
   }
 
   public void addProcedlureOrFunctionVariable(
@@ -90,66 +104,40 @@ public final class ProceduresAndFunctionsTable {
     int line,
     VariableType type
   ) {
-    
-    int index = -1;
-    for (int i = 0; i < table.size(); i++) {
-      if (table.get(i).name.equals(procedureOrFunctionIdentifier)) {
-        index = i;
-        break;
-      }
-    }
+    ProceduresAndFunctionsEntry entry = table.get(procedureOrFunctionIdentifier);
 
-    VariablesTable locVariablesTable = getLocalVariables(index);
-    locVariablesTable.addVariable(variableIdentifier, line, type);
+    assert entry != null;
+
+    VariablesTable localVariables = entry.localVariables;
+
+    assert !(localVariables.lookupVariable(variableIdentifier));
+
+    localVariables.addVariable(variableIdentifier, line, type);
   }
 
-  public int lookupVariable(String symbol, String procedureOrFunctionIdentifier) {
-    for (int i = 0; i < table.size(); i++) {
-      if (table.get(i).name.equals(symbol)) {
-        return i;
-      }
-    }
-
-    return -1;
+  public ProceduresAndFunctionsEntry get(String identifier) {
+    return table.get(identifier);
   }
 
-    public int lookupProcedureOrFunction(String procedureOrFunctionIdentifier) {
-    for (int i = 0; i < table.size(); i++) {
-      if (table.get(i).name.equals(procedureOrFunctionIdentifier)) {
-        return i;
-      }
-    }
-
-    return -1;
-  }
-
-  public String getName(int i) {
-    return table.get(i).name;
-  }
-
-  public int getLine(int i) {
-    return table.get(i).line;
-  }
-
-  public PrimitiveType getReturnType(int i) {
-    return table.get(i).returnType;
-  }
-
-  public VariablesTable getParameters(int i) {
-    return table.get(i).parameters;
-  }
-
-  public VariablesTable getLocalVariables(int i) {
-    return table.get(i).localVariables;
-  }
-
+  @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     Formatter f = new Formatter(sb);
     
-    f.format("Variables table:\n");
-    for (int i = 0; i < table.size(); i++) {
-      f.format("Entry %d -- name: %s, line: %d, type: %s\n", i, getName(i), getLine(i), getReturnType(i).toString());
+    for(ProceduresAndFunctionsEntry entry : table.values()) {
+      f.format(
+        "%s %s -- line %d%s\n",
+        entry.type == ProcedureOrFunctionEnum.FUNCTION ? "FUNCTION" : "PROCEDURE",
+        entry.name,
+        entry.line,
+        entry.type == ProcedureOrFunctionEnum.FUNCTION ? (", return type: " + entry.returnType.toString()) : ""
+      );
+
+      f.format("Parameters:\n");
+      f.format(entry.parameters.toString());
+      
+      f.format("Local variables:\n");
+      f.format(entry.localVariables.toString());
     }
     f.close();
     

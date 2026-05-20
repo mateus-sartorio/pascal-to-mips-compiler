@@ -41,5 +41,6 @@ public class Main {
 
     semanticChecker.printLiteralsTable();
     semanticChecker.printSymbolsTable();
+    semanticChecker.printProceduresAndFunctionsTable();
   }
 }

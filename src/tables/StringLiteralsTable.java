@@ -1,27 +1,24 @@
 package tables;
 
-import java.util.ArrayList;
 import java.util.Formatter;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
-public final class StringLiteralsTable extends ArrayList<String> {
-  @Override
-  public boolean add(String s) {
-    for (int i = 0; i < this.size(); i++) {
-      if (this.get(i).equals(s)) {
-        return false;
-      }
-    }
+public final class StringLiteralsTable {
+  private Set<String> table = new LinkedHashSet<>();
 
-    return super.add(s);
+  public void addStringLiteral(String literal) {
+    table.add(literal);
   }
 
   public String toString() {
     StringBuilder sb = new StringBuilder();
     Formatter f = new Formatter(sb);
     
-    f.format("String literals table:\n");
-    for (int i = 0; i < this.size(); i++) {
-      f.format("Entry %d -- %s\n", i, this.get(i));
+    int i = 0;
+    for (String literal : table) {
+      f.format("Entry %d -- %s\n", i, literal);
+      i++;
     }
     f.close();
     

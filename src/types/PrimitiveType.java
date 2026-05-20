@@ -1,7 +1,5 @@
 package types;
 
-import parser.PascalLexer;
-
 public enum PrimitiveType {
   INTEGER,
   REAL,
@@ -9,26 +7,8 @@ public enum PrimitiveType {
   BOOLEAN,
   CHAR;
 
-  public static PrimitiveType getVarType(int lexerTokenType) throws Exception {
-    switch (lexerTokenType) {
-      case PascalLexer.INTEGER:
-        return PrimitiveType.INTEGER;
-      case PascalLexer.REAL:
-        return PrimitiveType.REAL;
-      case PascalLexer.STRING:
-        return PrimitiveType.STRING;
-      case PascalLexer.BOOLEAN:
-        return PrimitiveType.BOOLEAN;
-      case PascalLexer.CHAR:
-        return PrimitiveType.CHAR;
-      default:
-        System.err.println("ERROR: invalid lexer token type for variable declaration.");
-        throw new Exception();
-    }
-  }
-
-  public static PrimitiveType getVarType(String type) {
-    switch (type) {
+  public static PrimitiveType getType(String typeDenoter) {
+    switch (typeDenoter) {
       case "integer":
         return PrimitiveType.INTEGER;
       case "real":
