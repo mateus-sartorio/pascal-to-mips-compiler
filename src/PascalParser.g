@@ -17,17 +17,10 @@ variable_declaration_part: ( VAR variable_declaration ( SEMICOLON variable_decla
 procedure_and_function_declaration_part: ( ( procedure_declaration | function_declaration ) SEMICOLON )* ;
 
 
-// -------------------- 6.3 Constant-definitions --------------------
-
-constant_deifinition: IDENTIFIER EQUAL_TO constant ;
-constant: ( ( PLUS | MINUS )? UNSIGNED_INTEGER | UNSIGNED_REAL ) | CHARACTER_STRING ;
-
-
 // -------------------- 6.4 Type-definitions --------------------
 
 primitive_type: INTEGER | REAL | BOOLEAN | CHAR | STRING ;
-type_definition: IDENTIFIER EQUAL_TO type_denoter ;
-type_denoter: primitive_type | array_type | IDENTIFIER ;
+type_denoter: primitive_type | array_type ;
 
 // 6.4.2 Simple-types Not needed
 
@@ -35,10 +28,10 @@ type_denoter: primitive_type | array_type | IDENTIFIER ;
 identifier_list: IDENTIFIER ( COMMA IDENTIFIER )* ;
 
 // 6.4.2.4 Subrange-types
-subrange_type: constant RANGE constant ;
+subrange_type: UNSIGNED_INTEGER RANGE UNSIGNED_INTEGER ;
 
 // 6.4.3.2 Array-types
-array_type: ( PACKED )? ARRAY OPEN_BRACKET subrange_type ( COMMA subrange_type )* CLOSE_BRACKET OF type_denoter ;
+array_type: ( PACKED )? ARRAY OPEN_BRACKET subrange_type CLOSE_BRACKET OF primitive_type ;
 
 
 // -------------------- 6.5 Declarations and denotations of variables --------------------
@@ -114,14 +107,14 @@ relational_operator:
 // 6.7.3 Function-designators
 function_designator: IDENTIFIER ( actual_parameter_list )? ;
 actual_parameter_list: OPEN_PARENTHESIS actual_parameter ( COMMA actual_parameter )* CLOSE_PARENTHESIS ;
-actual_parameter: expression | variable_access | IDENTIFIER ;
+actual_parameter: expression | variable_access ;
 
 
 // -------------------- 6.8 Statements --------------------
 
 // 6.8.1 General
 
-statement: ( IDENTIFIER COLON )? ( simple_statement | structured_statement ) ;
+statement: simple_statement | structured_statement ;
 
 // 6.8.2 Simple-statements
 
@@ -147,8 +140,7 @@ procedure_statement: IDENTIFIER ( actual_parameter_list )? ;
 // 6.8.3.1 General
 
 structured_statement:
-	compound_statement
-	| if_statement
+	if_statement
 	| for_statement
   ;
 
@@ -169,4 +161,4 @@ for_statement: FOR IDENTIFIER ASSIGNMENT expression ( TO | DOWNTO ) expression D
 
 program: program_heading SEMICOLON block PERIOD ;
 
-program_heading: PROGRAM IDENTIFIER ( OPEN_BRACKET identifier_list CLOSE_BRACKET )? ;
+program_heading: PROGRAM IDENTIFIER ;

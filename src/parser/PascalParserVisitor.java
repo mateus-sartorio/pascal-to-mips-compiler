@@ -31,29 +31,11 @@ public interface PascalParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitProcedure_and_function_declaration_part(PascalParser.Procedure_and_function_declaration_partContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link PascalParser#constant_deifinition}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitConstant_deifinition(PascalParser.Constant_deifinitionContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link PascalParser#constant}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitConstant(PascalParser.ConstantContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link PascalParser#primitive_type}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitPrimitive_type(PascalParser.Primitive_typeContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link PascalParser#type_definition}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitType_definition(PascalParser.Type_definitionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link PascalParser#type_denoter}.
 	 * @param ctx the parse tree
