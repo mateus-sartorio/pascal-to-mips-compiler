@@ -8,7 +8,7 @@ import types.PrimitiveType;
 
 
 public final class ProceduresAndFunctionsTable {
-  private enum Type {
+  private enum ProcedureOrFunctionType {
     PROCEDURE,
     FUNCTION
   }
@@ -16,23 +16,60 @@ public final class ProceduresAndFunctionsTable {
   private static final class Entry {
     private final String name;
     private final int line;
-    private final Type type;
+    private final ProcedureOrFunctionType type;
     private final PrimitiveType returnType;
-    private final List<TypesTable> parameters;
-    private final List<TypesTable> localVariables;
+    public final VariablesTable parameters;
+    public final VariablesTable localVariables;
 
 
-    Entry(String name, int line, PrimitiveType returnType, List<PrimitiveType> argTypes) {
+    Entry(
+      String name,
+      int line,
+      ProcedureOrFunctionType type,
+      PrimitiveType returnType,
+      VariablesTable parameters,
+      VariablesTable localVariables
+    ) {
       this.name = name;
       this.line = line;
+      this.type = type;
       this.returnType = returnType;
-      this.argTypes = argTypes;
+      this.parameters = parameters;
+      this.localVariables = localVariables;
     }
   }
 
   private List<Entry> table = new ArrayList<Entry>();
 
-  public int lookupVariable(String symbol) {
+  public int lookProcedureOrFunction(String procedureOrFunctionIdentifier) {
+    for (int i = 0; i < table.size(); i++) {
+      if (table.get(i).name.equals(procedureOrFunctionIdentifier)) {
+        return i;
+      }
+    }
+
+    return -1;
+  }
+
+  public void addProcedure(String procedureName, int line) {
+    Entry entry = new Entry(
+      procedureName,
+      line,
+      ProcedureOrFunctionType.PROCEDURE,
+      null,
+      null,
+      null
+    );
+
+    table.add(entry);
+  }
+
+  public void addProcedlureOrFunctionParameter(String procedureOrFunctionName, String parameterName, int line, VariablesTable.Type type) {
+    Entry entry = null;
+    entry.parameters.addVariable(parameterName, line, type);
+  }
+
+  public int lookupVariable(String symbol, String procedureOrFunctionIdentifier) {
     for (int i = 0; i < table.size(); i++) {
       if (table.get(i).name.equals(symbol)) {
         return i;
@@ -42,11 +79,14 @@ public final class ProceduresAndFunctionsTable {
     return -1;
   }
 
-  public int addVariable(String s, int line, PrimitiveType type, List<PrimitiveType> argTypes) {
-    Entry entry = new Entry(s, line, type, argTypes);
-    int indexAdded = table.size();
-    table.add(entry);
-    return indexAdded;
+    public int lookupProcedureOrFunction(String procedureOrFunctionIdentifier) {
+    for (int i = 0; i < table.size(); i++) {
+      if (table.get(i).name.equals(procedureOrFunctionIdentifier)) {
+        return i;
+      }
+    }
+
+    return -1;
   }
 
   public String getName(int i) {
@@ -59,10 +99,6 @@ public final class ProceduresAndFunctionsTable {
 
   public PrimitiveType getReturnType(int i) {
     return table.get(i).returnType;
-  }
-
-  public List<PrimitiveType> getArgTypes(int i) {
-    return table.get(i).argTypes;
   }
 
   public String toString() {

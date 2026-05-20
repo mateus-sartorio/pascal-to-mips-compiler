@@ -8,11 +8,18 @@ import types.PrimitiveType;
 
 
 public final class VariablesTable {
-  private final class Type {
+  public static final class Type {
     private final boolean isPrimitive;
     private final PrimitiveType primitiveType;
     private final int startIndex;
     private final int endIndex;
+
+    public Type(PrimitiveType primitiveType) {
+      this.isPrimitive = true;
+      this.primitiveType = primitiveType;
+      this.startIndex = 0;
+      this.endIndex = 0;
+    }
   }
   
   private static final class Entry {
@@ -20,7 +27,7 @@ public final class VariablesTable {
     private final int line;
     private final Type type;
 
-    Entry(String name, int line, PrimitiveType type) {
+    Entry(String name, int line, Type type) {
       this.name = name;
       this.line = line;
       this.type = type;
@@ -39,7 +46,7 @@ public final class VariablesTable {
     return -1;
   }
 
-  public int addVariable(String s, int line, PrimitiveType type) {
+  public int addVariable(String s, int line, Type type) {
     Entry entry = new Entry(s, line, type);
     int indexAdded = table.size();
     table.add(entry);
@@ -54,7 +61,7 @@ public final class VariablesTable {
     return table.get(i).line;
   }
 
-  public PrimitiveType getType(int i) {
+  public Type getType(int i) {
     return table.get(i).type;
   }
 

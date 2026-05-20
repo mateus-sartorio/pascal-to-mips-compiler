@@ -19,12 +19,6 @@ public interface PascalParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitBlock(PascalParser.BlockContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link PascalParser#type_definition_part}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitType_definition_part(PascalParser.Type_definition_partContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link PascalParser#variable_declaration_part}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -133,23 +127,11 @@ public interface PascalParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFormal_parameter_list(PascalParser.Formal_parameter_listContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link PascalParser#formal_parameter_section}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFormal_parameter_section(PascalParser.Formal_parameter_sectionContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link PascalParser#value_parameter_speficiation}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitValue_parameter_speficiation(PascalParser.Value_parameter_speficiationContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link PascalParser#variable_parameter_specification}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitVariable_parameter_specification(PascalParser.Variable_parameter_specificationContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link PascalParser#expression}.
 	 * @param ctx the parse tree

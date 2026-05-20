@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import parser.PascalParser.ConstantContext;
 import parser.PascalParser.For_statementContext;
 import parser.PascalParser.Formal_parameter_listContext;
+import parser.PascalParser.Function_headingContext;
 import parser.PascalParser.Identifier_listContext;
 import parser.PascalParser.Indexed_variableContext;
 import parser.PascalParser.Procedure_headingContext;
@@ -13,10 +14,9 @@ import parser.PascalParser.Unsigned_constantContext;
 import parser.PascalParser.Value_parameter_speficiationContext;
 import parser.PascalParser.Variable_accessContext;
 import parser.PascalParser.Variable_declarationContext;
-import parser.PascalParser.Variable_parameter_specificationContext;
 import parser.PascalParserBaseVisitor;
 import tables.StringLiteralsTable;
-import tables.TypesTable;
+import tables.VariablesTable;
 import tables.ProceduresAndFunctionsTable;
 import types.PrimitiveType;
 
@@ -25,7 +25,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
   private final StringLiteralsTable stringLiteralsTable = new StringLiteralsTable();
 
   // Tabela de símbolos para armazenar as variáveis declaradas no código
-  private final TypesTable variablesTable = new TypesTable();
+  private final VariablesTable variablesTable = new VariablesTable();
 
   private final ProceduresAndFunctionsTable proceduresAndFunctionsTable = new ProceduresAndFunctionsTable();
 
@@ -48,7 +48,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
   }
 
   // Auxiliar reutilizável para cadastrar variáveis na tabela e checar duplicados
-  private void registerVariables(Identifier_listContext ctx, String lexerTokenType) {
+  private void registerGlobalVariables(Identifier_listContext ctx, String lexerTokenType) {
     for (TerminalNode identifierNode : ctx.IDENTIFIER()) {
       Token token = identifierNode.getSymbol();
       String variableId = token.getText();
@@ -62,10 +62,14 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
       }
 
       var varLine = token.getLine();
-      var varType = PrimitiveType.getVarType(lexerTokenType);
+      var varType = new VariablesTable.Type(PrimitiveType.getVarType(lexerTokenType));
 
       variablesTable.addVariable(variableId, varLine, varType);
     }
+  }
+
+  private void registerProcedureOrFunctionParameters(Formal_parameter_listContext ctx, String functionOrProcedureName) {
+    ctx
   }
 
   private void registerProceduresAndFunctions(String procedureOrFunctionName, Formal_parameter_listContext ctx) {
@@ -76,19 +80,59 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
       return;
     }
 
-    proceduresAndFunctionsTable.addVariable(procedureOrFunctionName, i, null, null);
+    // proceduresAndFunctionsTable.addVariable(procedureOrFunctionName, i, null, null);
   }
 
-  // ------------------ VISITORS DE DECLARAÇÃO -----------------------
+
+
+
+  // ------------------ VISITORS DE DECLARAÇÃO DE VARIÁVEIS GLOBAIS -----------------------
 
   @Override
   public Void visitVariable_declaration(Variable_declarationContext ctx) {
-    if (ctx.type_denoter() != null) {
-      registerVariables(ctx.identifier_list(), ctx.type_denoter().getText());
+    registerGlobalVariables(ctx.identifier_list(), ctx.type_denoter().getText());
+    return visitChildren(ctx);
+  }
+
+  // --------------------------------------------------------------------------------------
+
+
+
+  // ------------------ VISITORS DE DECLARAÇÃO DE VARIÁVEIS DE PROCEDURES -----------------------
+
+  @Override
+  public Void visitProcedure_heading(Procedure_headingContext ctx) {
+    var identifier = ctx.IDENTIFIER();
+    var identifierName = identifier.getText();
+    var identifierLine = identifier.getSymbol().getLine();
+    
+    int index = proceduresAndFunctionsTable.lookProcedureOrFunction(identifierName);
+    
+    if(index != -1) {
+      // Da erro
     }
+
+    proceduresAndFunctionsTable.addProcedure(identifierName, identifierLine);
 
     return visitChildren(ctx);
   }
+
+  @Override
+  public Void visitValue_parameter_specification(Value_parameter_speficiationContext ctx) {
+    var declaration = ctx.parent.parent;
+
+    if(declaration instanceof Function_headingContext functionHeadingContext) {
+      var identifier = functionHeadingContext.IDENTIFIER().getText();
+      proceduresAndFunctionsTable.addProcedlureOrFunctionParameter(identifier, )
+    }
+    else if(declaration instanceof Procedure_headingContext procedureHeadingContext) {
+      var identifier = procedureHeadingContext.IDENTIFIER();
+    }
+  }
+
+  // --------------------------------------------------------------------------------------
+
+
 
   // @Override
   // public Void visitValue_parameter_speficiation(Value_parameter_speficiationContext ctx) {
@@ -107,13 +151,6 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
 
   //   return visitChildren(ctx);
   // }
-
-  @Override
-  public Void visitProcedure_heading(Procedure_headingContext ctx) {
-    ctx.IDENTIFIER();
-
-    return visitChildren(ctx);
-  }
 
 
   // ------------------- CHECAGEM DE USO DE VARIÁVEIS ------------------
