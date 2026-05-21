@@ -84,7 +84,7 @@ CHARACTER_STRING: '\'' STRING_ELEMENT+ '\'';
 COMMENTARY: (('{' .*? '}') | ('(*' .*? '*)')) -> skip;
 
 // 6.1.3. Identifiers (Outside the ISO order so it doesn’t pick up parts of other tokens)
-IDENTIFIER: [a-zA-Z][a-zA-Z0-9]*;
+IDENTIFIER: [a-zA-Z_] [a-zA-Z0-9_]*;
 
 // 6.1.9 Lexical alternatives Was not implemented because we either don't support the reference token or the alternative token is not commonly used
 
