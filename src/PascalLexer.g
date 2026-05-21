@@ -81,7 +81,7 @@ fragment STRING_ELEMENT: APOSTROPHE_IMAGE | STRING_CHARACTER;
 CHARACTER_STRING: '\'' STRING_ELEMENT+ '\'';
 
 // 6.1.8 Token separators
-COMMENTARY: (('{' .*? '}') | ('(*' .*? '*)')) -> skip;
+COMMENTARY: (('{' .*? '}') | ('(*' .*? '*)') | ('//' ~[\r\n]*)) -> skip;
 
 // 6.1.3. Identifiers (Outside the ISO order so it doesn’t pick up parts of other tokens)
 IDENTIFIER: [a-zA-Z_] [a-zA-Z0-9_]*;
