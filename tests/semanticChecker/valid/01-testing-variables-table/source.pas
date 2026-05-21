@@ -10,7 +10,7 @@ var
     nome : string;
     str1, str2 : string;
 
-    verificacao : boolean;
+    verificacao_dad : boolean;
     check1, check2 : boolean;
 
     letra : char;
@@ -21,5 +21,7 @@ var
     arrayOfString : array[1..3] of string;
 
 begin
-  
+  writeln('Hello, World!');
+  writeln('á â ç é ê í ó ô ú');
+  // Comentario diferente para testar
 end.
