@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -13,7 +14,7 @@ public class Main {
   public static void main(String[] args) throws IOException {
 
     // Criando um char stream que le todos os caracteres do arquivo
-    CharStream input = CharStreams.fromFileName(args[0]);
+    CharStream input = CharStreams.fromFileName(args[0],StandardCharsets.UTF_8);
 
     // Criando o lexer que vai consumir esses caracteres
     PascalLexer lexer = new PascalLexer(input);
