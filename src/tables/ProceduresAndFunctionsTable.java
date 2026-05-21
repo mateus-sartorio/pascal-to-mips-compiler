@@ -136,8 +136,15 @@ public final class ProceduresAndFunctionsTable {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     Formatter f = new Formatter(sb);
+
     
     for(ProceduresAndFunctionsEntry entry : table.values()) {
+      
+      // Pulando as entradas pré-declaradas (write, writeln, read, readln) para não poluir a saída dos testes
+      if(entry.line == -1) {
+        continue;
+      }
+
       f.format(
         "%s %s -- line %d%s\n",
         entry.type == ProcedureOrFunctionEnum.FUNCTION ? "FUNCTION" : "PROCEDURE",

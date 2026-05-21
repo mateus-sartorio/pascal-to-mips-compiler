@@ -38,6 +38,10 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
 
   private final ProceduresAndFunctionsTable proceduresAndFunctionsTable = new ProceduresAndFunctionsTable();
 
+  public SemanticChecker() {
+    registerPreDeclaredProceduresAndFunctions();
+  }
+
   public void printLiteralsTable() {
     System.out.println(stringLiteralsTable);
   }
@@ -59,33 +63,33 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
     }
   }
 
-  // Método auxiliar para verificar se uma variável global foi declarada antes de ser usada
+  // Método auxiliar para verificar se uma variável global foi declarada antes de
+  // ser usada
   // private boolean checkGlobalVariable(Token token) {
-  //   String variableIdentifier = token.getText();
+  // String variableIdentifier = token.getText();
 
-  //   if (!variablesTable.lookupVariable(variableIdentifier)) {
-  //     System.out.printf(
-  //       "SEMANTIC ERROR (%d): Variable '%s' was not declared.",
-  //       token.getLine(),
-  //       variableIdentifier
-  //     );
+  // if (!variablesTable.lookupVariable(variableIdentifier)) {
+  // System.out.printf(
+  // "SEMANTIC ERROR (%d): Variable '%s' was not declared.",
+  // token.getLine(),
+  // variableIdentifier
+  // );
 
-  //     System.exit(1);
-  //   }
+  // System.exit(1);
+  // }
   // }
 
   private void checkProcedureOrFunctionIdentifier(Token token, ProcedureOrFunctionEnum type) {
     String identifier = token.getText();
     int line = token.getLine();
 
-    if(proceduresAndFunctionsTable.lookProcedureOrFunction(identifier)) {
+    if (proceduresAndFunctionsTable.lookProcedureOrFunction(identifier)) {
       System.out.printf(
-        "SEMANTIC ERROR (%d): %s '%s' was already declared at line %d.\n",
-        token.getLine(),
-        type == ProcedureOrFunctionEnum.FUNCTION ? "FUNCTION" : "PROCEDURE",
-        identifier,
-        line
-      );
+          "SEMANTIC ERROR (%d): %s '%s' was already declared at line %d.\n",
+          token.getLine(),
+          type == ProcedureOrFunctionEnum.FUNCTION ? "FUNCTION" : "PROCEDURE",
+          identifier,
+          line);
 
       System.exit(1);
     }
@@ -99,15 +103,14 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
       String variableIdentifier = token.getText();
 
       VariableTableEntry entry = variablesTable.get(variableIdentifier);
-      
+
       // Validação de duplicidade de declaração de variável
       if (entry != null) {
         System.out.printf(
-          "SEMANTIC ERROR (%d): Global variable '%s' already declared at line %d.\n",
-          token.getLine(),
-          variableIdentifier,
-          entry.line
-        );
+            "SEMANTIC ERROR (%d): Global variable '%s' already declared at line %d.\n",
+            token.getLine(),
+            variableIdentifier,
+            entry.line);
 
         System.exit(1);
       }
@@ -118,15 +121,15 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
   }
 
   private void registerFunctionOrProcedureLocalVariables(
-    Identifier_listContext ctx,
-    String functionOrProcedureIdentifier,
-    VariableType variableType
-  ) {
+      Identifier_listContext ctx,
+      String functionOrProcedureIdentifier,
+      VariableType variableType) {
     for (TerminalNode identifierNode : ctx.IDENTIFIER()) {
       Token token = identifierNode.getSymbol();
       String variableIdentifier = token.getText();
 
-      ProceduresAndFunctionsEntry procedureOrFunctionEntry = proceduresAndFunctionsTable.get(functionOrProcedureIdentifier);
+      ProceduresAndFunctionsEntry procedureOrFunctionEntry = proceduresAndFunctionsTable
+          .get(functionOrProcedureIdentifier);
 
       assert procedureOrFunctionEntry != null;
 
@@ -135,12 +138,11 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
 
       if (parameterEntry != null) {
         System.out.printf(
-          "SEMANTIC ERROR (%d): Local variable '%s' of function '%s' was already declared at line %d.\n",
-          token.getLine(),
-          variableIdentifier,
-          functionOrProcedureIdentifier,
-          parameterEntry.line
-        );
+            "SEMANTIC ERROR (%d): Local variable '%s' of function '%s' was already declared at line %d.\n",
+            token.getLine(),
+            variableIdentifier,
+            functionOrProcedureIdentifier,
+            parameterEntry.line);
 
         System.exit(1);
       }
@@ -148,36 +150,34 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
       // Validação de duplicidade de declaração de variável
       if (variableEntry != null) {
         System.out.printf(
-          "SEMANTIC ERROR (%d): Local variable '%s' of function '%s' was already declared at line %d.\n",
-          token.getLine(),
-          variableIdentifier,
-          functionOrProcedureIdentifier,
-          variableEntry.line
-        );
+            "SEMANTIC ERROR (%d): Local variable '%s' of function '%s' was already declared at line %d.\n",
+            token.getLine(),
+            variableIdentifier,
+            functionOrProcedureIdentifier,
+            variableEntry.line);
 
         System.exit(1);
       }
 
       var varLine = token.getLine();
       proceduresAndFunctionsTable.addProcedlureOrFunctionVariable(
-        functionOrProcedureIdentifier,
-        variableIdentifier,
-        varLine,
-        variableType
-      );
+          functionOrProcedureIdentifier,
+          variableIdentifier,
+          varLine,
+          variableType);
     }
   }
 
   private void registerFunctionOrProcedureParameters(
-    Identifier_listContext ctx,
-    String functionOrProcedureIdentifier,
-    VariableType variableType
-  ) {
+      Identifier_listContext ctx,
+      String functionOrProcedureIdentifier,
+      VariableType variableType) {
     for (TerminalNode identifierNode : ctx.IDENTIFIER()) {
       Token token = identifierNode.getSymbol();
       String variableIdentifier = token.getText();
 
-      ProceduresAndFunctionsEntry procedureOrFunctionEntry = proceduresAndFunctionsTable.get(functionOrProcedureIdentifier);
+      ProceduresAndFunctionsEntry procedureOrFunctionEntry = proceduresAndFunctionsTable
+          .get(functionOrProcedureIdentifier);
 
       assert procedureOrFunctionEntry != null;
 
@@ -186,26 +186,23 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
       // Validação de duplicidade de declaração de variável
       if (variableEntry != null) {
         System.out.printf(
-          "SEMANTIC ERROR (%d): Parameter '%s' of function '%s' was already declared at line %d.\n",
-          token.getLine(),
-          variableIdentifier,
-          functionOrProcedureIdentifier,
-          variableEntry.line
-        );
+            "SEMANTIC ERROR (%d): Parameter '%s' of function '%s' was already declared at line %d.\n",
+            token.getLine(),
+            variableIdentifier,
+            functionOrProcedureIdentifier,
+            variableEntry.line);
 
         System.exit(1);
       }
 
       var varLine = token.getLine();
       proceduresAndFunctionsTable.addProcedlureOrFunctionParameter(
-        functionOrProcedureIdentifier,
-        variableIdentifier,
-        varLine,
-        variableType
-      );
+          functionOrProcedureIdentifier,
+          variableIdentifier,
+          varLine,
+          variableType);
     }
   }
-
 
   // ------------------ PROGRAM HEADING -----------------------
 
@@ -217,23 +214,18 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
 
   // --------------------------------------------------------------------------------------
 
-
-
-
-
-
-  // ------------------ VISITORS DE DECLARAÇÃO DE VARIÁVEIS GLOBAIS E LOCAIS -----------------------
+  // ------------------ VISITORS DE DECLARAÇÃO DE VARIÁVEIS GLOBAIS E LOCAIS
+  // -----------------------
 
   @Override
   public Void visitVariable_declaration(Variable_declarationContext ctx) {
     VariableType type;
     var typeDenoter = ctx.type_denoter();
-    
-    if(typeDenoter.primitive_type() != null) {
+
+    if (typeDenoter.primitive_type() != null) {
       var primitiveType = typeDenoter.primitive_type();
       type = new VariableType(PrimitiveType.getType(primitiveType.getText()));
-    }
-    else {
+    } else {
       var arrayType = typeDenoter.array_type();
       var primitiveType = PrimitiveType.getType(arrayType.primitive_type().getText());
       var subrangeType = arrayType.subrange_type();
@@ -241,21 +233,21 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
       var endIndex = Integer.parseInt(subrangeType.UNSIGNED_INTEGER(1).getText());
       type = new VariableType(primitiveType, startIndex, endIndex);
     }
-    
+
     var parent = ctx.parent.parent;
 
-    if(parent instanceof Procedure_headingContext procedureHeadingContext) {
+    if (parent instanceof Procedure_headingContext) {
+      Procedure_headingContext procedureHeadingContext = (Procedure_headingContext) parent;
       var identifier = procedureHeadingContext.IDENTIFIER().getText();
       assert proceduresAndFunctionsTable.lookProcedureOrFunction(identifier);
       registerFunctionOrProcedureLocalVariables(ctx.identifier_list(), identifier, type);
-    }
-    else if(parent instanceof Function_headingContext functionHeadingContext) {
+    } else if (parent instanceof Function_headingContext) {
+      Function_headingContext functionHeadingContext = (Function_headingContext) parent;
       var identifier = functionHeadingContext.IDENTIFIER().getText();
       assert proceduresAndFunctionsTable.lookProcedureOrFunction(identifier);
       registerFunctionOrProcedureLocalVariables(ctx.identifier_list(), identifier, type);
 
-    }
-    else {
+    } else {
       registerGlobalVariables(ctx.identifier_list(), type);
     }
 
@@ -264,16 +256,15 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
 
   // --------------------------------------------------------------------------------------
 
-
-
-  // ------------------ VISITORS DE DECLARAÇÃO DE PROCEDURES E FUNCTIONS -----------------------
+  // ------------------ VISITORS DE DECLARAÇÃO DE PROCEDURES E FUNCTIONS
+  // -----------------------
 
   @Override
   public Void visitProcedure_heading(Procedure_headingContext ctx) {
     var identifier = ctx.IDENTIFIER().getSymbol();
     var procedureIdentifier = identifier.getText();
     var line = identifier.getLine();
-    
+
     checkProcedureOrFunctionIdentifier(identifier, ProcedureOrFunctionEnum.PROCEDURE);
     proceduresAndFunctionsTable.addProcedure(procedureIdentifier, line);
 
@@ -285,7 +276,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
     var identifier = ctx.IDENTIFIER().getSymbol();
     var functionIdentifier = identifier.getText();
     var line = identifier.getLine();
-    
+
     checkProcedureOrFunctionIdentifier(identifier, ProcedureOrFunctionEnum.FUNCTION);
     proceduresAndFunctionsTable.addProcedure(functionIdentifier, line);
 
@@ -294,22 +285,18 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
 
   // --------------------------------------------------------------------------------------
 
-
-
-
-
-  // ------------------ VISITORS DE DECLARAÇÃO DE PARÂMETROS DE PROCEDURES E FUNCTIONS -----------------------
+  // ------------------ VISITORS DE DECLARAÇÃO DE PARÂMETROS DE PROCEDURES E
+  // FUNCTIONS -----------------------
 
   @Override
   public Void visitValue_parameter_speficiation(Value_parameter_speficiationContext ctx) {
     VariableType type;
     var typeDenoter = ctx.type_denoter();
-    
-    if(typeDenoter.primitive_type() != null) {
+
+    if (typeDenoter.primitive_type() != null) {
       var primitiveType = typeDenoter.primitive_type();
       type = new VariableType(PrimitiveType.getType(primitiveType.getText()));
-    }
-    else {
+    } else {
       var arrayType = typeDenoter.array_type();
       var primitiveType = PrimitiveType.getType(arrayType.primitive_type().getText());
       var subrangeType = arrayType.subrange_type();
@@ -320,12 +307,13 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
 
     var declaration = ctx.parent.parent;
 
-    if(declaration instanceof Function_headingContext functionHeadingContext) {
+    if (declaration instanceof Function_headingContext) {
+      Function_headingContext functionHeadingContext = (Function_headingContext) declaration;
       var identifier = functionHeadingContext.IDENTIFIER().getText();
       assert proceduresAndFunctionsTable.lookProcedureOrFunction(identifier);
       registerFunctionOrProcedureParameters(ctx.identifier_list(), identifier, type);
-    }
-    else if(declaration instanceof Procedure_headingContext procedureHeadingContext) {
+    } else if (declaration instanceof Procedure_headingContext) {
+      Procedure_headingContext procedureHeadingContext = (Procedure_headingContext) declaration;
       var identifier = procedureHeadingContext.IDENTIFIER().getText();
       assert proceduresAndFunctionsTable.lookProcedureOrFunction(identifier);
       registerFunctionOrProcedureParameters(ctx.identifier_list(), identifier, type);
@@ -336,12 +324,8 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
 
   // --------------------------------------------------------------------------------------
 
-
-
-
-
-
-  // ------------------- CHECAGEM DE USO DE VARIÁVEIS LOCAIS E GLOBAIS ------------------
+  // ------------------- CHECAGEM DE USO DE VARIÁVEIS LOCAIS E GLOBAIS
+  // ------------------
 
   @Override
   public Void visitVariable_access(Variable_accessContext ctx) {
@@ -349,46 +333,47 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
 
     if (ctx.IDENTIFIER() != null) {
       identifier = ctx.IDENTIFIER();
-    }
-    else {
+    } else {
       var indexedVariable = ctx.indexed_variable();
       identifier = indexedVariable.IDENTIFIER();
     }
-    
+
     String variableIdentifier = identifier.getSymbol().getText();
-    
-    if(variablesTable.lookupVariable(identifier.getSymbol().getText())) {
+
+    if (variablesTable.lookupVariable(identifier.getSymbol().getText())) {
       return visitChildren(ctx);
     }
 
     var parent = ctx.parent;
 
-    while(!(parent instanceof ProgramContext)) {
-      if(parent instanceof Function_declarationContext functionDeclarationContext) {
+    while (!(parent instanceof ProgramContext)) {
+      if (parent instanceof Function_declarationContext) {
+        Function_declarationContext functionDeclarationContext = (Function_declarationContext) parent;
         var functionHeading = functionDeclarationContext.function_heading();
         var functionIdentifier = functionHeading.IDENTIFIER().getText();
-        
-        if(
-          proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalParameter(functionIdentifier, variableIdentifier) |
-          proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalVariable(functionIdentifier, variableIdentifier) |
-          variableIdentifier.equals(functionIdentifier)
-        ) {
+
+        if (proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalParameter(functionIdentifier, variableIdentifier)
+            |
+            proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalVariable(functionIdentifier, variableIdentifier) |
+            variableIdentifier.equals(functionIdentifier)) {
           return visitChildren(ctx);
-        };
-        
+        }
+        ;
+
         break;
-      }
-      else if(parent instanceof Procedure_declarationContext procedureDeclarationContext) {
+      } else if (parent instanceof Procedure_declarationContext) {
+        Procedure_declarationContext procedureDeclarationContext = (Procedure_declarationContext) parent;
         var procedureHeading = procedureDeclarationContext.procedure_heading();
         var procedureIdentifier = procedureHeading.IDENTIFIER().getText();
-        
-        if(
-          proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalParameter(procedureIdentifier, variableIdentifier) |
-          proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalVariable(procedureIdentifier, variableIdentifier)
-        ) {
+
+        if (proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalParameter(procedureIdentifier, variableIdentifier)
+            |
+            proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalVariable(procedureIdentifier,
+                variableIdentifier)) {
           return visitChildren(ctx);
-        };
-        
+        }
+        ;
+
         break;
       }
 
@@ -396,10 +381,9 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
     }
 
     System.out.printf(
-      "SEMANTIC ERROR (%d): Variable '%s' was not declared.",
-      identifier.getSymbol().getLine(),
-      variableIdentifier
-    );
+        "SEMANTIC ERROR (%d): Variable '%s' was not declared.",
+        identifier.getSymbol().getLine(),
+        variableIdentifier);
 
     System.exit(1);
 
@@ -411,37 +395,39 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
     var identifier = ctx.IDENTIFIER();
 
     String variableIdentifier = identifier.getSymbol().getText();
-    
-    if(variablesTable.lookupVariable(identifier.getSymbol().getText())) {
+
+    if (variablesTable.lookupVariable(identifier.getSymbol().getText())) {
       return visitChildren(ctx);
     }
 
     var parent = ctx.parent;
-    while(!(parent instanceof ProgramContext)) {
-      if(parent instanceof Function_declarationContext functionDeclarationContext) {
+    while (!(parent instanceof ProgramContext)) {
+      if (parent instanceof Function_declarationContext) {
+        Function_declarationContext functionDeclarationContext = (Function_declarationContext) parent;
         var functionHeading = functionDeclarationContext.function_heading();
         var functionIdentifier = functionHeading.IDENTIFIER().getText();
-        
-        if(
-          proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalVariable(functionIdentifier, variableIdentifier) |
-          proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalParameter(functionIdentifier, variableIdentifier)
-        ) {
+
+        if (proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalVariable(functionIdentifier, variableIdentifier) |
+            proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalParameter(functionIdentifier,
+                variableIdentifier)) {
           return visitChildren(ctx);
-        };
-        
+        }
+        ;
+
         break;
-      }
-      else if(parent instanceof Procedure_declarationContext procedureDeclarationContext) {
+      } else if (parent instanceof Procedure_declarationContext) {
+        Procedure_declarationContext procedureDeclarationContext = (Procedure_declarationContext) parent;
         var procedureHeading = procedureDeclarationContext.procedure_heading();
         var procedureIdentifier = procedureHeading.IDENTIFIER().getText();
-        
-        if(
-          proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalVariable(procedureIdentifier, variableIdentifier) |
-          proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalParameter(procedureIdentifier, variableIdentifier)
-        ) {
+
+        if (proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalVariable(procedureIdentifier, variableIdentifier)
+            |
+            proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalParameter(procedureIdentifier,
+                variableIdentifier)) {
           return visitChildren(ctx);
-        };
-        
+        }
+        ;
+
         break;
       }
 
@@ -449,10 +435,9 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
     }
 
     System.out.printf(
-      "SEMANTIC ERROR (%d): Variable '%s' was not declared.",
-      identifier.getSymbol().getLine(),
-      variableIdentifier
-    );
+        "SEMANTIC ERROR (%d): Variable '%s' was not declared.",
+        identifier.getSymbol().getLine(),
+        variableIdentifier);
 
     System.exit(1);
 
@@ -461,22 +446,22 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
 
   // --------------------------------------------------------------------------------------
 
-
-  // ------------------- CHECAGEM DE USO DE PROCEDURES E FUNCTIONS ------------------
+  // ------------------- CHECAGEM DE USO DE PROCEDURES E FUNCTIONS
+  // ------------------
 
   @Override
   public Void visitProcedure_statement(Procedure_statementContext ctx) {
     var identifier = ctx.IDENTIFIER();
-    
-    if(!proceduresAndFunctionsTable.lookProcedureOrFunction(identifier.getText())) {
+
+    if (!proceduresAndFunctionsTable.lookProcedureOrFunction(identifier.getText())) {
       System.out.printf(
-        "SEMANTIC ERROR (%d): Procedure '%s' is not defined.",
-        identifier.getSymbol().getLine(),
-        identifier.getText()
-      );
+          "SEMANTIC ERROR (%d): Procedure '%s' is not defined.",
+          identifier.getSymbol().getLine(),
+          identifier.getText());
 
       System.exit(1);
-    };
+    }
+    ;
 
     return visitChildren(ctx);
   }
@@ -484,23 +469,21 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
   @Override
   public Void visitFunction_designator(Function_designatorContext ctx) {
     var identifier = ctx.IDENTIFIER();
-    
-    if(!proceduresAndFunctionsTable.lookProcedureOrFunction(identifier.getText())) {
+
+    if (!proceduresAndFunctionsTable.lookProcedureOrFunction(identifier.getText())) {
       System.out.printf(
-        "SEMANTIC ERROR (%d): Function '%s' is not defined.",
-        identifier.getSymbol().getLine(),
-        identifier.getText()
-      );
+          "SEMANTIC ERROR (%d): Function '%s' is not defined.",
+          identifier.getSymbol().getLine(),
+          identifier.getText());
 
       System.exit(1);
-    };
+    }
+    ;
 
     return visitChildren(ctx);
   }
 
-
   // --------------------------------------------------------------------------------------
-
 
   // ------------------- CHECAGEM DE USO DE LITERAIS ------------------
 
@@ -512,9 +495,18 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
       // Remove as aspas simples de início e fim ('texto' -> texto)
       stringLiteralsTable.addStringLiteral(stringLiteral.substring(1, stringLiteral.length() - 1));
     }
-    
+
     return null;
   }
 
   // --------------------------------------------------------------------------------------
+
+  // ------------------- PRE DECLARED PROCEDURES AND FUNCTIONS ------------------
+
+  private void registerPreDeclaredProceduresAndFunctions() {
+    proceduresAndFunctionsTable.addProcedure("write", -1);
+    proceduresAndFunctionsTable.addProcedure("writeln", -1);
+    proceduresAndFunctionsTable.addProcedure("read", -1);
+    proceduresAndFunctionsTable.addProcedure("readln", -1);
+  }
 }
