@@ -1,7 +1,7 @@
 # ANTLR generated code 
 src/.antlr
 java_bin/**/*
-src/parser/**/*
+src/parser
 
 # Result files from test runs
 tests/**/**/**/actual_result.txt
