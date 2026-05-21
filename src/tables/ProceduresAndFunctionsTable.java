@@ -54,6 +54,19 @@ public final class ProceduresAndFunctionsTable {
     return localVariables.lookupVariable(localVariableIdentifier);
   }
 
+  public boolean lookupProcedureOrFunctionLocalParameter(
+    String procedureOrFunctionIdentifier,
+    String localVariableIdentifier
+  ) {
+    assert table.containsKey(procedureOrFunctionIdentifier);
+
+    ProceduresAndFunctionsEntry entry = table.get(procedureOrFunctionIdentifier);
+
+    VariablesTable parameters = entry.parameters;
+
+    return parameters.lookupVariable(localVariableIdentifier);
+  }
+
   public void addProcedure(String identifier, int line) {
     ProceduresAndFunctionsEntry entry = new ProceduresAndFunctionsEntry(
       identifier,

@@ -38,9 +38,14 @@ public class Main {
     // semânticas
     SemanticChecker semanticChecker = new SemanticChecker();
     semanticChecker.visit(tree);
-
+    
+    System.out.println("String Literals table:");
     semanticChecker.printLiteralsTable();
-    semanticChecker.printSymbolsTable();
+    
+    System.out.println("Global variables:");
+    semanticChecker.printGlobalVariablesTable();
+
+    System.out.println("Procedures and functions:");
     semanticChecker.printProceduresAndFunctionsTable();
   }
 }

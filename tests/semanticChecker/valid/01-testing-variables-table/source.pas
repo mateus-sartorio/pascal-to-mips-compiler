@@ -1,7 +1,6 @@
 program p1;
 
 var
-    // Variáveis para teste da tabela de símbolos
     idade : integer;
     x, y, z : integer;
 
@@ -22,5 +21,5 @@ var
     arrayOfString : array[1..3] of string;
 
 begin
-  writeln('Teste de variáveis para tabela de símbolos');
+  
 end.

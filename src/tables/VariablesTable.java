@@ -42,7 +42,7 @@ public final class VariablesTable {
     int i = 0;
     for (VariableTableEntry entry : table.values()) {
       f.format(
-        "Entry %d -- name: %s, line: %d, type: %s\n",
+        "%d - name: %s, line: %d, type: %s\n",
         i,
         entry.name,
         entry.line,

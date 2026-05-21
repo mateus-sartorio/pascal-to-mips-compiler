@@ -42,7 +42,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
     System.out.println(stringLiteralsTable);
   }
 
-  public void printSymbolsTable() {
+  public void printGlobalVariablesTable() {
     System.out.println(variablesTable);
   }
 
@@ -131,6 +131,19 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
       assert procedureOrFunctionEntry != null;
 
       VariableTableEntry variableEntry = procedureOrFunctionEntry.localVariables.get(variableIdentifier);
+      VariableTableEntry parameterEntry = procedureOrFunctionEntry.parameters.get(variableIdentifier);
+
+      if (parameterEntry != null) {
+        System.out.printf(
+          "SEMANTIC ERROR (%d): Local variable '%s' of function '%s' was already declared at line %d.\n",
+          token.getLine(),
+          variableIdentifier,
+          functionOrProcedureIdentifier,
+          parameterEntry.line
+        );
+
+        System.exit(1);
+      }
 
       // Validação de duplicidade de declaração de variável
       if (variableEntry != null) {
@@ -209,7 +222,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
 
 
 
-  // ------------------ VISITORS DE DECLARAÇÃO DE VARIÁVEIS GLOBAIS -----------------------
+  // ------------------ VISITORS DE DECLARAÇÃO DE VARIÁVEIS GLOBAIS E LOCAIS -----------------------
 
   @Override
   public Void visitVariable_declaration(Variable_declarationContext ctx) {
@@ -349,12 +362,17 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
     }
 
     var parent = ctx.parent;
+
     while(!(parent instanceof ProgramContext)) {
       if(parent instanceof Function_declarationContext functionDeclarationContext) {
         var functionHeading = functionDeclarationContext.function_heading();
         var functionIdentifier = functionHeading.IDENTIFIER().getText();
         
-        if(proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalVariable(functionIdentifier, variableIdentifier)) {
+        if(
+          proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalParameter(functionIdentifier, variableIdentifier) |
+          proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalVariable(functionIdentifier, variableIdentifier) |
+          variableIdentifier.equals(functionIdentifier)
+        ) {
           return visitChildren(ctx);
         };
         
@@ -364,14 +382,17 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
         var procedureHeading = procedureDeclarationContext.procedure_heading();
         var procedureIdentifier = procedureHeading.IDENTIFIER().getText();
         
-        if(proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalVariable(procedureIdentifier, variableIdentifier)) {
+        if(
+          proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalParameter(procedureIdentifier, variableIdentifier) |
+          proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalVariable(procedureIdentifier, variableIdentifier)
+        ) {
           return visitChildren(ctx);
         };
         
         break;
       }
 
-      parent = ctx.parent;
+      parent = parent.parent;
     }
 
     System.out.printf(
@@ -401,7 +422,10 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
         var functionHeading = functionDeclarationContext.function_heading();
         var functionIdentifier = functionHeading.IDENTIFIER().getText();
         
-        if(proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalVariable(functionIdentifier, variableIdentifier)) {
+        if(
+          proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalVariable(functionIdentifier, variableIdentifier) |
+          proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalParameter(functionIdentifier, variableIdentifier)
+        ) {
           return visitChildren(ctx);
         };
         
@@ -411,14 +435,17 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
         var procedureHeading = procedureDeclarationContext.procedure_heading();
         var procedureIdentifier = procedureHeading.IDENTIFIER().getText();
         
-        if(proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalVariable(procedureIdentifier, variableIdentifier)) {
+        if(
+          proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalVariable(procedureIdentifier, variableIdentifier) |
+          proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalParameter(procedureIdentifier, variableIdentifier)
+        ) {
           return visitChildren(ctx);
         };
         
         break;
       }
 
-      parent = ctx.parent;
+      parent = parent.parent;
     }
 
     System.out.printf(
