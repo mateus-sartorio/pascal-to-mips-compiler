@@ -37,8 +37,16 @@ public final class ProceduresAndFunctionsTable {
 
   private Map<String, ProceduresAndFunctionsEntry> table = new LinkedHashMap<>();
 
+  public boolean isEmpty() {
+    return table.isEmpty();
+  }
+
   public boolean lookProcedureOrFunction(String identifier) {
     return table.containsKey(identifier);
+  }
+
+  public ProceduresAndFunctionsEntry get(String identifier) {
+    return table.get(identifier);
   }
 
   public boolean lookupProcedureOrFunctionLocalVariable(
@@ -128,10 +136,6 @@ public final class ProceduresAndFunctionsTable {
     localVariables.addVariable(variableIdentifier, line, type);
   }
 
-  public ProceduresAndFunctionsEntry get(String identifier) {
-    return table.get(identifier);
-  }
-
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
@@ -139,25 +143,23 @@ public final class ProceduresAndFunctionsTable {
 
     
     for(ProceduresAndFunctionsEntry entry : table.values()) {
-      
-      // Pulando as entradas pré-declaradas (write, writeln, read, readln) para não poluir a saída dos testes
-      if(entry.line == -1) {
-        continue;
-      }
-
       f.format(
-        "%s %s -- line %d%s\n",
-        entry.type == ProcedureOrFunctionEnum.FUNCTION ? "FUNCTION" : "PROCEDURE",
+        "%s %s - line %d%s\n",
+        entry.type == ProcedureOrFunctionEnum.FUNCTION ? "Function" : "Procedure",
         entry.name,
         entry.line,
         entry.type == ProcedureOrFunctionEnum.FUNCTION ? (", return type: " + entry.returnType.toString()) : ""
       );
 
-      f.format("Parameters:\n");
-      f.format(entry.parameters.toString());
-      
-      f.format("Local variables:\n");
-      f.format(entry.localVariables.toString());
+      if(!entry.parameters.isEmpty()) {
+        f.format("Parameters:\n");
+        f.format(entry.parameters.toString());
+      }
+
+      if(!entry.localVariables.isEmpty()) {
+        f.format("Local variables:\n");
+        f.format(entry.localVariables.toString());
+      }
     }
     f.close();
     

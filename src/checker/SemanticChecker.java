@@ -1,5 +1,7 @@
 package checker;
 
+import java.util.List;
+
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -21,6 +23,7 @@ import parser.PascalParserBaseVisitor;
 import tables.StringLiteralsTable;
 import tables.VariablesTable;
 import tables.VariablesTable.VariableTableEntry;
+import tables.BuiltInProceduresAndFunctionsTable;
 import tables.ProceduresAndFunctionsTable;
 import tables.ProceduresAndFunctionsTable.ProceduresAndFunctionsEntry;
 import types.PrimitiveType;
@@ -38,20 +41,46 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
 
   private final ProceduresAndFunctionsTable proceduresAndFunctionsTable = new ProceduresAndFunctionsTable();
 
+  private final BuiltInProceduresAndFunctionsTable builtInProceduresAndFunctionsTable = new BuiltInProceduresAndFunctionsTable();
+
   public SemanticChecker() {
     registerPreDeclaredProceduresAndFunctions();
   }
 
   public void printLiteralsTable() {
+    if (stringLiteralsTable.isEmpty()) {
+      return;
+    }
+
+    System.out.println("String Literals table:\n");
     System.out.println(stringLiteralsTable);
   }
 
   public void printGlobalVariablesTable() {
+    if (variablesTable.isEmpty()) {
+      return;
+    }
+
+    System.out.println("Global variables:\n");
     System.out.println(variablesTable);
   }
 
   public void printProceduresAndFunctionsTable() {
+    if (proceduresAndFunctionsTable.isEmpty()) {
+      return;
+    }
+
+    System.out.println("Procedures and functions:\n");
     System.out.println(proceduresAndFunctionsTable);
+  }
+
+  public void printBuiltInProceduresAndFunctionsTable() {
+    if (builtInProceduresAndFunctionsTable.isEmpty()) {
+      return;
+    }
+
+    System.out.println("Built-in procedures and functions:\n");
+    System.out.println(builtInProceduresAndFunctionsTable);
   }
 
   public void checkProgramHeadingIdentifier(Token token) {
@@ -504,9 +533,11 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
   // ------------------- PRE DECLARED PROCEDURES AND FUNCTIONS ------------------
 
   private void registerPreDeclaredProceduresAndFunctions() {
-    proceduresAndFunctionsTable.addProcedure("write", -1);
-    proceduresAndFunctionsTable.addProcedure("writeln", -1);
-    proceduresAndFunctionsTable.addProcedure("read", -1);
-    proceduresAndFunctionsTable.addProcedure("readln", -1);
+    var stringParameterType = new VariableTableEntry("x", -1, new VariableType(PrimitiveType.STRING));
+
+    builtInProceduresAndFunctionsTable.addProcedure("write", List.of(stringParameterType));
+    builtInProceduresAndFunctionsTable.addProcedure("writeln", List.of(stringParameterType));
+    builtInProceduresAndFunctionsTable.addProcedure("read", List.of(stringParameterType));
+    builtInProceduresAndFunctionsTable.addProcedure("readln", List.of(stringParameterType));
   }
 }

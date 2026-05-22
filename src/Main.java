@@ -14,7 +14,7 @@ public class Main {
   public static void main(String[] args) throws IOException {
 
     // Criando um char stream que le todos os caracteres do arquivo
-    CharStream input = CharStreams.fromFileName(args[0],StandardCharsets.UTF_8);
+    CharStream input = CharStreams.fromFileName(args[0], StandardCharsets.UTF_8);
 
     // Criando o lexer que vai consumir esses caracteres
     PascalLexer lexer = new PascalLexer(input);
@@ -40,13 +40,9 @@ public class Main {
     SemanticChecker semanticChecker = new SemanticChecker();
     semanticChecker.visit(tree);
     
-    System.out.println("String Literals table:");
     semanticChecker.printLiteralsTable();
-    
-    System.out.println("Global variables:");
+    semanticChecker.printBuiltInProceduresAndFunctionsTable();
     semanticChecker.printGlobalVariablesTable();
-
-    System.out.println("Procedures and functions:");
     semanticChecker.printProceduresAndFunctionsTable();
   }
 }

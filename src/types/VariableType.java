@@ -3,7 +3,7 @@ package types;
 import java.util.Formatter;
 
 public class VariableType {
-  private final boolean isPrimitive;
+    private final boolean isPrimitive;
     private final PrimitiveType primitiveType;
     private final int startIndex;
     private final int endIndex;

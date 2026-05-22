@@ -7,6 +7,10 @@ import java.util.Set;
 public final class StringLiteralsTable {
   private Set<String> table = new LinkedHashSet<>();
 
+  public boolean isEmpty() {
+    return table.isEmpty();
+  }
+
   public void addStringLiteral(String literal) {
     table.add(literal);
   }

@@ -2,6 +2,7 @@ package tables;
 
 import java.util.Formatter;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import types.VariableType;
@@ -13,7 +14,7 @@ public final class VariablesTable {
     public final int line;
     public final VariableType type;
 
-    VariableTableEntry(String name, int line, VariableType type) {
+    public VariableTableEntry(String name, int line, VariableType type) {
       this.name = name;
       this.line = line;
       this.type = type;
@@ -21,6 +22,22 @@ public final class VariablesTable {
   }
 
   private Map<String, VariableTableEntry> table = new LinkedHashMap<>();
+
+  public VariablesTable() {
+    table = new LinkedHashMap<>();
+  }
+
+  public VariablesTable(List<VariableTableEntry> list) {
+    table = new LinkedHashMap<>();
+
+    for(VariableTableEntry entry : list) {
+      table.put(entry.name, entry);
+    }
+  }
+
+  public boolean isEmpty() {
+    return table.isEmpty();
+  }
 
   public boolean lookupVariable(String identifier) {
     return table.containsKey(identifier);
@@ -42,10 +59,10 @@ public final class VariablesTable {
     int i = 0;
     for (VariableTableEntry entry : table.values()) {
       f.format(
-        "%d - name: %s, line: %d, type: %s\n",
+        "%d - name: %s%s, type: %s\n",
         i,
         entry.name,
-        entry.line,
+        entry.line >= 0 ? ", line: " + entry.line : "",
         entry.type.toString()
       );
       i++;

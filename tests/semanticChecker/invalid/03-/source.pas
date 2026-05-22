@@ -9,11 +9,8 @@ procedure InicializarNotas();
 begin
   // Testa o visitFor_statement usando variável global
   for i := 1 to 5 do
-  begin
-    // Testa o visitVariable_access caindo no ramo 'indexed_variable'
-    notas[i] := 0.0; 
-    writeln('Zerando nota...') // Testa o Unsigned_constant e Procedure_statement
-  end
+  notas[i] := 0.0; 
+  writeln('Zerando nota...') // Testa o Unsigned_constant e Procedure_statement
 end;
 
 begin
