@@ -140,7 +140,8 @@ procedure_statement: IDENTIFIER ( actual_parameter_list )? ;
 // 6.8.3.1 General
 
 structured_statement:
-	if_statement
+  compound_statement
+	| if_statement
 	| for_statement
   ;
 
