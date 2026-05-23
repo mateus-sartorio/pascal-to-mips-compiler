@@ -45,14 +45,14 @@ public final class BuiltInProceduresAndFunctionsTable {
   }
 
   public void addProcedure(String identifier, List<VariableTableEntry> parameterList) {
-    addProcedureOrFunction(identifier, ProcedureOrFunctionEnum.PROCEDURE, null, parameterList);
+    addProcedureOrFunction(identifier, ProcedureOrFunctionEnum.PROCEDURE, parameterList, null);
   }
 
-  public void addFunction(String identifier, PrimitiveType returnType, List<VariableTableEntry> parameterList) {
-    addProcedureOrFunction(identifier, ProcedureOrFunctionEnum.FUNCTION, returnType, parameterList);
+  public void addFunction(String identifier, List<VariableTableEntry> parameterList, PrimitiveType returnType) {
+    addProcedureOrFunction(identifier, ProcedureOrFunctionEnum.FUNCTION, parameterList, returnType);
   }
 
-  private void addProcedureOrFunction(String identifier, ProcedureOrFunctionEnum type, PrimitiveType returnType, List<VariableTableEntry> parameterList) {
+  private void addProcedureOrFunction(String identifier, ProcedureOrFunctionEnum type, List<VariableTableEntry> parameterList, PrimitiveType returnType) {
     BuiltInProceduresAndFunctionsEntry newEntry = new BuiltInProceduresAndFunctionsEntry(
       identifier,
       type,

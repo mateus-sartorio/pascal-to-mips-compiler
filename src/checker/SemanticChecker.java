@@ -2,19 +2,24 @@ package checker;
 
 import java.util.List;
 
+import org.antlr.v4.runtime.RuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import parser.PascalParser.Array_typeContext;
 import parser.PascalParser.For_statementContext;
 import parser.PascalParser.Function_declarationContext;
 import parser.PascalParser.Function_designatorContext;
 import parser.PascalParser.Function_headingContext;
 import parser.PascalParser.Identifier_listContext;
+import parser.PascalParser.Indexed_variableContext;
+import parser.PascalParser.Primitive_typeContext;
 import parser.PascalParser.Procedure_declarationContext;
 import parser.PascalParser.Procedure_headingContext;
 import parser.PascalParser.Procedure_statementContext;
 import parser.PascalParser.ProgramContext;
 import parser.PascalParser.Program_headingContext;
+import parser.PascalParser.Subrange_typeContext;
 import parser.PascalParser.Type_denoterContext;
 import parser.PascalParser.Unsigned_constantContext;
 import parser.PascalParser.Value_parameter_speficiationContext;
@@ -36,14 +41,16 @@ import types.VariableType;
 public class SemanticChecker extends PascalParserBaseVisitor<Void> {
   String programHeadingIdentifier;
 
-  // Tabela de literais para armazenar as strings literais encontradas no código
+  // Table to store string literals found in the code
   private final StringLiteralsTable stringLiteralsTable = new StringLiteralsTable();
 
+  // Symbol table to store pre-declared procedures and functions and their parameters
   private final BuiltInProceduresAndFunctionsTable builtInProceduresAndFunctionsTable = new BuiltInProceduresAndFunctionsTable();
 
-  // Tabela de símbolos para armazenar as variáveis declaradas no código
+  // Symbol table to store variables declared in the code
   private final VariablesTable globalVariablesTable = new VariablesTable();
 
+  // Symbol table to store declared procedures and functions, their local variables and parameters
   private final ProceduresAndFunctionsTable proceduresAndFunctionsTable = new ProceduresAndFunctionsTable();
 
   public SemanticChecker() {
@@ -86,7 +93,47 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
     System.out.println(builtInProceduresAndFunctionsTable);
   }
 
-  // HELPER METHODS
+  // Helper methods
+
+  // Pre-declared procedures and functions
+  private void registerPreDeclaredProceduresAndFunctions() {
+    // Reusable primitive types
+    VariableType typeString = new PrimitiveVariableType(PrimitiveType.STRING);
+    VariableType typeInt = new PrimitiveVariableType(PrimitiveType.INTEGER);
+    VariableType typeReal = new PrimitiveVariableType(PrimitiveType.REAL);
+    VariableType typeChar = new PrimitiveVariableType(PrimitiveType.CHAR);
+
+    // Standard parameter entries
+    VariableTableEntry stringParam = new VariableTableEntry("str", typeString);
+    VariableTableEntry intParam = new VariableTableEntry("n", typeInt);
+    VariableTableEntry realParam = new VariableTableEntry("n", typeReal);
+    VariableTableEntry charParam = new VariableTableEntry("c", typeChar);
+
+    // --- PROCEDURES ---
+    // I/O
+    builtInProceduresAndFunctionsTable.addProcedure("write", List.of(stringParam));
+    builtInProceduresAndFunctionsTable.addProcedure("writeln", List.of(stringParam));
+    builtInProceduresAndFunctionsTable.addProcedure("read", List.of(stringParam));
+    builtInProceduresAndFunctionsTable.addProcedure("readln", List.of(stringParam));
+
+    // --- FUNCTIONS ---
+    // Math
+    builtInProceduresAndFunctionsTable.addFunction("abs", List.of(intParam), PrimitiveType.INTEGER);
+    builtInProceduresAndFunctionsTable.addFunction("sqr", List.of(intParam), PrimitiveType.INTEGER);
+    builtInProceduresAndFunctionsTable.addFunction("sqrt", List.of(realParam), PrimitiveType.REAL);
+    builtInProceduresAndFunctionsTable.addFunction("trunc", List.of(realParam), PrimitiveType.INTEGER);
+    builtInProceduresAndFunctionsTable.addFunction("round", List.of(realParam), PrimitiveType.INTEGER);
+
+    // Ordinal & Character
+    builtInProceduresAndFunctionsTable.addFunction("ord", List.of(charParam), PrimitiveType.INTEGER);
+    builtInProceduresAndFunctionsTable.addFunction("chr", List.of(intParam), PrimitiveType.CHAR);
+    builtInProceduresAndFunctionsTable.addFunction("succ", List.of(intParam), PrimitiveType.INTEGER);
+    builtInProceduresAndFunctionsTable.addFunction("pred", List.of(intParam), PrimitiveType.INTEGER);
+
+    // String
+    builtInProceduresAndFunctionsTable.addFunction("length", List.of(stringParam), PrimitiveType.INTEGER);
+    builtInProceduresAndFunctionsTable.addFunction("upcase", List.of(charParam), PrimitiveType.CHAR);
+  }
 
   private void checkGlobalIdentifierIsNotDefined(Token identifierToken) {
     String identifier = identifierToken.getText();
@@ -142,7 +189,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
       System.exit(1);
     }
 
-    // Validação de duplicidade de declaração de variável
+    // Validate duplicate variable declaration
     if (variableEntry != null) {
       System.out.printf("SEMANTIC ERROR (%d): Local variable '%s' of %s '%s' was already declared at line %d.\n", identifierToken.getLine(), procedureOrFunctionEntry.type.toString(), identifier, procedureOrFunctionIdentifier, variableEntry.line);
 
@@ -150,7 +197,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
     }
   }
 
-  // Auxiliar reutilizável para cadastrar variáveis na tabela e checar duplicados
+  // Reusable helper to register variables in the table and check duplicates
   private void registerGlobalVariables(Identifier_listContext context, VariableType variableType) {
     for (TerminalNode identifierNode : context.IDENTIFIER()) {
       Token identifierToken = identifierNode.getSymbol();
@@ -158,7 +205,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
 
       checkGlobalIdentifierIsNotDefined(identifierToken);
 
-      var varLine = identifierToken.getLine();
+      int varLine = identifierToken.getLine();
       globalVariablesTable.addVariable(variableIdentifier, varLine, variableType);
     }
   }
@@ -171,7 +218,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
       checkProcedureOrFunctionParameterOrLocalVariableIdentifierIsNotDefined(token, procedureOrFunctionIdentifier);
 
       String variableIdentifier = token.getText();
-      var variableLine = token.getLine();
+      int variableLine = token.getLine();
 
       proceduresAndFunctionsTable.addProcedlureOrFunctionVariable(procedureOrFunctionIdentifier, variableIdentifier, variableLine, variableType);
     }
@@ -185,7 +232,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
       checkProcedureOrFunctionParameterOrLocalVariableIdentifierIsNotDefined(token, procedureOrFunctionIdentifier);
 
       String variableIdentifier = token.getText();
-      var variableLine = token.getLine();
+      int variableLine = token.getLine();
 
       proceduresAndFunctionsTable.addProcedlureOrFunctionParameter(procedureOrFunctionIdentifier, variableIdentifier, variableLine, variableType);
     }
@@ -195,22 +242,22 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
     VariableType type;
 
     if (context.primitive_type() != null) {
-      var primitiveType = context.primitive_type();
+      Primitive_typeContext primitiveType = context.primitive_type();
       type = new PrimitiveVariableType(PrimitiveType.getType(primitiveType.getText()));
     }
     else {
-      var arrayType = context.array_type();
-      var primitiveType = PrimitiveType.getType(arrayType.primitive_type().getText());
-      var subrangeType = arrayType.subrange_type();
-      var startIndex = Integer.parseInt(subrangeType.UNSIGNED_INTEGER(0).getText());
-      var endIndex = Integer.parseInt(subrangeType.UNSIGNED_INTEGER(1).getText());
+      Array_typeContext arrayType = context.array_type();
+      PrimitiveType primitiveType = PrimitiveType.getType(arrayType.primitive_type().getText());
+      Subrange_typeContext subrangeType = arrayType.subrange_type();
+      int startIndex = Integer.parseInt(subrangeType.UNSIGNED_INTEGER(0).getText());
+      int endIndex = Integer.parseInt(subrangeType.UNSIGNED_INTEGER(1).getText());
       type = new ArrayVariableType(primitiveType, startIndex, endIndex);
     }
 
     return type;
   }
 
-  // PROGRAM HEADING VISITOR
+  // Program heading visitor
 
   @Override
   public Void visitProgram_heading(Program_headingContext context) {
@@ -218,25 +265,25 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
     return visitChildren(context);
   }
 
-  // VISITORS DE DECLARAÇÃO DE VARIÁVEIS GLOBAIS E LOCAIS
+  // Visitors for global and local variable declarations
 
   @Override
   public Void visitVariable_declaration(Variable_declarationContext context) {
     Type_denoterContext typeDenoter = context.type_denoter();
     VariableType type = extractVariableTypeFromTypeDenoter(typeDenoter);
 
-    var parent = context.parent.parent;
+    org.antlr.v4.runtime.RuleContext parent = context.parent.parent;
 
     if (parent instanceof Procedure_headingContext) {
       Procedure_headingContext procedureHeadingContext = (Procedure_headingContext) parent;
-      var identifier = procedureHeadingContext.IDENTIFIER().getText();
+      String identifier = procedureHeadingContext.IDENTIFIER().getText();
       assert proceduresAndFunctionsTable.lookProcedureOrFunction(identifier);
       registerProcedureOrFunctionLocalVariables(context.identifier_list(), identifier, type);
     }
     else
       if (parent instanceof Function_headingContext) {
         Function_headingContext functionHeadingContext = (Function_headingContext) parent;
-        var identifier = functionHeadingContext.IDENTIFIER().getText();
+        String identifier = functionHeadingContext.IDENTIFIER().getText();
         assert proceduresAndFunctionsTable.lookProcedureOrFunction(identifier);
         registerProcedureOrFunctionLocalVariables(context.identifier_list(), identifier, type);
 
@@ -248,16 +295,16 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
     return visitChildren(context);
   }
 
-  // VISITORS DE DECLARAÇÃO DE PROCEDURES E FUNCTIONS
+  // Visitors for procedure and function declarations
 
   @Override
   public Void visitProcedure_heading(Procedure_headingContext context) {
-    var identifierToken = context.IDENTIFIER().getSymbol();
+    Token identifierToken = context.IDENTIFIER().getSymbol();
 
     checkGlobalIdentifierIsNotDefined(identifierToken);
 
-    var procedureIdentifier = identifierToken.getText();
-    var line = identifierToken.getLine();
+    String procedureIdentifier = identifierToken.getText();
+    int line = identifierToken.getLine();
 
     proceduresAndFunctionsTable.addProcedure(procedureIdentifier, line);
 
@@ -266,37 +313,37 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
 
   @Override
   public Void visitFunction_heading(Function_headingContext context) {
-    var identifierToken = context.IDENTIFIER().getSymbol();
+    Token identifierToken = context.IDENTIFIER().getSymbol();
 
     checkGlobalIdentifierIsNotDefined(identifierToken);
 
-    var functionIdentifier = identifierToken.getText();
-    var line = identifierToken.getLine();
+    String functionIdentifier = identifierToken.getText();
+    int line = identifierToken.getLine();
 
     proceduresAndFunctionsTable.addProcedure(functionIdentifier, line);
 
     return visitChildren(context);
   }
 
-  // VISITORS DE DECLARAÇÃO DE PARÂMETROS DE PROCEDURES E FUNCTIONS
+  // Visitors for procedure/function parameter declarations
 
   @Override
   public Void visitValue_parameter_speficiation(Value_parameter_speficiationContext context) {
     Type_denoterContext typeDenoter = context.type_denoter();
     VariableType type = extractVariableTypeFromTypeDenoter(typeDenoter);
 
-    var declaration = context.parent.parent;
+    RuleContext declaration = context.parent.parent;
 
     if (declaration instanceof Function_headingContext) {
       Function_headingContext functionHeadingContext = (Function_headingContext) declaration;
-      var identifier = functionHeadingContext.IDENTIFIER().getText();
+      String identifier = functionHeadingContext.IDENTIFIER().getText();
       assert proceduresAndFunctionsTable.lookProcedureOrFunction(identifier);
       registerProcedureOrFunctionParameters(context.identifier_list(), identifier, type);
     }
     else
       if (declaration instanceof Procedure_headingContext) {
         Procedure_headingContext procedureHeadingContext = (Procedure_headingContext) declaration;
-        var identifier = procedureHeadingContext.IDENTIFIER().getText();
+        String identifier = procedureHeadingContext.IDENTIFIER().getText();
         assert proceduresAndFunctionsTable.lookProcedureOrFunction(identifier);
         registerProcedureOrFunctionParameters(context.identifier_list(), identifier, type);
       }
@@ -304,7 +351,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
     return visitChildren(context);
   }
 
-  // CHECAGEM DE USO DE VARIÁVEIS LOCAIS E GLOBAIS
+  // Checking usage of local and global variables
 
   @Override
   public Void visitVariable_access(Variable_accessContext context) {
@@ -314,7 +361,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
       identifier = context.IDENTIFIER();
     }
     else {
-      var indexedVariable = context.indexed_variable();
+      Indexed_variableContext indexedVariable = context.indexed_variable();
       identifier = indexedVariable.IDENTIFIER();
     }
 
@@ -324,13 +371,13 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
       return visitChildren(context);
     }
 
-    var parent = context.parent;
+    RuleContext parent = context.parent;
 
     while (!(parent instanceof ProgramContext)) {
       if (parent instanceof Function_declarationContext) {
         Function_declarationContext functionDeclarationContext = (Function_declarationContext) parent;
-        var functionHeading = functionDeclarationContext.function_heading();
-        var functionIdentifier = functionHeading.IDENTIFIER().getText();
+        Function_headingContext functionHeading = functionDeclarationContext.function_heading();
+        String functionIdentifier = functionHeading.IDENTIFIER().getText();
 
         if (proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalParameter(functionIdentifier, variableIdentifier) | proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalVariable(functionIdentifier, variableIdentifier) | variableIdentifier.equals(functionIdentifier)) {
           return visitChildren(context);
@@ -341,8 +388,8 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
       else
         if (parent instanceof Procedure_declarationContext) {
           Procedure_declarationContext procedureDeclarationContext = (Procedure_declarationContext) parent;
-          var procedureHeading = procedureDeclarationContext.procedure_heading();
-          var procedureIdentifier = procedureHeading.IDENTIFIER().getText();
+          Procedure_headingContext procedureHeading = procedureDeclarationContext.procedure_heading();
+          String procedureIdentifier = procedureHeading.IDENTIFIER().getText();
 
           if (proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalParameter(procedureIdentifier, variableIdentifier) | proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalVariable(procedureIdentifier, variableIdentifier)) {
             return visitChildren(context);
@@ -363,7 +410,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
 
   @Override
   public Void visitFor_statement(For_statementContext context) {
-    var identifier = context.IDENTIFIER();
+    TerminalNode identifier = context.IDENTIFIER();
 
     String variableIdentifier = identifier.getSymbol().getText();
 
@@ -371,12 +418,12 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
       return visitChildren(context);
     }
 
-    var parent = context.parent;
+    org.antlr.v4.runtime.RuleContext parent = context.parent;
     while (!(parent instanceof ProgramContext)) {
       if (parent instanceof Function_declarationContext) {
         Function_declarationContext functionDeclarationContext = (Function_declarationContext) parent;
-        var functionHeading = functionDeclarationContext.function_heading();
-        var functionIdentifier = functionHeading.IDENTIFIER().getText();
+        Function_headingContext functionHeading = functionDeclarationContext.function_heading();
+        String functionIdentifier = functionHeading.IDENTIFIER().getText();
 
         if (proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalVariable(functionIdentifier, variableIdentifier) | proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalParameter(functionIdentifier, variableIdentifier)) {
           return visitChildren(context);
@@ -387,8 +434,8 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
       else
         if (parent instanceof Procedure_declarationContext) {
           Procedure_declarationContext procedureDeclarationContext = (Procedure_declarationContext) parent;
-          var procedureHeading = procedureDeclarationContext.procedure_heading();
-          var procedureIdentifier = procedureHeading.IDENTIFIER().getText();
+          Procedure_headingContext procedureHeading = procedureDeclarationContext.procedure_heading();
+          String procedureIdentifier = procedureHeading.IDENTIFIER().getText();
 
           if (proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalVariable(procedureIdentifier, variableIdentifier) | proceduresAndFunctionsTable.lookupProcedureOrFunctionLocalParameter(procedureIdentifier, variableIdentifier)) {
             return visitChildren(context);
@@ -407,11 +454,11 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
     return visitChildren(context);
   }
 
-  // CHECAGEM DE USO DE PROCEDURES E FUNCTIONS
+  // Checking usage of procedures and functions
 
   @Override
   public Void visitProcedure_statement(Procedure_statementContext context) {
-    var identifier = context.IDENTIFIER();
+    TerminalNode identifier = context.IDENTIFIER();
 
     if (!proceduresAndFunctionsTable.lookProcedureOrFunction(identifier.getText())) {
       System.out.printf("SEMANTIC ERROR (%d): Procedure '%s' is not defined.", identifier.getSymbol().getLine(), identifier.getText());
@@ -424,7 +471,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
 
   @Override
   public Void visitFunction_designator(Function_designatorContext context) {
-    var identifier = context.IDENTIFIER();
+    TerminalNode identifier = context.IDENTIFIER();
 
     if (!proceduresAndFunctionsTable.lookProcedureOrFunction(identifier.getText())) {
       System.out.printf("SEMANTIC ERROR (%d): Function '%s' is not defined.", identifier.getSymbol().getLine(), identifier.getText());
@@ -435,28 +482,17 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
     return visitChildren(context);
   }
 
-  // CHECAGEM DE USO DE LITERAIS
+  // Checking usage of literals
 
   @Override
   public Void visitUnsigned_constant(Unsigned_constantContext context) {
-    // Como unsigned_constant aceita números, precisamos isolar apenas a String
+    // Since unsigned_constant accepts numbers, isolate only the string literal
     if (context.CHARACTER_STRING() != null) {
       String stringLiteral = context.CHARACTER_STRING().getText();
-      // Remove as aspas simples de início e fim ('texto' -> texto)
+      // Remove the surrounding single quotes ('text' -> text)
       stringLiteralsTable.addStringLiteral(stringLiteral.substring(1, stringLiteral.length() - 1));
     }
 
     return null;
-  }
-
-  // PRE DECLARED PROCEDURES AND FUNCTIONS
-
-  private void registerPreDeclaredProceduresAndFunctions() {
-    var stringParameterType = new VariableTableEntry("str", new PrimitiveVariableType(PrimitiveType.STRING));
-
-    builtInProceduresAndFunctionsTable.addProcedure("write", List.of(stringParameterType));
-    builtInProceduresAndFunctionsTable.addProcedure("writeln", List.of(stringParameterType));
-    builtInProceduresAndFunctionsTable.addProcedure("read", List.of(stringParameterType));
-    builtInProceduresAndFunctionsTable.addProcedure("readln", List.of(stringParameterType));
   }
 }
