@@ -11,7 +11,7 @@ import types.VariableType;
 
 public final class ProceduresAndFunctionsTable {
   public static final class ProceduresAndFunctionsEntry {
-    public final String name;
+    public final String identifier;
     public final int line;
     public final ProcedureOrFunctionEnum type;
     public final PrimitiveType returnType;
@@ -19,14 +19,14 @@ public final class ProceduresAndFunctionsTable {
     public final VariablesTable localVariables;
 
     ProceduresAndFunctionsEntry(
-      String name,
+      String identifier,
       int line,
       ProcedureOrFunctionEnum type,
       PrimitiveType returnType,
       VariablesTable parameters,
       VariablesTable localVariables
     ) {
-      this.name = name;
+      this.identifier = identifier;
       this.line = line;
       this.type = type;
       this.returnType = returnType;
@@ -42,20 +42,20 @@ public final class ProceduresAndFunctionsTable {
   }
 
   public boolean lookProcedureOrFunction(String identifier) {
-    return table.containsKey(identifier);
+    return table.containsKey(identifier.toLowerCase());
   }
 
   public ProceduresAndFunctionsEntry get(String identifier) {
-    return table.get(identifier);
+    return table.get(identifier.toLowerCase());
   }
 
   public boolean lookupProcedureOrFunctionLocalVariable(
     String procedureOrFunctionIdentifier,
     String localVariableIdentifier
   ) {
-    assert table.containsKey(procedureOrFunctionIdentifier);
+    assert lookProcedureOrFunction(procedureOrFunctionIdentifier);
 
-    ProceduresAndFunctionsEntry entry = table.get(procedureOrFunctionIdentifier);
+    ProceduresAndFunctionsEntry entry = get(procedureOrFunctionIdentifier);
 
     VariablesTable localVariables = entry.localVariables;
 
@@ -66,9 +66,9 @@ public final class ProceduresAndFunctionsTable {
     String procedureOrFunctionIdentifier,
     String localVariableIdentifier
   ) {
-    assert table.containsKey(procedureOrFunctionIdentifier);
+    assert lookProcedureOrFunction(procedureOrFunctionIdentifier);
 
-    ProceduresAndFunctionsEntry entry = table.get(procedureOrFunctionIdentifier);
+    ProceduresAndFunctionsEntry entry = get(procedureOrFunctionIdentifier);
 
     VariablesTable parameters = entry.parameters;
 
@@ -85,7 +85,7 @@ public final class ProceduresAndFunctionsTable {
       new VariablesTable()
     );
 
-    table.put(identifier, entry);
+    table.put(identifier.toLowerCase(), entry);
   }
 
   public void addFunction(String identifier, int line, PrimitiveType type) {
@@ -98,7 +98,7 @@ public final class ProceduresAndFunctionsTable {
       new VariablesTable()
     );
 
-    table.put(identifier, entry);
+    table.put(identifier.toLowerCase(), entry);
   }
 
   public void addProcedlureOrFunctionParameter(
@@ -108,7 +108,7 @@ public final class ProceduresAndFunctionsTable {
     VariableType type
   ) {
     
-    ProceduresAndFunctionsEntry entry = table.get(procedureOrFunctionIdentifier);
+    ProceduresAndFunctionsEntry entry = get(procedureOrFunctionIdentifier);
 
     assert entry != null;
 
@@ -125,7 +125,7 @@ public final class ProceduresAndFunctionsTable {
     int line,
     VariableType type
   ) {
-    ProceduresAndFunctionsEntry entry = table.get(procedureOrFunctionIdentifier);
+    ProceduresAndFunctionsEntry entry = get(procedureOrFunctionIdentifier);
 
     assert entry != null;
 
@@ -144,9 +144,9 @@ public final class ProceduresAndFunctionsTable {
     
     for(ProceduresAndFunctionsEntry entry : table.values()) {
       f.format(
-        "%s %s - line %d%s\n",
+        "%s '%s' - line %d%s\n",
         entry.type == ProcedureOrFunctionEnum.FUNCTION ? "Function" : "Procedure",
-        entry.name,
+        entry.identifier,
         entry.line,
         entry.type == ProcedureOrFunctionEnum.FUNCTION ? (", return type: " + entry.returnType.toString()) : ""
       );
@@ -160,6 +160,8 @@ public final class ProceduresAndFunctionsTable {
         f.format("Local variables:\n");
         f.format(entry.localVariables.toString());
       }
+
+      f.format("\n");
     }
     f.close();
     

@@ -12,19 +12,18 @@ import types.ProcedureOrFunctionEnum;
 
 public final class BuiltInProceduresAndFunctionsTable {
   public static final class BuiltInProceduresAndFunctionsEntry {
-    public final String name;
+    public final String identifier;
     public final ProcedureOrFunctionEnum type;
     public final PrimitiveType returnType;
     public final VariablesTable parameters;
 
     BuiltInProceduresAndFunctionsEntry(
-      String name,
-      int line,
+      String identifier,
       ProcedureOrFunctionEnum type,
       PrimitiveType returnType,
       VariablesTable parameters
     ) {
-      this.name = name;
+      this.identifier = identifier;
       this.type = type;
       this.returnType = returnType;
       this.parameters = parameters;
@@ -38,11 +37,11 @@ public final class BuiltInProceduresAndFunctionsTable {
   }
 
   public boolean lookProcedureOrFunction(String identifier) {
-    return table.containsKey(identifier);
+    return table.containsKey(identifier.toLowerCase());
   }
 
   public List<BuiltInProceduresAndFunctionsEntry> get(String identifier) {
-    return table.get(identifier);
+    return table.get(identifier.toLowerCase());
   }
 
   public void addProcedure(String identifier, List<VariableTableEntry> parameterList) {
@@ -56,7 +55,6 @@ public final class BuiltInProceduresAndFunctionsTable {
   private void addProcedureOrFunction(String identifier, ProcedureOrFunctionEnum type, PrimitiveType returnType, List<VariableTableEntry> parameterList) {
     BuiltInProceduresAndFunctionsEntry newEntry = new BuiltInProceduresAndFunctionsEntry(
       identifier,
-      -1,
       type,
       returnType,
       new VariablesTable(parameterList)
@@ -64,15 +62,15 @@ public final class BuiltInProceduresAndFunctionsTable {
 
     List<BuiltInProceduresAndFunctionsEntry> entries;
 
-    if(table.containsKey(identifier)) {
-      entries = table.get(identifier);
+    if(lookProcedureOrFunction(identifier)) {
+      entries = get(identifier);
       entries.add(newEntry);
     }
     else {
       entries = List.of(newEntry);
     }
     
-    table.put(identifier, entries);
+    table.put(identifier.toLowerCase(), entries);
   }
 
   @Override
@@ -84,8 +82,8 @@ public final class BuiltInProceduresAndFunctionsTable {
       for(BuiltInProceduresAndFunctionsEntry entry : entriesList) {
         f.format(
           "%s '%s'%s\n",
-          entry.type == ProcedureOrFunctionEnum.FUNCTION ? "Built-In Function" : "Built-In Procedure",
-          entry.name,
+          entry.type == ProcedureOrFunctionEnum.FUNCTION ? "Built-in function" : "Built-in procedure",
+          entry.identifier,
           entry.type == ProcedureOrFunctionEnum.FUNCTION ? (", return type: " + entry.returnType.toString()) : ""
         );
   
@@ -97,6 +95,7 @@ public final class BuiltInProceduresAndFunctionsTable {
         f.format("\n");
       }
     }
+
     f.close();
     
     return sb.toString();

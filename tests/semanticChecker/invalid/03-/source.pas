@@ -4,6 +4,7 @@ var
   notas : array[1..5] of real;
   i : integer;
   media : real;
+  Media : real; // Testa o Case_insensitive_identifier
 
 procedure InicializarNotas();
 begin

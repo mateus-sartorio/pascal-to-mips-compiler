@@ -10,18 +10,18 @@ import types.VariableType;
 
 public final class VariablesTable {
   public static final class VariableTableEntry {
-    public final String name;
+    public final String identifier;
     public final Integer line;
     public final VariableType type;
 
-    public VariableTableEntry(String name, int line, VariableType type) {
-      this.name = name;
+    public VariableTableEntry(String identifier, int line, VariableType type) {
+      this.identifier = identifier;
       this.line = line;
       this.type = type;
     }
 
     public VariableTableEntry(String name, VariableType type) {
-      this.name = name;
+      this.identifier = name;
       this.line = null;
       this.type = type;
     }
@@ -37,7 +37,7 @@ public final class VariablesTable {
     table = new LinkedHashMap<>();
 
     for(VariableTableEntry entry : list) {
-      table.put(entry.name, entry);
+      table.put(entry.identifier.toLowerCase(), entry);
     }
   }
 
@@ -46,16 +46,16 @@ public final class VariablesTable {
   }
 
   public boolean lookupVariable(String identifier) {
-    return table.containsKey(identifier);
+    return table.containsKey(identifier.toLowerCase());
   }
 
   public void addVariable(String identifier, int line, VariableType type) {
     VariableTableEntry entry = new VariableTableEntry(identifier, line, type);
-    table.put(identifier, entry);
+    table.put(identifier.toLowerCase(), entry);
   }
 
   public VariableTableEntry get(String identifier) {
-    return table.get(identifier);
+    return table.get(identifier.toLowerCase());
   }
 
   public String toString() {
@@ -65,9 +65,9 @@ public final class VariablesTable {
     int i = 0;
     for (VariableTableEntry entry : table.values()) {
       f.format(
-        "%d - name: %s%s, type: %s\n",
+        "%d. identifier: '%s'%s, type: %s\n",
         i,
-        entry.name,
+        entry.identifier,
         entry.line != null ? ", line: " + entry.line : "",
         entry.type.toString()
       );

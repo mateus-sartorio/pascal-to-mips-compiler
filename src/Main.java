@@ -35,8 +35,7 @@ public class Main {
       return;
     }
     
-    // Criando o analisaador semântico para percorrer a parser tree e fazer as verificações
-    // semânticas
+    // Criando o analisaador semântico para percorrer a parser tree e fazer as verificações semânticas
     SemanticChecker semanticChecker = new SemanticChecker();
     semanticChecker.visit(tree);
     

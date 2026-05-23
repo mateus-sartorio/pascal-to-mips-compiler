@@ -2,5 +2,10 @@ package types;
 
 public enum ProcedureOrFunctionEnum {
   PROCEDURE,
-  FUNCTION
+  FUNCTION;
+
+  @Override
+  public String toString() {
+    return name().toLowerCase();
+  }
 }

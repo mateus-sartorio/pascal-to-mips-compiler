@@ -8,7 +8,7 @@ public enum PrimitiveType {
   CHAR;
 
   public static PrimitiveType getType(String typeDenoter) {
-    switch (typeDenoter) {
+    switch (typeDenoter.toLowerCase()) {
       case "integer":
         return PrimitiveType.INTEGER;
       case "real":

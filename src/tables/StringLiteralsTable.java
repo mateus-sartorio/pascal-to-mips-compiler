@@ -21,7 +21,7 @@ public final class StringLiteralsTable {
     
     int i = 0;
     for (String literal : table) {
-      f.format("%d - '%s'\n", i, literal);
+      f.format("%d. '%s'\n", i, literal);
       i++;
     }
     f.close();
