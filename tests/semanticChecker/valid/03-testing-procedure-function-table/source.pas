@@ -12,7 +12,7 @@ var
 begin
   textoLocalProcedure := 'Calculando a soma de ';
   copiaLocalProcedure := a;
-  resultado := copiaLocalProcedure + 10;
+  resultado := copiaLocalProcedure + -10;
 end;
 
 function FormatarNome(id: integer; sufixo: string) : string;

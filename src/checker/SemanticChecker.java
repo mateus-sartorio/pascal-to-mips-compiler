@@ -19,9 +19,9 @@ import parser.PascalParser.Procedure_headingContext;
 import parser.PascalParser.Procedure_statementContext;
 import parser.PascalParser.ProgramContext;
 import parser.PascalParser.Program_headingContext;
+import parser.PascalParser.StringConstantContext;
 import parser.PascalParser.Subrange_typeContext;
 import parser.PascalParser.Type_denoterContext;
-import parser.PascalParser.Unsigned_constantContext;
 import parser.PascalParser.Value_parameter_speficiationContext;
 import parser.PascalParser.Variable_accessContext;
 import parser.PascalParser.Variable_declarationContext;
@@ -485,14 +485,11 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
   // Checking usage of literals
 
   @Override
-  public Void visitUnsigned_constant(Unsigned_constantContext context) {
-    // Since unsigned_constant accepts numbers, isolate only the string literal
-    if (context.CHARACTER_STRING() != null) {
-      String stringLiteral = context.CHARACTER_STRING().getText();
-      // Remove the surrounding single quotes ('text' -> text)
-      stringLiteralsTable.addStringLiteral(stringLiteral.substring(1, stringLiteral.length() - 1));
-    }
+  public Void visitStringConstant(StringConstantContext context) {
+    String stringLiteral = context.CHARACTER_STRING().getText();
+    // Remove the surrounding single quotes ('text' -> text)
+    stringLiteralsTable.addStringLiteral(stringLiteral.substring(1, stringLiteral.length() - 1));
 
-    return null;
+    return visitChildren(context);
   }
 }

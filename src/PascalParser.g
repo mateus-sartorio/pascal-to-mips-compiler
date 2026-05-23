@@ -76,18 +76,15 @@ simple_expression: ( PLUS | MINUS )? term ( adding_operator term )* ;
 term: factor ( multiplying_operator factor)* ;
 
 factor:
-	variable_access
-	| unsigned_constant
-	| function_designator
-	| OPEN_PARENTHESIS expression CLOSE_PARENTHESIS
-	| NOT factor
+	variable_access                                     # VariableAccess
+  | CHARACTER_STRING                                  # StringConstant
+	| numeric_constant                                  # NumericConstant
+	| function_designator                               # FunctionCall
+	| OPEN_PARENTHESIS expression CLOSE_PARENTHESIS     # ParenthesisExpression
+	| NOT factor                                        # NotFactor
   ;
 
-unsigned_constant:
-	UNSIGNED_INTEGER
-	| UNSIGNED_REAL
-	| CHARACTER_STRING
-  ;
+numeric_constant: ( PLUS | MINUS )? (UNSIGNED_INTEGER | UNSIGNED_REAL ) ;
 
 // 6.7.2 Operators
 
