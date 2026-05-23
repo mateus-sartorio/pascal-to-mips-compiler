@@ -1,5 +1,6 @@
 package tables;
 
+import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -64,7 +65,9 @@ public final class BuiltInProceduresAndFunctionsTable {
 
     if(lookProcedureOrFunction(identifier)) {
       entries = get(identifier);
-      entries.add(newEntry);
+      List<BuiltInProceduresAndFunctionsEntry> newEntries = new ArrayList<>(entries);
+      newEntries.add(newEntry);
+      entries = newEntries;
     }
     else {
       entries = List.of(newEntry);

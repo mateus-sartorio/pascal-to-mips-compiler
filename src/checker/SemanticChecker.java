@@ -111,16 +111,29 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
 
     // --- PROCEDURES ---
     // I/O
+    builtInProceduresAndFunctionsTable.addProcedure("write", List.of(intParam));
     builtInProceduresAndFunctionsTable.addProcedure("write", List.of(stringParam));
+    
+    builtInProceduresAndFunctionsTable.addProcedure("writeln", List.of(intParam));
     builtInProceduresAndFunctionsTable.addProcedure("writeln", List.of(stringParam));
+
+    builtInProceduresAndFunctionsTable.addProcedure("read", List.of(intParam));
     builtInProceduresAndFunctionsTable.addProcedure("read", List.of(stringParam));
+
+    builtInProceduresAndFunctionsTable.addProcedure("readln", List.of(intParam));
     builtInProceduresAndFunctionsTable.addProcedure("readln", List.of(stringParam));
 
     // --- FUNCTIONS ---
     // Math
     builtInProceduresAndFunctionsTable.addFunction("abs", List.of(intParam), PrimitiveType.INTEGER);
+    builtInProceduresAndFunctionsTable.addFunction("abs", List.of(realParam), PrimitiveType.REAL);
+
     builtInProceduresAndFunctionsTable.addFunction("sqr", List.of(intParam), PrimitiveType.INTEGER);
+    builtInProceduresAndFunctionsTable.addFunction("sqr", List.of(realParam), PrimitiveType.REAL);
+    
+    builtInProceduresAndFunctionsTable.addFunction("sqrt", List.of(intParam), PrimitiveType.REAL);
     builtInProceduresAndFunctionsTable.addFunction("sqrt", List.of(realParam), PrimitiveType.REAL);
+    
     builtInProceduresAndFunctionsTable.addFunction("trunc", List.of(realParam), PrimitiveType.INTEGER);
     builtInProceduresAndFunctionsTable.addFunction("round", List.of(realParam), PrimitiveType.INTEGER);
 
