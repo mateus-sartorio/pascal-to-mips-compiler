@@ -1,5 +1,7 @@
 lexer grammar PascalLexer;
 
+options { caseInsensitive=true; }
+
 @header {
 package parser;
 }
