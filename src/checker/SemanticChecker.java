@@ -26,7 +26,9 @@ import tables.VariablesTable.VariableTableEntry;
 import tables.BuiltInProceduresAndFunctionsTable;
 import tables.ProceduresAndFunctionsTable;
 import tables.ProceduresAndFunctionsTable.ProceduresAndFunctionsEntry;
+import types.ArrayVariableType;
 import types.PrimitiveType;
+import types.PrimitiveVariableType;
 import types.ProcedureOrFunctionEnum;
 import types.VariableType;
 
@@ -253,14 +255,14 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
 
     if (typeDenoter.primitive_type() != null) {
       var primitiveType = typeDenoter.primitive_type();
-      type = new VariableType(PrimitiveType.getType(primitiveType.getText()));
+      type = new PrimitiveVariableType(PrimitiveType.getType(primitiveType.getText()));
     } else {
       var arrayType = typeDenoter.array_type();
       var primitiveType = PrimitiveType.getType(arrayType.primitive_type().getText());
       var subrangeType = arrayType.subrange_type();
       var startIndex = Integer.parseInt(subrangeType.UNSIGNED_INTEGER(0).getText());
       var endIndex = Integer.parseInt(subrangeType.UNSIGNED_INTEGER(1).getText());
-      type = new VariableType(primitiveType, startIndex, endIndex);
+      type = new ArrayVariableType(primitiveType, startIndex, endIndex);
     }
 
     var parent = ctx.parent.parent;
@@ -324,14 +326,14 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
 
     if (typeDenoter.primitive_type() != null) {
       var primitiveType = typeDenoter.primitive_type();
-      type = new VariableType(PrimitiveType.getType(primitiveType.getText()));
+      type = new PrimitiveVariableType(PrimitiveType.getType(primitiveType.getText()));
     } else {
       var arrayType = typeDenoter.array_type();
       var primitiveType = PrimitiveType.getType(arrayType.primitive_type().getText());
       var subrangeType = arrayType.subrange_type();
       var startIndex = Integer.parseInt(subrangeType.UNSIGNED_INTEGER(0).getText());
       var endIndex = Integer.parseInt(subrangeType.UNSIGNED_INTEGER(1).getText());
-      type = new VariableType(primitiveType, startIndex, endIndex);
+      type = new ArrayVariableType(primitiveType, startIndex, endIndex);
     }
 
     var declaration = ctx.parent.parent;
@@ -533,7 +535,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
   // ------------------- PRE DECLARED PROCEDURES AND FUNCTIONS ------------------
 
   private void registerPreDeclaredProceduresAndFunctions() {
-    var stringParameterType = new VariableTableEntry("x", -1, new VariableType(PrimitiveType.STRING));
+    var stringParameterType = new VariableTableEntry("str", new PrimitiveVariableType(PrimitiveType.STRING));
 
     builtInProceduresAndFunctionsTable.addProcedure("write", List.of(stringParameterType));
     builtInProceduresAndFunctionsTable.addProcedure("writeln", List.of(stringParameterType));

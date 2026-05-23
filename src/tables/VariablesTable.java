@@ -11,12 +11,18 @@ import types.VariableType;
 public final class VariablesTable {
   public static final class VariableTableEntry {
     public final String name;
-    public final int line;
+    public final Integer line;
     public final VariableType type;
 
     public VariableTableEntry(String name, int line, VariableType type) {
       this.name = name;
       this.line = line;
+      this.type = type;
+    }
+
+    public VariableTableEntry(String name, VariableType type) {
+      this.name = name;
+      this.line = null;
       this.type = type;
     }
   }
@@ -62,7 +68,7 @@ public final class VariablesTable {
         "%d - name: %s%s, type: %s\n",
         i,
         entry.name,
-        entry.line >= 0 ? ", line: " + entry.line : "",
+        entry.line != null ? ", line: " + entry.line : "",
         entry.type.toString()
       );
       i++;
