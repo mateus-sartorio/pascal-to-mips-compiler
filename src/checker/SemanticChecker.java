@@ -285,7 +285,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
     Type_denoterContext typeDenoter = context.type_denoter();
     VariableType type = extractVariableTypeFromTypeDenoter(typeDenoter);
 
-    org.antlr.v4.runtime.RuleContext parent = context.parent.parent;
+    RuleContext parent = context.parent.parent;
 
     if (parent instanceof Procedure_headingContext) {
       Procedure_headingContext procedureHeadingContext = (Procedure_headingContext) parent;
@@ -431,7 +431,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<Void> {
       return visitChildren(context);
     }
 
-    org.antlr.v4.runtime.RuleContext parent = context.parent;
+    RuleContext parent = context.parent;
     while (!(parent instanceof ProgramContext)) {
       if (parent instanceof Function_declarationContext) {
         Function_declarationContext functionDeclarationContext = (Function_declarationContext) parent;
