@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import tables.VariablesTable.VariableTableEntry;
-import types.PrimitiveType;
+import types.PrimitiveTypeEnum;
 import types.ProcedureOrFunctionEnum;
 
 
@@ -15,13 +15,13 @@ public final class BuiltInProceduresAndFunctionsTable {
   public static final class BuiltInProceduresAndFunctionsEntry {
     public final String identifier;
     public final ProcedureOrFunctionEnum type;
-    public final PrimitiveType returnType;
+    public final PrimitiveTypeEnum returnType;
     public final VariablesTable parameters;
 
     BuiltInProceduresAndFunctionsEntry(
       String identifier,
       ProcedureOrFunctionEnum type,
-      PrimitiveType returnType,
+      PrimitiveTypeEnum returnType,
       VariablesTable parameters
     ) {
       this.identifier = identifier;
@@ -49,11 +49,11 @@ public final class BuiltInProceduresAndFunctionsTable {
     addProcedureOrFunction(identifier, ProcedureOrFunctionEnum.PROCEDURE, parameterList, null);
   }
 
-  public void addFunction(String identifier, List<VariableTableEntry> parameterList, PrimitiveType returnType) {
+  public void addFunction(String identifier, List<VariableTableEntry> parameterList, PrimitiveTypeEnum returnType) {
     addProcedureOrFunction(identifier, ProcedureOrFunctionEnum.FUNCTION, parameterList, returnType);
   }
 
-  private void addProcedureOrFunction(String identifier, ProcedureOrFunctionEnum type, List<VariableTableEntry> parameterList, PrimitiveType returnType) {
+  private void addProcedureOrFunction(String identifier, ProcedureOrFunctionEnum type, List<VariableTableEntry> parameterList, PrimitiveTypeEnum returnType) {
     BuiltInProceduresAndFunctionsEntry newEntry = new BuiltInProceduresAndFunctionsEntry(
       identifier,
       type,

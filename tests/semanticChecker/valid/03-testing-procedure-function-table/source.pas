@@ -19,13 +19,17 @@ function FormatarNome(id: integer; sufixo: string) : string;
 var
   nomeFormatado: string;
 begin
-  nomeFormatado := 'ID_' + sufixo;
-  FormatarNome := nomeFormatado;
+  begin
+    nomeFormatado := 'ID_' + sufixo;
+    FormatarNome := nomeFormatado;
+  end;
 end;
 
 begin
   globalInteger := 5;
   calcularSoma(globalInteger, globalInteger);
+  writeln(1);
+  writeln('''');
   
   globalStr := FormatarNome(123, 'Teste');
 end.

@@ -7,13 +7,28 @@ public class ArrayVariableType extends VariableType {
     public final int endIndex;
 
     public ArrayVariableType(
-      PrimitiveType basePrimitiveType,
+      PrimitiveTypeEnum basePrimitiveType,
       int startIndex,
       int endIndex
     ) {
       this.basePrimitiveType = basePrimitiveType;
       this.startIndex = startIndex;
       this.endIndex = endIndex;
+    }
+
+    @Override
+    public boolean isEquivalent(VariableType other) {
+      if(!(other instanceof ArrayVariableType)) {
+        return false;
+      }
+
+      ArrayVariableType otherCorrectType = (ArrayVariableType) other;
+      
+      return (
+        this.basePrimitiveType == other.basePrimitiveType &&
+        this.startIndex == otherCorrectType.startIndex &&
+        this.endIndex == otherCorrectType.endIndex
+      );
     }
 
     @Override

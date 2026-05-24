@@ -4,7 +4,7 @@ import java.util.Formatter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import types.PrimitiveType;
+import types.PrimitiveTypeEnum;
 import types.ProcedureOrFunctionEnum;
 import types.VariableType;
 
@@ -14,7 +14,7 @@ public final class ProceduresAndFunctionsTable {
     public final String identifier;
     public final int line;
     public final ProcedureOrFunctionEnum type;
-    public final PrimitiveType returnType;
+    public final PrimitiveTypeEnum returnType;
     public final VariablesTable parameters;
     public final VariablesTable localVariables;
 
@@ -22,7 +22,7 @@ public final class ProceduresAndFunctionsTable {
       String identifier,
       int line,
       ProcedureOrFunctionEnum type,
-      PrimitiveType returnType,
+      PrimitiveTypeEnum returnType,
       VariablesTable parameters,
       VariablesTable localVariables
     ) {
@@ -80,7 +80,7 @@ public final class ProceduresAndFunctionsTable {
       identifier,
       line,
       ProcedureOrFunctionEnum.PROCEDURE,
-      null,
+      PrimitiveTypeEnum.NO_TYPE,
       new VariablesTable(),
       new VariablesTable()
     );
@@ -88,7 +88,7 @@ public final class ProceduresAndFunctionsTable {
     table.put(identifier.toLowerCase(), entry);
   }
 
-  public void addFunction(String identifier, int line, PrimitiveType type) {
+  public void addFunction(String identifier, int line, PrimitiveTypeEnum type) {
     ProceduresAndFunctionsEntry entry = new ProceduresAndFunctionsEntry(
       identifier,
       line,

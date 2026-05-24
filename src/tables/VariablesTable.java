@@ -1,5 +1,6 @@
 package tables;
 
+import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -56,6 +57,10 @@ public final class VariablesTable {
 
   public VariableTableEntry get(String identifier) {
     return table.get(identifier.toLowerCase());
+  }
+
+  public List<VariableTableEntry> toList() {
+    return new ArrayList<VariableTableEntry>(table.values());
   }
 
   public String toString() {

@@ -1,27 +1,29 @@
 package types;
 
-public enum PrimitiveType {
+public enum PrimitiveTypeEnum {
   INTEGER,
   REAL,
   STRING,
   BOOLEAN,
-  CHAR;
+  CHAR,
+  NO_TYPE;
 
-  public static PrimitiveType getType(String typeDenoter) {
+  public static PrimitiveTypeEnum getType(String typeDenoter) {
     switch (typeDenoter.toLowerCase()) {
       case "integer":
-        return PrimitiveType.INTEGER;
+        return PrimitiveTypeEnum.INTEGER;
       case "real":
-        return PrimitiveType.REAL;
+        return PrimitiveTypeEnum.REAL;
       case "string":
-        return PrimitiveType.STRING;
+        return PrimitiveTypeEnum.STRING;
       case "boolean":
-        return PrimitiveType.BOOLEAN;
+        return PrimitiveTypeEnum.BOOLEAN;
       case "char":
-        return PrimitiveType.CHAR;
+        return PrimitiveTypeEnum.CHAR;
       default:
         System.err.println("ERROR: invalid lexer token type for variable declaration.");
-        return PrimitiveType.CHAR;
+        System.exit(1);
+        return PrimitiveTypeEnum.NO_TYPE;
     }
   }
 
@@ -40,6 +42,7 @@ public enum PrimitiveType {
         return "char";
       default:
         System.err.println("ERROR: type enumaration has an invalid value.");
+        System.exit(1);
         return "";
     }
   }

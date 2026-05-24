@@ -42,7 +42,7 @@ variable_declaration: identifier_list COLON type_denoter;
 variable_access: IDENTIFIER | indexed_variable;
 
 // 6.5.3.2 Indexed-variables
-indexed_variable: IDENTIFIER OPEN_BRACKET ( expression ( COMMA expression )* ) CLOSE_BRACKET ;
+indexed_variable: IDENTIFIER OPEN_BRACKET ( expression ) CLOSE_BRACKET ;
 
 
 // -------------------- 6.6 Procedure and function declarations --------------------
@@ -72,8 +72,8 @@ value_parameter_speficiation: identifier_list COLON type_denoter ;
 // 6.7.1 General
 
 expression: simple_expression ( relational_operator simple_expression )? ;
-simple_expression: ( PLUS | MINUS )? term ( adding_operator term )* ;
-term: factor ( multiplying_operator factor)* ;
+simple_expression: term ( adding_operator term )* ;
+term: factor ( multiplying_operator factor )* ;
 
 factor:
 	variable_access                                     # VariableAccess
@@ -84,7 +84,7 @@ factor:
 	| NOT factor                                        # NotFactor
   ;
 
-numeric_constant: ( PLUS | MINUS )? (UNSIGNED_INTEGER | UNSIGNED_REAL ) ;
+numeric_constant: ( PLUS | MINUS )? ( UNSIGNED_INTEGER | UNSIGNED_REAL ) ;
 
 // 6.7.2 Operators
 
