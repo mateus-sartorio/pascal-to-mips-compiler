@@ -71,7 +71,7 @@ run-parser-gui:
 	$(GRUN) parser.$(GRAMAR_NAME) program $(RUN_FILE) -gui
 
 # Run the semantic checker
-run-semantic-checker:
+run-semantic:
 	@$(JAVA) $(CLASS_PATH_OPTION) App $(RUN_FILE)
 
 # Run all automated tests
