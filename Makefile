@@ -23,19 +23,19 @@ LEXER_NAME=$(GRAMAR_NAME)Lexer
 PARSER_NAME=$(GRAMAR_NAME)Parser
 
 # Project paths
-SRC_DIR=src/
-LEXER_FILE=$(SRC_DIR)$(LEXER_NAME).g
-PARSER_FILE=$(SRC_DIR)$(PARSER_NAME).g
+SRC_DIR=src
+LEXER_FILE=$(SRC_DIR)/$(LEXER_NAME).g
+PARSER_FILE=$(SRC_DIR)/$(PARSER_NAME).g
 
 # Pascal Compiler Configuration
-FPC = fpc
-BIN_DIR = bin
+FPC=fpc
+BIN_DIR=bin
 
 # Directory for generated files
 TARGET_PATH=$(SRC_DIR)/parser
 
 # Input file for run target converted to absolute path
-RUN_FILE=$(abspath $(FILE))
+FILE_ABSOLUTE_PATH=$(abspath $(FILE))
 
 # Run ANTLR and Java compiler
 all: antlr javac
@@ -44,8 +44,8 @@ all: antlr javac
 # Run ANTLR to compile the grammar
 antlr: $(LEXER_FILE) $(PARSER_FILE)
 	@mkdir -p $(TARGET_PATH)
-	$(ANTLR4) -Xexact-output-dir -no-listener -package parser -visitor -o $(TARGET_PATH) $(LEXER_FILE) 
-	$(ANTLR4) -Xexact-output-dir -no-listener -package parser -visitor -lib $(TARGET_PATH) -o $(TARGET_PATH) $(PARSER_FILE)
+	$(ANTLR4) -Xexact-output-dir -no-listener -visitor -o $(TARGET_PATH) $(LEXER_FILE) 
+	$(ANTLR4) -Xexact-output-dir -no-listener -visitor -lib $(TARGET_PATH) -o $(TARGET_PATH) $(PARSER_FILE)
 
 # Run javac to compile generated files
 javac:
@@ -60,19 +60,19 @@ clean:
 
 # Run the lexer
 run-lexer:
-	$(GRUN) parser.$(LEXER_NAME) tokens -tokens $(RUN_FILE)
+	$(GRUN) parser.$(LEXER_NAME) tokens -tokens $(FILE_ABSOLUTE_PATH)
 
 # Run the parser
 run-parser:
-	$(GRUN) parser.$(GRAMAR_NAME) program $(RUN_FILE) -tree
+	$(GRUN) parser.$(GRAMAR_NAME) program $(FILE_ABSOLUTE_PATH) -tree
 
 # Run the parser with GUI
 run-parser-gui:
-	$(GRUN) parser.$(GRAMAR_NAME) program $(RUN_FILE) -gui
+	$(GRUN) parser.$(GRAMAR_NAME) program $(FILE_ABSOLUTE_PATH) -gui
 
 # Run the semantic checker
-run-semantic:
-	@$(JAVA) $(CLASS_PATH_OPTION) App $(RUN_FILE)
+run-semantic-checker:
+	@$(JAVA) $(CLASS_PATH_OPTION) Main $(FILE_ABSOLUTE_PATH)
 
 # Run all automated tests
 test:
@@ -86,6 +86,6 @@ test-clean:
 # Compile and run the Pascal program
 run-pascal:
 	@mkdir -p $(BIN_DIR)
-	$(FPC) -FE$(BIN_DIR) $(RUN_FILE)
+	$(FPC) -FE$(BIN_DIR) $(FILE_ABSOLUTE_PATH)
 	@echo "--- Executando o programa Pascal ---"
-	@./$(BIN_DIR)/$$(basename $(RUN_FILE) .pas)
+	@./$(BIN_DIR)/$$(basename $(FILE_ABSOLUTE_PATH) .pas)

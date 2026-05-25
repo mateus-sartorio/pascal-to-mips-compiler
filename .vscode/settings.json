@@ -8,8 +8,6 @@
   "antlr4.generation": {
     "mode": "none"
   },
-  "java.project.sourcePaths": [
-    "src"
-  ],
-  "java.errors.incompleteClasspath.severity": "ignore"
+  "java.errors.incompleteClasspath.severity": "ignore",
+  "java.format.settings.url": ".vscode/java-formatter.xml"
 }

@@ -1,5 +1,11 @@
 lexer grammar PascalLexer;
 
+options { caseInsensitive=true; }
+
+@header {
+package parser;
+}
+
 // -------------------- 6.1. Lexical Tokens --------------------
 
 // 6.1.2. Special symbols
@@ -77,10 +83,10 @@ fragment STRING_ELEMENT: APOSTROPHE_IMAGE | STRING_CHARACTER;
 CHARACTER_STRING: '\'' STRING_ELEMENT+ '\'';
 
 // 6.1.8 Token separators
-COMMENTARY: (('{' .*? '}') | ('(*' .*? '*)')) -> skip;
+COMMENTARY: (('{' .*? '}') | ('(*' .*? '*)') | ('//' ~[\r\n]*)) -> skip;
 
 // 6.1.3. Identifiers (Outside the ISO order so it doesn’t pick up parts of other tokens)
-IDENTIFIER: [a-zA-Z][a-zA-Z0-9]*;
+IDENTIFIER: [a-z_] [a-z0-9_]*;
 
 // 6.1.9 Lexical alternatives Was not implemented because we either don't support the reference token or the alternative token is not commonly used
 
