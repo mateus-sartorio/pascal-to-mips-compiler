@@ -40,7 +40,6 @@ run_module() {
     done
 }
 
-# Removemos o "make -s" daqui de dentro pois o Makefile já faz isso
 case "$1" in
     "--lexer")
         run_module "lexer"
@@ -48,14 +47,17 @@ case "$1" in
     "--parser")
         run_module "parser"
         ;;
+    "--semantic")
+        run_module "semantic"
+        ;;
     "--clean")
         find tests -name "actual_result.txt" -delete
         find tests -name "diff.diff" -delete
         echo -e "${YELLOW}Logs limpos.${NC}"
         ;;
     *)
-        # Execução padrão (sem duplicar echo)
         run_module "lexer"
         run_module "parser"
+        run_module "semantic"
         ;;
 esac
