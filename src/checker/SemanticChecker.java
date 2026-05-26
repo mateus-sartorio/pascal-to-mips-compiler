@@ -221,7 +221,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
   private void checkProcedureOrFunctionParameterOrLocalVariableIdentifierIsNotDefined(Token identifierToken, String procedureOrFunctionIdentifier) {
     String identifier = identifierToken.getText();
 
-    ProceduresAndFunctionsEntry procedureOrFunctionEntry = proceduresAndFunctionsTable.get(identifier);
+    ProceduresAndFunctionsEntry procedureOrFunctionEntry = proceduresAndFunctionsTable.get(procedureOrFunctionIdentifier);
 
     if (procedureOrFunctionEntry == null) {
       return;
@@ -234,8 +234,8 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
       System.out.printf(
         "SEMANTIC ERROR (%d): Parameter '%s' of %s '%s' was already declared at line %d.\n",
         identifierToken.getLine(),
-        procedureOrFunctionEntry.type.toString(),
         identifier,
+        procedureOrFunctionEntry.type.toString(),
         procedureOrFunctionIdentifier,
         parameterEntry.line
       );
@@ -248,8 +248,8 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
       System.out.printf(
         "SEMANTIC ERROR (%d): Local variable '%s' of %s '%s' was already declared at line %d.\n",
         identifierToken.getLine(),
-        procedureOrFunctionEntry.type.toString(),
         identifier,
+        procedureOrFunctionEntry.type.toString(),
         procedureOrFunctionIdentifier,
         variableEntry.line
       );
