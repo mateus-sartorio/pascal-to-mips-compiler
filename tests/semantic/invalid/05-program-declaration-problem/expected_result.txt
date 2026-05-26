@@ -1,0 +1,2 @@
+SEMANTIC ERROR (3): Program heading 'ExemploErro' cannot be used.
+make[1]: *** [Makefile:75: run-semantic] Error 1

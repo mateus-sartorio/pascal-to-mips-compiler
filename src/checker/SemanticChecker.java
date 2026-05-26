@@ -221,7 +221,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
   private void checkProcedureOrFunctionParameterOrLocalVariableIdentifierIsNotDefined(Token identifierToken, String procedureOrFunctionIdentifier) {
     String identifier = identifierToken.getText();
 
-    ProceduresAndFunctionsEntry procedureOrFunctionEntry = proceduresAndFunctionsTable.get(identifier);
+    ProceduresAndFunctionsEntry procedureOrFunctionEntry = proceduresAndFunctionsTable.get(procedureOrFunctionIdentifier);
 
     if (procedureOrFunctionEntry == null) {
       return;
@@ -234,8 +234,8 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
       System.out.printf(
         "SEMANTIC ERROR (%d): Parameter '%s' of %s '%s' was already declared at line %d.\n",
         identifierToken.getLine(),
-        procedureOrFunctionEntry.type.toString(),
         identifier,
+        procedureOrFunctionEntry.type.toString(),
         procedureOrFunctionIdentifier,
         parameterEntry.line
       );
@@ -248,8 +248,8 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
       System.out.printf(
         "SEMANTIC ERROR (%d): Local variable '%s' of %s '%s' was already declared at line %d.\n",
         identifierToken.getLine(),
-        procedureOrFunctionEntry.type.toString(),
         identifier,
+        procedureOrFunctionEntry.type.toString(),
         procedureOrFunctionIdentifier,
         variableEntry.line
       );
@@ -407,7 +407,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
     if(!(returnType instanceof PrimitiveVariableType)) {
       System.out.printf(
-        "SEMANTIC ERROR (%d): Function '%s' return type should be a primitive type.",
+        "SEMANTIC ERROR (%d): Function '%s' return type should be a primitive type.\n",
         line,
         functionIdentifier
       );
@@ -519,7 +519,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
     }
 
     System.out.printf(
-      "SEMANTIC ERROR (%d): Variable '%s' was not declared.",
+      "SEMANTIC ERROR (%d): Variable '%s' was not declared.\n",
       identifier.getSymbol().getLine(),
       variableIdentifier
     );
@@ -560,7 +560,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
     if (globalVariableEntry != null) {
       if(!globalVariableEntry.type.isEquivalent(new PrimitiveVariableType(PrimitiveTypeEnum.INTEGER))) {
         System.out.printf(
-          "SEMANTIC ERROR (%d): Variable '%s' should be integer type.",
+          "SEMANTIC ERROR (%d): Variable '%s' should be integer type.\n",
           identifier.getSymbol().getLine(),
           variableIdentifier
         );
@@ -583,7 +583,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
         if(!a.type.isEquivalent(new PrimitiveVariableType(PrimitiveTypeEnum.INTEGER))) {
           System.out.printf(
-            "SEMANTIC ERROR (%d): Variable '%s' should be integer type.",
+            "SEMANTIC ERROR (%d): Variable '%s' should be integer type.\n",
             identifier.getSymbol().getLine(),
             variableIdentifier
           );
@@ -595,7 +595,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
         if(!b.type.isEquivalent(new PrimitiveVariableType(PrimitiveTypeEnum.INTEGER))) {
           System.out.printf(
-            "SEMANTIC ERROR (%d): Variable '%s' should be integer type.",
+            "SEMANTIC ERROR (%d): Variable '%s' should be integer type.\n",
             identifier.getSymbol().getLine(),
             variableIdentifier
           );
@@ -616,7 +616,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
           if(!a.type.isEquivalent(new PrimitiveVariableType(PrimitiveTypeEnum.INTEGER))) {
             System.out.printf(
-              "SEMANTIC ERROR (%d): Variable '%s' should be integer type.",
+              "SEMANTIC ERROR (%d): Variable '%s' should be integer type.\n",
               identifier.getSymbol().getLine(),
               variableIdentifier
             );
@@ -628,7 +628,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
           if(!b.type.isEquivalent(new PrimitiveVariableType(PrimitiveTypeEnum.INTEGER))) {
             System.out.printf(
-              "SEMANTIC ERROR (%d): Variable '%s' should be integer type.",
+              "SEMANTIC ERROR (%d): Variable '%s' should be integer type.\n",
               identifier.getSymbol().getLine(),
               variableIdentifier
             );
@@ -643,7 +643,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
     }
 
     System.out.printf(
-      "SEMANTIC ERROR (%d): Variable '%s' was not declared.",
+      "SEMANTIC ERROR (%d): Variable '%s' was not declared.\n",
       identifier.getSymbol().getLine(),
       variableIdentifier
     );
@@ -661,7 +661,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
     if(leftType instanceof ArrayVariableType || rightType instanceof ArrayVariableType) {
       if(!leftType.isEquivalent(rightType)) {
         System.out.printf(
-          "SEMANTIC ERROR (%d): Assignment statement.",
+          "SEMANTIC ERROR (%d): Assignment statement.\n",
           context.ASSIGNMENT().getSymbol().getLine()
         );
         
@@ -675,7 +675,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
     
     if(a == PrimitiveTypeEnum.NO_TYPE) {
       System.out.printf(
-        "SEMANTIC ERROR (%d): Assignment statement.",
+        "SEMANTIC ERROR (%d): Assignment statement.\n",
         context.ASSIGNMENT().getSymbol().getLine()
       );
       
@@ -732,7 +732,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
       if(!anyMatched) {
         System.out.printf(
-          "SEMANTIC ERROR (%d): Built-in procedure '%s' does not have a corresponding overload.",
+          "SEMANTIC ERROR (%d): Built-in procedure '%s' does not have a corresponding overload.\n",
           identifier.getSymbol().getLine(),
           identifier.getText()
         );
@@ -748,7 +748,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
     if (proceduresAndFunctionsEntry == null) {
       System.out.printf(
-        "SEMANTIC ERROR (%d): Procedure '%s' is not defined.",
+        "SEMANTIC ERROR (%d): Procedure '%s' is not defined.\n",
         identifier.getSymbol().getLine(),
         identifier.getText()
       );
@@ -766,7 +766,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
     if(actualParameters.size() != parametersList.size()) {
       System.out.printf(
-        "SEMANTIC ERROR (%d): Invalid number of arguments to procedure '%s'.",
+        "SEMANTIC ERROR (%d): Invalid number of arguments to procedure '%s'.\n",
         identifier.getSymbol().getLine(),
         proceduresAndFunctionsEntry.identifier
       );
@@ -781,7 +781,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
       if(!parameter.type.isEquivalent(actualParameterType)) {
         System.out.printf(
-          "SEMANTIC ERROR (%d): Invalid type '%s' for parameter '%s' of %s '%s'.",
+          "SEMANTIC ERROR (%d): Invalid type '%s' for parameter '%s' of %s '%s'.\n",
           identifier.getSymbol().getLine(),
           actualParameterType.toString(),
           parameter.identifier,
@@ -838,7 +838,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
         if(currentMatched) {
           if(entry.type == ProcedureOrFunctionEnum.PROCEDURE) {
             System.out.printf(
-              "SEMANTIC ERROR (%d): Built-in procedure '%s' invocation is not an expression.",
+              "SEMANTIC ERROR (%d): Built-in procedure '%s' invocation is not an expression.\n",
               identifier.getSymbol().getLine(),
               identifier.getText()
             );
@@ -854,7 +854,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
       if(!anyMatched) {
         System.out.printf(
-          "SEMANTIC ERROR (%d): Built-in procedure '%s' does not have a corresponding overload.",
+          "SEMANTIC ERROR (%d): Built-in procedure '%s' does not have a corresponding overload.\n",
           identifier.getSymbol().getLine(),
           identifier.getText()
         );
@@ -870,7 +870,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
     if (proceduresAndFunctionsEntry == null) {
       System.out.printf(
-        "SEMANTIC ERROR (%d): Function '%s' is not defined.",
+        "SEMANTIC ERROR (%d): Function '%s' is not defined.\n",
         identifier.getSymbol().getLine(),
         identifier.getText()
       );
@@ -880,7 +880,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
     if(proceduresAndFunctionsEntry.type == ProcedureOrFunctionEnum.PROCEDURE) {
       System.out.printf(
-        "SEMANTIC ERROR (%d): Procedure '%s' invocation is not an expression.",
+        "SEMANTIC ERROR (%d): Procedure '%s' invocation is not an expression.\n",
         identifier.getSymbol().getLine(),
         identifier.getText()
       );
@@ -898,7 +898,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
     if(actualParameters.size() != parametersList.size()) {
       System.out.printf(
-        "SEMANTIC ERROR (%d): Invalid number of arguments to function '%s'.",
+        "SEMANTIC ERROR (%d): Invalid number of arguments to function '%s'.\n",
         identifier.getSymbol().getLine(),
         proceduresAndFunctionsEntry.identifier
       );
@@ -913,7 +913,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
       if(!parameter.type.isEquivalent(actualParameterType)) {
         System.out.printf(
-          "SEMANTIC ERROR (%d): Invalid type '%s' for parameter '%s' of %s '%s'.",
+          "SEMANTIC ERROR (%d): Invalid type '%s' for parameter '%s' of %s '%s'.\n",
           identifier.getSymbol().getLine(),
           actualParameterType.toString(),
           parameter.identifier,

@@ -1,0 +1,2 @@
+SEMANTIC ERROR (8): Global variable 'a' was already declared at line 4.
+make[1]: *** [Makefile:75: run-semantic] Error 1

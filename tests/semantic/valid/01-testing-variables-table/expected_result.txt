@@ -1,0 +1,121 @@
+STRING LITERALS TABLE:
+
+0. 'Hello, World!'
+1. 'á â ç é ê í ó ô ú'
+
+
+BUILT-IN PROCEDURES AND FUNCTIONS TABLE:
+
+Built-in procedure 'write'
+Parameters:
+0. identifier: 'n', type: integer
+
+Built-in procedure 'write'
+Parameters:
+0. identifier: 'str', type: string
+
+Built-in procedure 'writeln'
+Parameters:
+0. identifier: 'n', type: integer
+
+Built-in procedure 'writeln'
+Parameters:
+0. identifier: 'str', type: string
+
+Built-in procedure 'read'
+Parameters:
+0. identifier: 'n', type: integer
+
+Built-in procedure 'read'
+Parameters:
+0. identifier: 'str', type: string
+
+Built-in procedure 'readln'
+Parameters:
+0. identifier: 'n', type: integer
+
+Built-in procedure 'readln'
+Parameters:
+0. identifier: 'str', type: string
+
+Built-in function 'abs', return type: integer
+Parameters:
+0. identifier: 'n', type: integer
+
+Built-in function 'abs', return type: real
+Parameters:
+0. identifier: 'n', type: real
+
+Built-in function 'sqr', return type: integer
+Parameters:
+0. identifier: 'n', type: integer
+
+Built-in function 'sqr', return type: real
+Parameters:
+0. identifier: 'n', type: real
+
+Built-in function 'sqrt', return type: real
+Parameters:
+0. identifier: 'n', type: integer
+
+Built-in function 'sqrt', return type: real
+Parameters:
+0. identifier: 'n', type: real
+
+Built-in function 'trunc', return type: integer
+Parameters:
+0. identifier: 'n', type: real
+
+Built-in function 'round', return type: integer
+Parameters:
+0. identifier: 'n', type: real
+
+Built-in function 'ord', return type: integer
+Parameters:
+0. identifier: 'c', type: char
+
+Built-in function 'chr', return type: char
+Parameters:
+0. identifier: 'n', type: integer
+
+Built-in function 'succ', return type: integer
+Parameters:
+0. identifier: 'n', type: integer
+
+Built-in function 'pred', return type: integer
+Parameters:
+0. identifier: 'n', type: integer
+
+Built-in function 'length', return type: integer
+Parameters:
+0. identifier: 'str', type: string
+
+Built-in function 'upcase', return type: char
+Parameters:
+0. identifier: 'c', type: char
+
+
+
+GLOBAL VARIABLES TABLE:
+
+0. identifier: 'idade', line: 4, type: integer
+1. identifier: 'x', line: 5, type: integer
+2. identifier: 'y', line: 5, type: integer
+3. identifier: 'z', line: 5, type: integer
+4. identifier: 'salario', line: 7, type: real
+5. identifier: 'resultado', line: 8, type: real
+6. identifier: 'desconto', line: 8, type: real
+7. identifier: 'nome', line: 10, type: string
+8. identifier: 'str1', line: 11, type: string
+9. identifier: 'str2', line: 11, type: string
+10. identifier: 'verificacao_dad', line: 13, type: boolean
+11. identifier: 'check1', line: 14, type: boolean
+12. identifier: 'check2', line: 14, type: boolean
+13. identifier: 'letra', line: 16, type: char
+14. identifier: 'a', line: 17, type: char
+15. identifier: 'b', line: 17, type: char
+16. identifier: 'c', line: 17, type: char
+17. identifier: 'arrayOfInteder', line: 19, type: array[1..10] of integer
+18. identifier: 'arrayOfReal', line: 20, type: array[1..5] of real
+19. identifier: 'arrayOfString', line: 21, type: array[1..3] of string
+

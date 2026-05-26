@@ -1,11 +1,8 @@
 program p3;
 
-type
-  arrayOfInteger = array [1..10] of integer;
-
 var
   v1: integer;
-  v2: arrayOfInteger;
+  v2: array[1..3] of integer;
 
 procedure ProcedWithoutParameter;
 begin
@@ -13,11 +10,14 @@ begin
 end;
 
 function soma(a, b: integer): integer;
+var
+  result: integer;
 begin
-  soma := a + b;
+  result := a + b;
+  soma := result;
 end;
 
-procedure ProcedWithParam(var x: integer; y: arrayOfInteger);
+procedure ProcedWithParam(x: integer; y: array[1..3] of integer);
 begin
   x := y[1];
 end;

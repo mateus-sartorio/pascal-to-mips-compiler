@@ -1,0 +1,2 @@
+SEMANTIC ERROR (7): Variable 'c' was not declared.
+make[1]: *** [Makefile:75: run-semantic] Error 1
