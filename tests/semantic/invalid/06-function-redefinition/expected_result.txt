@@ -1,0 +1,2 @@
+SEMANTIC ERROR (3): 'abs' is a built-in function.
+make[1]: *** [Makefile:75: run-semantic] Error 1

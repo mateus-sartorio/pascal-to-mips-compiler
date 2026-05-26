@@ -1,0 +1,2 @@
+SEMANTIC ERROR (4): Global variable 'x' was already declared at line 3.
+make[1]: *** [Makefile:75: run-semantic] Error 1

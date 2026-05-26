@@ -4,7 +4,6 @@ var
   globalInteger: integer;
   globalStr: string;
 
-{ Olha com calma essa questao de passar o resultado por referencia, e se eh necessario ou nao (usando o VAR) }
 procedure calcularSoma(a : integer; resultado : integer);
 var 
   copiaLocalProcedure: integer;
