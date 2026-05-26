@@ -23,12 +23,16 @@ public class ArrayVariableType extends VariableType {
       }
 
       ArrayVariableType otherCorrectType = (ArrayVariableType) other;
+
+      if(!(this.startIndex == otherCorrectType.startIndex) || !(this.endIndex == otherCorrectType.endIndex)) {
+        return false;
+      }
       
-      return (
-        this.basePrimitiveType == other.basePrimitiveType &&
-        this.startIndex == otherCorrectType.startIndex &&
-        this.endIndex == otherCorrectType.endIndex
-      );
+      if(this.basePrimitiveType == PrimitiveTypeEnum.REAL && this.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
+        return true;
+      }
+    
+      return this.basePrimitiveType == other.basePrimitiveType;
     }
 
     @Override
