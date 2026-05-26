@@ -1,0 +1,2 @@
+SEMANTIC ERROR (5): Local variable 'y' of procedure 'MinhaProc' was already declared at line 4.
+make[1]: *** [Makefile:75: run-semantic] Error 1

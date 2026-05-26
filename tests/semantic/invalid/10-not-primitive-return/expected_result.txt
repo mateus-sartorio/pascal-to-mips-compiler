@@ -1,2 +1,0 @@
-SEMANTIC ERROR (3): Function 'MinhaFunc' return type should be a primitive type.
-make[1]: *** [Makefile:75: run-semantic] Error 1
