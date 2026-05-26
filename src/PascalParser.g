@@ -103,7 +103,7 @@ relational_operator:
 
 // 6.7.3 Function-designators
 function_designator: IDENTIFIER ( actual_parameter_list )? ;
-actual_parameter_list: OPEN_PARENTHESIS actual_parameter ( COMMA actual_parameter )* CLOSE_PARENTHESIS ;
+actual_parameter_list: OPEN_PARENTHESIS ( actual_parameter ( COMMA actual_parameter )* )? CLOSE_PARENTHESIS ;
 actual_parameter: expression | variable_access ;
 
 
