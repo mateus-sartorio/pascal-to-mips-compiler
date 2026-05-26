@@ -1,4 +1,2 @@
-line 1:13 token recognition error at: '_'
-line 1:19 token recognition error at: '_'
-line 1:14 mismatched input 'array' expecting {OPEN_BRACKET, ';'}
-(program (program_heading program error) array declaration ; type arrayOfInteger = array [ 1 .. ] of integer ; begin end .)
+line 3:0 mismatched input 'type' expecting {'begin', 'function', 'procedure', 'var'}
+(program (program_heading program error_array_declaration) ; (block variable_declaration_part procedure_and_function_declaration_part (compound_statement type arrayOfInteger = array [ 1 .. ] of integer ; begin end)) .)
