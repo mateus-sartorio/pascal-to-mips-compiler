@@ -659,7 +659,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
     VariableType rightType = visit(context.expression());
 
     if(leftType instanceof ArrayVariableType || rightType instanceof ArrayVariableType) {
-      if(!leftType.isEquivalent(rightType)) {
+      if(!rightType.isEquivalent(leftType)) {
         System.out.printf(
           "SEMANTIC ERROR (%d): Assignment statement.\n",
           context.ASSIGNMENT().getSymbol().getLine()
@@ -715,7 +715,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
           var actualParameter = actualParameters.get(i);
           var actualParameterType = visit(actualParameter);
 
-          if(!parameter.type.isEquivalent(actualParameterType)) {
+          if(!actualParameterType.isEquivalent(parameter.type)) {
             currentMatched = false;
             break;
           }
@@ -779,7 +779,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
       var actualParameter = actualParameters.get(i);
       var actualParameterType = visit(actualParameter);
 
-      if(!parameter.type.isEquivalent(actualParameterType)) {
+      if(!actualParameterType.isEquivalent(parameter.type)) {
         System.out.printf(
           "SEMANTIC ERROR (%d): Invalid type '%s' for parameter '%s' of %s '%s'.\n",
           identifier.getSymbol().getLine(),
@@ -827,7 +827,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
           var actualParameter = actualParameters.get(i);
           var actualParameterType = visit(actualParameter);
 
-          if(!parameter.type.isEquivalent(actualParameterType)) {
+          if(!actualParameterType.isEquivalent(parameter.type)) {
             currentMatched = false;
             break;
           }
@@ -911,7 +911,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
       var actualParameter = actualParameters.get(i);
       var actualParameterType = visit(actualParameter);
 
-      if(!parameter.type.isEquivalent(actualParameterType)) {
+      if(!actualParameterType.isEquivalent(parameter.type)) {
         System.out.printf(
           "SEMANTIC ERROR (%d): Invalid type '%s' for parameter '%s' of %s '%s'.\n",
           identifier.getSymbol().getLine(),

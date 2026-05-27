@@ -11,7 +11,7 @@ public class PrimitiveVariableType extends VariableType {
       return false;
     }
 
-    if(this.basePrimitiveType == PrimitiveTypeEnum.REAL && this.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
+    if(this.basePrimitiveType == PrimitiveTypeEnum.INTEGER && other.basePrimitiveType == PrimitiveTypeEnum.REAL) {
       return true;
     }
     
