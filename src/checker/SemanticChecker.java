@@ -807,7 +807,9 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
     var actualParameterList = context.actual_parameter_list();
 
     List<BuiltInProceduresAndFunctionsEntry> builtInProceduresAndFunctionsEntries = builtInProceduresAndFunctionsTable.get(identifier.getText());
-
+    
+    BuiltInProceduresAndFunctionsEntry matchedEntry = null;
+    
     boolean anyMatched = false;
     if (builtInProceduresAndFunctionsEntries != null) {
       for(var entry : builtInProceduresAndFunctionsEntries) {
@@ -818,7 +820,6 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
         }
 
         var actualParameters = actualParameterList.actual_parameter();
-        
         if(actualParameters.size() != parametersList.size()) {
           break;
         }
@@ -850,6 +851,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
 
           anyMatched = true;
+          matchedEntry = entry;
           break;
         }
       }
@@ -864,7 +866,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
         System.exit(1);
       }
       else {
-        return new PrimitiveVariableType(PrimitiveTypeEnum.NO_TYPE);
+        return new PrimitiveVariableType(matchedEntry.returnType);
       }
     }
 
