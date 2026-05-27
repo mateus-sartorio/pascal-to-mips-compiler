@@ -661,8 +661,10 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
     if(leftType instanceof ArrayVariableType || rightType instanceof ArrayVariableType) {
       if(!rightType.isEquivalent(leftType)) {
         System.out.printf(
-          "SEMANTIC ERROR (%d): Assignment statement.\n",
-          context.ASSIGNMENT().getSymbol().getLine()
+          "SEMANTIC ERROR (%d): incompatible type: type expected is %s, and the type is %s!\n",
+          context.ASSIGNMENT().getSymbol().getLine(),
+          leftType.toString(),
+          rightType.toString()
         );
         
         System.exit(1);
@@ -675,7 +677,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
     
     if(a == PrimitiveTypeEnum.NO_TYPE) {
       System.out.printf(
-        "SEMANTIC ERROR (%d): Assignment statement.\n",
+        "SEMANTIC ERROR (%d): Assignment statement has incompatible types.\n",
         context.ASSIGNMENT().getSymbol().getLine()
       );
       
