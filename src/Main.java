@@ -12,7 +12,6 @@ import checker.*;
 
 public class Main {
   public static void main(String[] args) throws IOException {
-
     // Criando um char stream que le todos os caracteres do arquivo
     CharStream input = CharStreams.fromFileName(args[0], StandardCharsets.UTF_8);
 
