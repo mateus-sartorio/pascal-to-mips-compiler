@@ -1195,7 +1195,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
     if(!(expressionType instanceof PrimitiveVariableType && expressionType.basePrimitiveType == PrimitiveTypeEnum.BOOLEAN)) {
       System.out.printf(
-        "SEMANTIC ERROR (%d): incompatible type for if.\n",
+        "SEMANTIC ERROR (%d): if expression must be boolean.\n",
         context.IF().getSymbol().getLine()
       );
 
