@@ -1,0 +1,106 @@
+
+BUILT-IN PROCEDURES AND FUNCTIONS TABLE:
+
+Built-in procedure 'write'
+Parameters:
+0. identifier: 'n', type: integer
+
+Built-in procedure 'write'
+Parameters:
+0. identifier: 'str', type: string
+
+Built-in procedure 'writeln'
+Parameters:
+0. identifier: 'n', type: integer
+
+Built-in procedure 'writeln'
+Parameters:
+0. identifier: 'str', type: string
+
+Built-in procedure 'read'
+Parameters:
+0. identifier: 'n', type: integer
+
+Built-in procedure 'read'
+Parameters:
+0. identifier: 'str', type: string
+
+Built-in procedure 'readln'
+Parameters:
+0. identifier: 'n', type: integer
+
+Built-in procedure 'readln'
+Parameters:
+0. identifier: 'str', type: string
+
+Built-in function 'abs', return type: integer
+Parameters:
+0. identifier: 'n', type: integer
+
+Built-in function 'abs', return type: real
+Parameters:
+0. identifier: 'n', type: real
+
+Built-in function 'sqr', return type: integer
+Parameters:
+0. identifier: 'n', type: integer
+
+Built-in function 'sqr', return type: real
+Parameters:
+0. identifier: 'n', type: real
+
+Built-in function 'sqrt', return type: real
+Parameters:
+0. identifier: 'n', type: integer
+
+Built-in function 'sqrt', return type: real
+Parameters:
+0. identifier: 'n', type: real
+
+Built-in function 'trunc', return type: integer
+Parameters:
+0. identifier: 'n', type: real
+
+Built-in function 'round', return type: integer
+Parameters:
+0. identifier: 'n', type: real
+
+Built-in function 'ord', return type: integer
+Parameters:
+0. identifier: 'c', type: char
+
+Built-in function 'chr', return type: char
+Parameters:
+0. identifier: 'n', type: integer
+
+Built-in function 'succ', return type: integer
+Parameters:
+0. identifier: 'n', type: integer
+
+Built-in function 'pred', return type: integer
+Parameters:
+0. identifier: 'n', type: integer
+
+Built-in function 'length', return type: integer
+Parameters:
+0. identifier: 'str', type: string
+
+Built-in function 'upcase', return type: char
+Parameters:
+0. identifier: 'c', type: char
+
+
+
+GLOBAL VARIABLES TABLE:
+
+0. identifier: 'meuArray', line: 3, type: array[1..5] of integer
+1. identifier: 'result', line: 4, type: integer
+
+
+PROCEDURES AND FUNCTIONS TABLE:
+
+Function 'teste' - line 6, return type: integer
+Parameters:
+0. identifier: 'a', line: 6, type: integer
+
+

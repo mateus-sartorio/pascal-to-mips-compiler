@@ -1,0 +1,2 @@
+SEMANTIC ERROR (3): if expression must be boolean.
+make[1]: *** [Makefile:75: run-semantic] Error 1

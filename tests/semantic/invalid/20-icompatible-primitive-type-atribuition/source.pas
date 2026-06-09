@@ -1,0 +1,7 @@
+program TesteAtribuicaoPrimitiveTypes;
+var
+    a: integer;
+    b: string;
+begin
+    a := b;
+end.

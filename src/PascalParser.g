@@ -13,7 +13,7 @@ options {
 
 block: variable_declaration_part procedure_and_function_declaration_part compound_statement ;
 
-variable_declaration_part: ( VAR variable_declaration ( SEMICOLON variable_declaration )* SEMICOLON )*;
+variable_declaration_part: ( VAR variable_declaration ( SEMICOLON variable_declaration )* SEMICOLON )* ;
 procedure_and_function_declaration_part: ( ( procedure_declaration | function_declaration ) SEMICOLON )* ;
 
 
@@ -37,9 +37,9 @@ array_type: ( PACKED )? ARRAY OPEN_BRACKET subrange_type CLOSE_BRACKET OF primit
 // -------------------- 6.5 Declarations and denotations of variables --------------------
 
 // 6.5.1 Variable-declarations
-variable_declaration: identifier_list COLON type_denoter;
+variable_declaration: identifier_list COLON type_denoter ;
 
-variable_access: IDENTIFIER | indexed_variable;
+variable_access: IDENTIFIER | indexed_variable ;
 
 // 6.5.3.2 Indexed-variables
 indexed_variable: IDENTIFIER OPEN_BRACKET ( expression ) CLOSE_BRACKET ;
