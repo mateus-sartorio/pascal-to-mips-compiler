@@ -1,2 +1,2 @@
-SEMANTIC ERROR (5): incompatible type: type expected is array[1..5] of integer, and the type is integer!
+SEMANTIC ERROR (5): Assignment statement has incompatible types.
 make[1]: *** [Makefile:75: run-semantic] Error 1
