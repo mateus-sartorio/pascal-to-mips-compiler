@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
+import ast.AstBuilderVisitor;
 import parser.PascalLexer;
 import parser.PascalParser;
 import checker.*;
@@ -42,5 +43,8 @@ public class Main {
     semanticChecker.printBuiltInProceduresAndFunctionsTable();
     semanticChecker.printGlobalVariablesTable();
     semanticChecker.printProceduresAndFunctionsTable();
+
+    AstBuilderVisitor astBuilder = new AstBuilderVisitor();
+    astBuilder.visit(tree);
   }
 }
