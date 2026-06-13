@@ -1,14 +1,20 @@
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-import ast.AstBuilderVisitor;
+import ast.AstBuilder;
 import parser.PascalLexer;
 import parser.PascalParser;
+import tables.BuiltInProceduresAndFunctionsTable;
+import tables.ProceduresAndFunctionsTable;
+import tables.StringLiteralsTable;
+import tables.VariablesTable;
 import checker.*;
 
 public class Main {
@@ -28,9 +34,6 @@ public class Main {
     // Iniciando o processo de parsing (criando a parser tree)
     ParseTree tree = parser.program();
 
-    // Imprimindo a parser tree (opcional, para debug)
-    // System.out.println("Arvore de parsing: " + tree.toStringTree(parser));
-
     if (parser.getNumberOfSyntaxErrors() != 0) {
       return;
     }
@@ -44,7 +47,28 @@ public class Main {
     semanticChecker.printGlobalVariablesTable();
     semanticChecker.printProceduresAndFunctionsTable();
 
-    AstBuilderVisitor astBuilder = new AstBuilderVisitor();
+    String programIdentifier = semanticChecker.getProgramIdentifier();
+
+    StringLiteralsTable stringLiteralsTable = semanticChecker.getStringLiteralsTable();
+
+    BuiltInProceduresAndFunctionsTable builtInProceduresAndFunctionsTable = semanticChecker.getBuiltInProceduresAndFunctionsTable();
+
+    VariablesTable globalVariablesTable = semanticChecker.getGlobalVariablesTable();
+
+    ProceduresAndFunctionsTable proceduresAndFunctionsTable = semanticChecker.getProceduresAndFunctionsTable();
+
+    AstBuilder astBuilder = new AstBuilder(
+      programIdentifier,
+      stringLiteralsTable,
+      builtInProceduresAndFunctionsTable,
+      globalVariablesTable,
+      proceduresAndFunctionsTable
+    );
+
     astBuilder.visit(tree);
+
+    String dotNotation = astBuilder.toDotNotation();
+
+    Files.writeString(Path.of("test.dot"), dotNotation, StandardCharsets.UTF_8);
   }
 }

@@ -57,7 +57,8 @@ import types.TypeRules;
 import types.VariableType;
 
 public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
-  String programHeadingIdentifier;
+  // Program identifier
+  String programIdentifier;
 
   // Table to store string literals found in the code
   private final StringLiteralsTable stringLiteralsTable = new StringLiteralsTable();
@@ -70,6 +71,26 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
   // Symbol table to store declared procedures and functions, their local variables and parameters
   private final ProceduresAndFunctionsTable proceduresAndFunctionsTable = new ProceduresAndFunctionsTable();
+
+  public String getProgramIdentifier() {
+    return programIdentifier;
+  }
+
+  public StringLiteralsTable getStringLiteralsTable() {
+    return stringLiteralsTable;
+  }
+
+  public BuiltInProceduresAndFunctionsTable getBuiltInProceduresAndFunctionsTable() {
+    return builtInProceduresAndFunctionsTable;
+  }
+
+  public VariablesTable getGlobalVariablesTable() {
+    return globalVariablesTable;
+  }
+
+  public ProceduresAndFunctionsTable getProceduresAndFunctionsTable() {
+    return proceduresAndFunctionsTable;
+  }
 
   public SemanticChecker() {
     registerPreDeclaredProceduresAndFunctions();
@@ -169,11 +190,11 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
   private void checkGlobalIdentifierIsNotDefined(Token identifierToken) {
     String identifier = identifierToken.getText();
 
-    if (identifier.equalsIgnoreCase(programHeadingIdentifier)) {
+    if (identifier.equalsIgnoreCase(programIdentifier)) {
       System.out.printf(
         "SEMANTIC ERROR (%d): Program heading '%s' cannot be used.\n",
         identifierToken.getLine(),
-        programHeadingIdentifier
+        programIdentifier
       );
 
       System.exit(1);
@@ -349,7 +370,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
   @Override
   public VariableType visitProgram_heading(Program_headingContext context) {
-    programHeadingIdentifier = context.IDENTIFIER().getText();
+    programIdentifier = context.IDENTIFIER().getText();
     return new PrimitiveVariableType(PrimitiveTypeEnum.NO_TYPE);
   }
 

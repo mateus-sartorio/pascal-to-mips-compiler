@@ -1,19 +1,53 @@
 package ast.types;
 
-import java.util.List;
+import java.util.Optional;
+
+import ast.types.declarations.implementations.ProcedureAndFunctionDeclarationPartNode;
+import ast.types.declarations.implementations.VariableDeclarationPartNode;
+import ast.types.statements.implementations.CompoundStatementNode;
 
 public class ProgramNode extends AstNode {
-  List<VariableDeclarationNode> globalVariables;
-  ProcedureAndFunctionDeclarationPartNode proceduresAndFunctions;
+  String programIdentifier;
+  Optional<VariableDeclarationPartNode> variableDeclarationPart;
+  Optional<ProcedureAndFunctionDeclarationPartNode> proceduresAndFunctions;
   CompoundStatementNode compoundStatement;
 
   public ProgramNode(
-    List<VariableDeclarationNode> globalVariables,
-    ProcedureAndFunctionDeclarationPartNode proceduresAndFunctions,
+    String programIdentifier,
+    Optional<VariableDeclarationPartNode> variableDeclarationPart,
+    Optional<ProcedureAndFunctionDeclarationPartNode> proceduresAndFunctions,
     CompoundStatementNode compoundStatement
   ) {
-    this.globalVariables = globalVariables;
+    this.programIdentifier = programIdentifier;
+    this.variableDeclarationPart = variableDeclarationPart;
     this.proceduresAndFunctions = proceduresAndFunctions;
     this.compoundStatement = compoundStatement;
+  }
+
+  @Override
+  public String getDotNotationIdentifier() {
+    return "ProgramNode";
+  }
+
+  @Override
+  public String toDotNotation() {
+    StringBuilder sb = new StringBuilder();
+    
+    sb.append("%s [label=\"%s\"];\n".formatted(getDotNotationIdentifier(), programIdentifier));
+    
+    variableDeclarationPart.ifPresent(variableDeclarationPart -> {
+      sb.append(variableDeclarationPart.toDotNotation());
+      sb.append("%s -> %s;\n".formatted(getDotNotationIdentifier(), variableDeclarationPart.getDotNotationIdentifier()));
+    });
+    
+    proceduresAndFunctions.ifPresent(proceduresAndFunctions -> {
+      sb.append(proceduresAndFunctions.toDotNotation());
+      sb.append("%s -> %s;\n".formatted(getDotNotationIdentifier(), proceduresAndFunctions.getDotNotationIdentifier()));
+    });
+
+    sb.append(compoundStatement.toDotNotation());
+    sb.append("%s -> %s;\n".formatted(getDotNotationIdentifier(), compoundStatement.getDotNotationIdentifier()));
+
+    return sb.toString();
   }
 }

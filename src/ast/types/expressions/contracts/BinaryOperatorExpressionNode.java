@@ -1,4 +1,4 @@
-package ast.types;
+package ast.types.expressions.contracts;
 
 public abstract class BinaryOperatorExpressionNode extends ExpressionNode {
   public final ExpressionNode left;
