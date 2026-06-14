@@ -21,6 +21,7 @@ import ast.types.expressions.implementations.FunctionCallExpressionNode;
 import ast.types.expressions.implementations.IndexedVariableAccessExpressionNode;
 import ast.types.expressions.implementations.IntegerExpressionNode;
 import ast.types.expressions.implementations.LogicOperatorExpressionNode;
+import ast.types.expressions.implementations.NotOperatorExpressionNode;
 import ast.types.expressions.implementations.RealExpressionNode;
 import ast.types.expressions.implementations.StringExpressionNode;
 import ast.types.expressions.implementations.VariableAccessExpressionNode;
@@ -35,6 +36,8 @@ import parser.PascalParser.Actual_parameter_listContext;
 import parser.PascalParser.Adding_operatorContext;
 import parser.PascalParser.Assignment_statementContext;
 import parser.PascalParser.BlockContext;
+import parser.PascalParser.BooleanConstantContext;
+import parser.PascalParser.Boolean_constantContext;
 import parser.PascalParser.Compound_statementContext;
 import parser.PascalParser.Empty_statementContext;
 import parser.PascalParser.ExpressionContext;
@@ -370,13 +373,11 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
   }
 
   @Override
-  public ExpressionNode visitNumericConstant(NumericConstantContext context) {
-    Numeric_constantContext numericConstantContext = context.numeric_constant();
+  public ExpressionNode visitNumeric_constant(Numeric_constantContext context) {
+    TerminalNode minus = context.MINUS();
 
-    TerminalNode minus = numericConstantContext.MINUS();
-
-    TerminalNode integerValue = numericConstantContext.UNSIGNED_INTEGER();
-    TerminalNode realValue = numericConstantContext.UNSIGNED_REAL();
+    TerminalNode integerValue = context.UNSIGNED_INTEGER();
+    TerminalNode realValue = context.UNSIGNED_REAL();
 
     if(integerValue != null) {
       int value = Integer.parseInt(integerValue.getText());
@@ -395,6 +396,26 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     }
 
     return new RealExpressionNode(value);
+  }
+
+  @Override
+  public ExpressionNode visitNumericConstant(NumericConstantContext context) {
+    Numeric_constantContext numericConstantContext = context.numeric_constant();
+    return (ExpressionNode) visit(numericConstantContext);
+  }
+
+  @Override
+  public BooleanExpressionNode visitBoolean_constant(Boolean_constantContext context) {
+    if(context.FALSE() != null) {
+      return new BooleanExpressionNode(false);
+    }
+    return new BooleanExpressionNode(true);
+  }
+
+  @Override
+  public BooleanExpressionNode visitBooleanConstant(BooleanConstantContext context) {
+    var booleanConstantContext = context.boolean_constant();
+    return (BooleanExpressionNode) visit(booleanConstantContext);
   }
 
   @Override
@@ -423,9 +444,9 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
   }
 
   @Override
-  public BooleanExpressionNode visitNotFactor(NotFactorContext context) {
-    BooleanExpressionNode factor = (BooleanExpressionNode) visit(context.factor());
-    return new BooleanExpressionNode(!factor.value);
+  public NotOperatorExpressionNode visitNotFactor(NotFactorContext context) {
+    ExpressionNode expression = (ExpressionNode) visit(context.factor());
+    return new NotOperatorExpressionNode(expression);
   }
 
   @Override

@@ -13,7 +13,7 @@ public class BooleanExpressionNode extends ExpressionNode {
   public String toDotNotation() {
     StringBuilder sb = new StringBuilder();
 
-    sb.append("%s [label=\": %s\"];\n".formatted(getDotNotationIdentifier(), value));
+    sb.append("%s [label=\"%s\"];\n".formatted(getDotNotationIdentifier(), value));
     
     return sb.toString();
   }

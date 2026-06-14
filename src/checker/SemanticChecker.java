@@ -11,6 +11,8 @@ import parser.PascalParser.Actual_parameter_listContext;
 import parser.PascalParser.Adding_operatorContext;
 import parser.PascalParser.Array_typeContext;
 import parser.PascalParser.Assignment_statementContext;
+import parser.PascalParser.BooleanConstantContext;
+import parser.PascalParser.Boolean_constantContext;
 import parser.PascalParser.ExpressionContext;
 import parser.PascalParser.FactorContext;
 import parser.PascalParser.For_statementContext;
@@ -1188,9 +1190,20 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
   }
 
   @Override
+  public VariableType visitBoolean_constant(Boolean_constantContext context) {
+    return new PrimitiveVariableType(PrimitiveTypeEnum.BOOLEAN);
+  }
+
+  @Override
   public VariableType visitNumericConstant(NumericConstantContext context) {
     Numeric_constantContext numericConstant = context.numeric_constant();
     return visit(numericConstant);
+  }
+
+  @Override
+  public VariableType visitBooleanConstant(BooleanConstantContext context) {
+    Boolean_constantContext booleanConstant = context.boolean_constant();
+    return visit(booleanConstant);
   }
 
   @Override
