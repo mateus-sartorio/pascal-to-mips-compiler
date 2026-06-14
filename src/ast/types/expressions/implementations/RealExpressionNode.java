@@ -13,7 +13,7 @@ public class RealExpressionNode extends ExpressionNode {
   public String toDotNotation() {
     StringBuilder sb = new StringBuilder();
 
-    sb.append(getDotNotationIdentifier() + " [label=\"RealExpressionNode: " + value + "\"];\n");
+    sb.append("%s [label=\"%.2f\"];\n".formatted(getDotNotationIdentifier(), value));
     
     return sb.toString();
   }

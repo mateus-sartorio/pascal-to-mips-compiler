@@ -27,14 +27,14 @@ public class IfStatementNode extends StatementNode {
     sb.append("%s [label=\"if\"];\n".formatted(getDotNotationIdentifier()));
 
     sb.append(condition.toDotNotation());
-    sb.append("%s -> %s;\n".formatted(getDotNotationIdentifier(), condition.getDotNotationIdentifier()));
+    sb.append("%s -> %s [label=\"condition\"];\n".formatted(getDotNotationIdentifier(), condition.getDotNotationIdentifier()));
 
     sb.append(thenStatement.toDotNotation());
-    sb.append("%s -> %s;\n".formatted(getDotNotationIdentifier(), thenStatement.getDotNotationIdentifier()));
+    sb.append("%s -> %s [label=\"then\"];\n".formatted(getDotNotationIdentifier(), thenStatement.getDotNotationIdentifier()));
     
     elseStatement.ifPresent(statement -> {
       sb.append(statement.toDotNotation());
-      sb.append("%s -> %s;\n".formatted(getDotNotationIdentifier(), statement.getDotNotationIdentifier()));
+      sb.append("%s -> %s [label=\"else\"];\n".formatted(getDotNotationIdentifier(), statement.getDotNotationIdentifier()));
     });
     
     return sb.toString();

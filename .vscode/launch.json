@@ -6,7 +6,7 @@
       "name": "Main",
       "request": "launch",
       "mainClass": "Main",
-      "args": ["${workspaceFolder}/tests/ast/valid/02-procedure-function-declaration/source.pas"]
+      "args": ["${workspaceFolder}/tests/ast/valid/07-for-statement/source.pas"]
     }
   ]
 }

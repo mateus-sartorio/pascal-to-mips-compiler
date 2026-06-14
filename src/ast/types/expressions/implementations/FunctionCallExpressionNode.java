@@ -20,11 +20,11 @@ public class FunctionCallExpressionNode extends ExpressionNode {
   public String toDotNotation() {
     StringBuilder sb = new StringBuilder();
     
-    sb.append("%s [label=\"%s() -> %s\"];\n".formatted(getDotNotationIdentifier(), procedureIdentifier, returnType));
+    sb.append("%s [label=\"(%s) %s()\"];\n".formatted(getDotNotationIdentifier(), returnType, procedureIdentifier));
 
     for(var argument : arguments) {
       sb.append(argument.toDotNotation());
-      sb.append(getDotNotationIdentifier() + " -> " + argument.getDotNotationIdentifier() + " [label=\"argument\"];\n");
+      sb.append("%s -> %s [label=\"argument\"];\n".formatted(getDotNotationIdentifier(), argument.getDotNotationIdentifier()));
     }
     
     return sb.toString();

@@ -22,16 +22,16 @@ public class FunctionDeclarationNode extends ProcedureOrFunctionDeclarationNode 
   public String toDotNotation() {
     StringBuilder sb = new StringBuilder();
     
-    sb.append(String.format("%s [label=\"FunctionDeclarationNode: %s -> %s\"];\n", getDotNotationIdentifier(), identifier, returnType));
+    sb.append("%s [label=\"function: (%s) %s\"];\n".formatted(getDotNotationIdentifier(), returnType, identifier));
     
     sb.append(parameters.toDotNotation());
     sb.append(getDotNotationIdentifier() + " -> " + parameters.getDotNotationIdentifier() + " [label=\"parameters\"];\n");
 
     sb.append(localVariables.toDotNotation());
-    sb.append(getDotNotationIdentifier() + " -> " + localVariables.getDotNotationIdentifier() + " [label=\"localVariables\"];\n");
+    sb.append(getDotNotationIdentifier() + " -> " + localVariables.getDotNotationIdentifier() + " [label=\"local variables\"];\n");
 
     sb.append(compoundStatement.toDotNotation());
-    sb.append(getDotNotationIdentifier() + " -> " + compoundStatement.getDotNotationIdentifier() + " [label=\"compoundStatement\"];\n");
+    sb.append(getDotNotationIdentifier() + " -> " + compoundStatement.getDotNotationIdentifier() + " [label=\"body\"];\n");
 
     return sb.toString();
   }

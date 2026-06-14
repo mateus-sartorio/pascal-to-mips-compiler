@@ -23,10 +23,10 @@ public class ProcedureDeclarationNode extends ProcedureOrFunctionDeclarationNode
     sb.append(getDotNotationIdentifier() + " -> " + parameters.getDotNotationIdentifier() + " [label=\"parameters\"];\n");
 
     sb.append(localVariables.toDotNotation());
-    sb.append(getDotNotationIdentifier() + " -> " + localVariables.getDotNotationIdentifier() + " [label=\"localVariables\"];\n");
+    sb.append(getDotNotationIdentifier() + " -> " + localVariables.getDotNotationIdentifier() + " [label=\"local variables\"];\n");
 
     sb.append(compoundStatement.toDotNotation());
-    sb.append(getDotNotationIdentifier() + " -> " + compoundStatement.getDotNotationIdentifier() + " [label=\"compoundStatement\"];\n");
+    sb.append(getDotNotationIdentifier() + " -> " + compoundStatement.getDotNotationIdentifier() + " [label=\"body\"];\n");
 
     return sb.toString();
   }

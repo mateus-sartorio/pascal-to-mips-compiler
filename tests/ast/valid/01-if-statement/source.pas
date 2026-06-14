@@ -12,4 +12,11 @@ begin
   if n <> 0
   then
     n := n;
+
+  if n < 10
+  then
+  begin
+    n := n * 2;
+    n := n / 2;
+  end;
 end.

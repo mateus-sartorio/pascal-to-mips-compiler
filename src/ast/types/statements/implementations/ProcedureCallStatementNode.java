@@ -22,7 +22,7 @@ public class ProcedureCallStatementNode extends StatementNode {
 
     for (var argument : arguments) {
       sb.append(argument.toDotNotation());
-      sb.append(getDotNotationIdentifier() + " -> " + argument.getDotNotationIdentifier() + ";\n");
+      sb.append("%s -> %s [label=\"argument\"];\n".formatted(getDotNotationIdentifier(), argument.getDotNotationIdentifier()));
     }
 
     return sb.toString();

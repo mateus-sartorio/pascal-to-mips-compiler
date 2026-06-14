@@ -14,6 +14,7 @@ public class IntegerExpressionNode extends ExpressionNode {
     StringBuilder sb = new StringBuilder();
 
     sb.append("%s [label=\"%d\"];\n".formatted(getDotNotationIdentifier(), value));
+    
     return sb.toString();
   }
 }

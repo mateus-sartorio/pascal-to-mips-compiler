@@ -51,31 +51,24 @@ import parser.PascalParser.TermContext;
 import parser.PascalParser.VariableAccessContext;
 import parser.PascalParser.Variable_accessContext;
 import parser.PascalParserBaseVisitor;
-import tables.BuiltInProceduresAndFunctionsTable;
 import tables.ProceduresAndFunctionsTable;
-import tables.StringLiteralsTable;
 import tables.VariablesTable;
+import types.PrimitiveVariableType;
 
 public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
   private ProgramNode programNode;
 
   private String programIdentifier;
-  private StringLiteralsTable stringLiteralsTable;
-  private BuiltInProceduresAndFunctionsTable builtInProceduresAndFunctionsTable;
   private VariablesTable globalVariablesTable;
   private ProceduresAndFunctionsTable proceduresAndFunctionsTable;
 
   
   public AstBuilder(
     String programIdentifier,
-    StringLiteralsTable stringLiteralsTable,
-    BuiltInProceduresAndFunctionsTable builtInProceduresAndFunctionsTable,
     VariablesTable globalVariablesTable,
     ProceduresAndFunctionsTable proceduresAndFunctionsTable
   ) {
     this.programIdentifier = programIdentifier;
-    this.stringLiteralsTable = stringLiteralsTable;
-    this.builtInProceduresAndFunctionsTable = builtInProceduresAndFunctionsTable;
     this.globalVariablesTable = globalVariablesTable;
     this.proceduresAndFunctionsTable = proceduresAndFunctionsTable;
   }
@@ -175,6 +168,11 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
 
         return new VariableAccessExpressionNode(variableIdentifier, procedureOrLocalVariableEntry.type);
       }
+    }
+
+    var functionEntry = proceduresAndFunctionsTable.get(variableIdentifier);
+    if(functionEntry != null) {
+      return new VariableAccessExpressionNode(variableIdentifier, new PrimitiveVariableType(functionEntry.returnType));
     }
 
     throw new RuntimeException("Variable " + variableIdentifier + " not found in symbol tables");
@@ -279,11 +277,8 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     else if(relationalOperatorContext.GREATER_THAN() != null) {
       operator = ">";
     }
-    else if(relationalOperatorContext.GREATER_THAN_OR_EQUAL_TO() != null) {
-      operator = ">=";
-    }
     else {
-      throw new RuntimeException("Unknown operator");
+      operator = ">=";
     }
 
     return new ComparisonOperatorExpressionNode(left, right, operator);
@@ -481,10 +476,10 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
   public ForStatementNode visitFor_statement(For_statementContext context) {
     var variableIdentifier = context.IDENTIFIER().getText();
 
-    var initialValue = (ExpressionNode) visit(context.expression(1));
-    var finalValue = (ExpressionNode) visit(context.expression(2));
+    var initialValue = (ExpressionNode) visit(context.expression(0));
+    var finalValue = (ExpressionNode) visit(context.expression(1));
 
-    var compoundStatement = (StatementNode) visit(context.statement());
+    var statement = (StatementNode) visit(context.statement());
 
     boolean isDownto = context.DOWNTO() != null;
 
@@ -493,7 +488,7 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
       initialValue,
       finalValue,
       isDownto,
-      compoundStatement
+      statement
     );
   }
 

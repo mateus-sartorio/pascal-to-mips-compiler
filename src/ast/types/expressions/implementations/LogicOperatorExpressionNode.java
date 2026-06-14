@@ -15,13 +15,12 @@ public class LogicOperatorExpressionNode extends BinaryOperatorExpressionNode {
   public String toDotNotation() {
     StringBuilder sb = new StringBuilder();
 
-    sb.append(getDotNotationIdentifier() + " [label=\"LogicOperatorExpressionNode: " + operator + "\"];\n");
-
+    sb.append("%s [label=\"%s\"];\n".formatted(getDotNotationIdentifier(), operator));
     sb.append(left.toDotNotation());
-    sb.append(getDotNotationIdentifier() + " -> " + left.getDotNotationIdentifier() + ";\n");
+    sb.append("%s -> %s;\n".formatted(getDotNotationIdentifier(), left.getDotNotationIdentifier()));
 
     sb.append(right.toDotNotation());
-    sb.append(getDotNotationIdentifier() + " -> " + right.getDotNotationIdentifier() + ";\n");
+    sb.append("%s -> %s;\n".formatted(getDotNotationIdentifier(), right.getDotNotationIdentifier()));
     
     return sb.toString();
   }

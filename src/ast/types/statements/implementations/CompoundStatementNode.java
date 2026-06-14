@@ -15,7 +15,7 @@ public class CompoundStatementNode extends StatementNode {
   public String toDotNotation() {
     StringBuilder sb = new StringBuilder();
     
-    sb.append("%s [label=\"begin...end;\"];\n".formatted(getDotNotationIdentifier()));
+    sb.append("%s [label=\"{ }\"];\n".formatted(getDotNotationIdentifier()));
     
     for (var statement : statements) {
       sb.append(statement.toDotNotation());

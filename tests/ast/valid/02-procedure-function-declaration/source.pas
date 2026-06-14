@@ -14,12 +14,13 @@ begin
   resultado := copiaLocalProcedure + -10;
 end;
 
-procedure FormatarNome(id: integer; sufixo: string);
+function FormatarNome(id: integer; sufixo: string) : string;
 var
   nomeFormatado: string;
 begin
   begin
     nomeFormatado := 'ID_' + sufixo;
+    FormatarNome := nomeFormatado;
   end;
 end;
 
@@ -29,5 +30,5 @@ begin
   writeln(1);
   writeln('''');
   
-  FormatarNome(123, 'Teste');
+  globalStr := FormatarNome(123, 'Teste');
 end.

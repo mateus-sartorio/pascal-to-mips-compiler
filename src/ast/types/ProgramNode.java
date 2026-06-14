@@ -37,16 +37,16 @@ public class ProgramNode extends AstNode {
     
     variableDeclarationPart.ifPresent(variableDeclarationPart -> {
       sb.append(variableDeclarationPart.toDotNotation());
-      sb.append("%s -> %s;\n".formatted(getDotNotationIdentifier(), variableDeclarationPart.getDotNotationIdentifier()));
+      sb.append("%s -> %s [label=\"global variables\"];\n".formatted(getDotNotationIdentifier(), variableDeclarationPart.getDotNotationIdentifier()));
     });
     
     proceduresAndFunctions.ifPresent(proceduresAndFunctions -> {
       sb.append(proceduresAndFunctions.toDotNotation());
-      sb.append("%s -> %s;\n".formatted(getDotNotationIdentifier(), proceduresAndFunctions.getDotNotationIdentifier()));
+      sb.append("%s -> %s [label=\"parocedure and function declarations\"] ;\n".formatted(getDotNotationIdentifier(), proceduresAndFunctions.getDotNotationIdentifier()));
     });
 
     sb.append(compoundStatement.toDotNotation());
-    sb.append("%s -> %s;\n".formatted(getDotNotationIdentifier(), compoundStatement.getDotNotationIdentifier()));
+    sb.append("%s -> %s [label=\"main body\"];\n".formatted(getDotNotationIdentifier(), compoundStatement.getDotNotationIdentifier()));
 
     return sb.toString();
   }
