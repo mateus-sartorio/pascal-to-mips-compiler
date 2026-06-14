@@ -15,12 +15,10 @@ public class IndexedVariableAccessExpressionNode extends VariableAccessExpressio
   public String toDotNotation() {
     StringBuilder sb = new StringBuilder();
 
-    if(indexExpressionNode instanceof IntegerExpressionNode) {
-      var integerExpressionNode = (IntegerExpressionNode) indexExpressionNode;
-      sb.append("%s [label=\"(%s) %s[%d]\"];\n".formatted(getDotNotationIdentifier(), type.basePrimitiveType, identifier, integerExpressionNode.value));
-    } else {
-      sb.append("%s [label=\"(%s) %s[]\"];\n".formatted(getDotNotationIdentifier(), type.basePrimitiveType, identifier));
-    }
+    sb.append("%s [label=\"(%s) %s[]\"];\n".formatted(getDotNotationIdentifier(), type.basePrimitiveType, identifier));
+    
+    sb.append(indexExpressionNode.toDotNotation());
+    sb.append("%s -> %s [label=\"index\"] ;\n".formatted(getDotNotationIdentifier(), indexExpressionNode.getDotNotationIdentifier()));
 
     return sb.toString();
   }
