@@ -20,10 +20,10 @@ public class AssignmentStatementNode extends StatementNode {
     sb.append("%s [label=\":=\"];\n".formatted(getDotNotationIdentifier()));
 
     sb.append(variableAccessExpressionNode.toDotNotation());
-    sb.append("%s -> %s;\n".formatted(getDotNotationIdentifier(), variableAccessExpressionNode.getDotNotationIdentifier()));
+    sb.append("%s -> %s [label=\"variable\"] ;\n".formatted(getDotNotationIdentifier(), variableAccessExpressionNode.getDotNotationIdentifier()));
 
     sb.append(expression.toDotNotation());
-    sb.append("%s -> %s;\n".formatted(getDotNotationIdentifier(), expression.getDotNotationIdentifier()));
+    sb.append("%s -> %s [label=\"value\"] ;\n".formatted(getDotNotationIdentifier(), expression.getDotNotationIdentifier()));
 
     return sb.toString();
   }
