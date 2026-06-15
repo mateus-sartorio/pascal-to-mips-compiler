@@ -6,6 +6,8 @@ src/parser/**/*
 # Result files from test runs
 tests/**/**/**/actual_result.txt
 tests/**/**/**/diff.diff
+tests/**/**/**/*.dot
+tests/**/**/**/*.png
 
 # Compiled binaries
 bin/**/*
