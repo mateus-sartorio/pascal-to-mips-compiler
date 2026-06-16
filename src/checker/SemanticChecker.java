@@ -1174,8 +1174,14 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
   @Override
   public VariableType visitStringConstant(StringConstantContext context) {
     String stringLiteral = context.CHARACTER_STRING().getText();
-    // Remove the surrounding single quotes ('text' -> text)
-    stringLiteralsTable.addStringLiteral(stringLiteral.substring(1, stringLiteral.length() - 1));
+
+    String croppedStringLiteral = stringLiteral.substring(1, stringLiteral.length() - 1);
+
+    stringLiteralsTable.addStringLiteral(croppedStringLiteral);
+
+    if(croppedStringLiteral.length() == 1) {
+      return new PrimitiveVariableType(PrimitiveTypeEnum.CHAR);
+    }
 
     return new PrimitiveVariableType(PrimitiveTypeEnum.STRING);
   }
