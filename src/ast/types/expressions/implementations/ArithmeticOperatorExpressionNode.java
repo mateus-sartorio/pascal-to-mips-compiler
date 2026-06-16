@@ -3,10 +3,10 @@ package ast.types.expressions.implementations;
 import ast.types.expressions.contracts.BinaryOperatorExpressionNode;
 import ast.types.expressions.contracts.ExpressionNode;
 
-public class ArithmeticBinaryOperatorExpressionNode extends BinaryOperatorExpressionNode {
+public class ArithmeticOperatorExpressionNode extends BinaryOperatorExpressionNode {
   String operator;
 
-  public ArithmeticBinaryOperatorExpressionNode(ExpressionNode left, ExpressionNode right, String operator) {
+  public ArithmeticOperatorExpressionNode(ExpressionNode left, ExpressionNode right, String operator) {
     super(left, right);
     this.operator = operator;
   }
