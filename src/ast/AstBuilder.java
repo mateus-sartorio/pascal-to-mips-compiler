@@ -14,16 +14,13 @@ import ast.types.declarations.implementations.VariableDeclarationNode;
 import ast.types.declarations.implementations.VariableDeclarationPartNode;
 import ast.types.expressions.contracts.BinaryOperatorExpressionNode;
 import ast.types.expressions.contracts.ExpressionNode;
-import ast.types.expressions.implementations.ArithmeticBinaryOperatorExpressionNode;
-import ast.types.expressions.implementations.BooleanExpressionNode;
+import ast.types.expressions.implementations.ArithmeticOperatorExpressionNode;
 import ast.types.expressions.implementations.ComparisonOperatorExpressionNode;
 import ast.types.expressions.implementations.FunctionCallExpressionNode;
 import ast.types.expressions.implementations.IndexedVariableAccessExpressionNode;
-import ast.types.expressions.implementations.IntegerExpressionNode;
 import ast.types.expressions.implementations.LogicOperatorExpressionNode;
 import ast.types.expressions.implementations.NotOperatorExpressionNode;
-import ast.types.expressions.implementations.RealExpressionNode;
-import ast.types.expressions.implementations.StringExpressionNode;
+import ast.types.expressions.implementations.PrimitiveTypeExpressionNode;
 import ast.types.expressions.implementations.VariableAccessExpressionNode;
 import ast.types.statements.contract.StatementNode;
 import ast.types.statements.implementations.AssignmentStatementNode;
@@ -32,6 +29,7 @@ import ast.types.statements.implementations.ForStatementNode;
 import ast.types.statements.implementations.IfStatementNode;
 import ast.types.statements.implementations.ProcedureCallStatementNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
+
 import parser.PascalParser.Actual_parameter_listContext;
 import parser.PascalParser.Adding_operatorContext;
 import parser.PascalParser.Assignment_statementContext;
@@ -315,10 +313,10 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
       ExpressionNode rightExpression = (ExpressionNode) visit(context.term(i));
 
       if(operator.PLUS() != null) {
-        returnExpression = new ArithmeticBinaryOperatorExpressionNode(leftExpression, rightExpression, "+");
+        returnExpression = new ArithmeticOperatorExpressionNode(leftExpression, rightExpression, "+");
       }
       else if(operator.MINUS() != null) {
-        returnExpression = new ArithmeticBinaryOperatorExpressionNode(leftExpression, rightExpression, "-");
+        returnExpression = new ArithmeticOperatorExpressionNode(leftExpression, rightExpression, "-");
       }
       else {
         returnExpression = new LogicOperatorExpressionNode(leftExpression, rightExpression, "or");
@@ -345,10 +343,10 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
       ExpressionNode rightExpression = (ExpressionNode) visit(context.factor(i));
 
       if(operator.MULTIPLICATION() != null) {
-        returnExpression = new ArithmeticBinaryOperatorExpressionNode(leftExpression, rightExpression, "*");
+        returnExpression = new ArithmeticOperatorExpressionNode(leftExpression, rightExpression, "*");
       }
       else if(operator.DIVISION() != null) {
-        returnExpression = new ArithmeticBinaryOperatorExpressionNode(leftExpression, rightExpression, "/");
+        returnExpression = new ArithmeticOperatorExpressionNode(leftExpression, rightExpression, "/");
       }
       else {
         returnExpression = new LogicOperatorExpressionNode(leftExpression, rightExpression, "and");
@@ -367,13 +365,13 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
   }
 
   @Override
-  public StringExpressionNode visitStringConstant(StringConstantContext context) {
+  public PrimitiveTypeExpressionNode<String> visitStringConstant(StringConstantContext context) {
     String stringLiteral = context.CHARACTER_STRING().getText();
-    return new StringExpressionNode(stringLiteral.substring(1, stringLiteral.length() - 1));
+    return new PrimitiveTypeExpressionNode<>(stringLiteral.substring(1, stringLiteral.length() - 1));
   }
 
   @Override
-  public ExpressionNode visitNumeric_constant(Numeric_constantContext context) {
+  public PrimitiveTypeExpressionNode<?> visitNumeric_constant(Numeric_constantContext context) {
     TerminalNode minus = context.MINUS();
 
     TerminalNode integerValue = context.UNSIGNED_INTEGER();
@@ -386,7 +384,7 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
         value = -value;
       }
 
-      return new IntegerExpressionNode(value);
+      return new PrimitiveTypeExpressionNode<Integer>(value);
     }
 
     double value = Double.parseDouble(realValue.getText());
@@ -395,27 +393,28 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
       value = -value;
     }
 
-    return new RealExpressionNode(value);
+    return new PrimitiveTypeExpressionNode<Double>(value);
   }
 
   @Override
-  public ExpressionNode visitNumericConstant(NumericConstantContext context) {
+  public PrimitiveTypeExpressionNode<?> visitNumericConstant(NumericConstantContext context) {
     Numeric_constantContext numericConstantContext = context.numeric_constant();
-    return (ExpressionNode) visit(numericConstantContext);
+    return visitNumeric_constant(numericConstantContext);
   }
 
   @Override
-  public BooleanExpressionNode visitBoolean_constant(Boolean_constantContext context) {
+  public PrimitiveTypeExpressionNode<Boolean> visitBoolean_constant(Boolean_constantContext context) {
     if(context.FALSE() != null) {
-      return new BooleanExpressionNode(false);
+      return new PrimitiveTypeExpressionNode<>(false);
     }
-    return new BooleanExpressionNode(true);
+
+    return new PrimitiveTypeExpressionNode<>(true);
   }
 
   @Override
-  public BooleanExpressionNode visitBooleanConstant(BooleanConstantContext context) {
+  public PrimitiveTypeExpressionNode<Boolean> visitBooleanConstant(BooleanConstantContext context) {
     var booleanConstantContext = context.boolean_constant();
-    return (BooleanExpressionNode) visit(booleanConstantContext);
+    return visitBoolean_constant(booleanConstantContext);
   }
 
   @Override
