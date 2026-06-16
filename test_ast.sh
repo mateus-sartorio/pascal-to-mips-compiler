@@ -41,8 +41,6 @@ for infile in $(find "$TESTS_DIR" -name "source.pas" | sort); do
         FAILED=$((FAILED + 1))
     else
         echo -e "${GREEN}[PASS] $case_name${NC}"
-        # Se passar, limpa os artefatos locais para deixar a pasta do teste limpa
-        rm -f "$diff_file" "$actual" "$png_file"
     fi
 done
 

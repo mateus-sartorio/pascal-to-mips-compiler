@@ -45,10 +45,6 @@ run_module() {
             echo -e "${RED}[FAIL] $case_name${NC}"
         else
             echo -e "${GREEN}[PASS] $case_name${NC}"
-            rm -f "$diff_file" "$actual"
-            if [ "$module" = "ast" ]; then
-                rm -f "$case_dir/actual_result.png"
-            fi
         fi
     done
 }

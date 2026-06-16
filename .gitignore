@@ -4,7 +4,7 @@ java_bin/**/*
 src/parser/**/*
 
 # Result files from test runs
-tests/**/**/**/actual_result.txt
+tests/**/**/**/actual_result.*
 tests/**/**/**/diff.diff
 tests/**/**/**/*.png
 
