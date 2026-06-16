@@ -1,0 +1,2 @@
+SEMANTIC ERROR (5): control variable type is 'integer' and loop bounds types are 'boolean'.
+make[1]: *** [Makefile:75: run-semantic] Error 1

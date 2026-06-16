@@ -657,24 +657,58 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
     return new PrimitiveVariableType(PrimitiveTypeEnum.NO_TYPE);
   }
 
+  private static void checkVariableIsOrdinal(Token identifierToken, VariableType variableType) {
+    if(!variableType.isOrdinal()) {
+      System.out.printf(
+        "SEMANTIC ERROR (%d): Variable '%s' should be an ordinal type.\n",
+        identifierToken.getLine(),
+        identifierToken.getText()
+      );
+
+      System.exit(1);
+    }
+  }
+
+  private static void checkPrimitiveTypesAreEqual(int line, PrimitiveVariableType leftType, PrimitiveVariableType rightType) {
+    if(leftType.basePrimitiveType != rightType.basePrimitiveType) {
+      System.out.printf(
+        "SEMANTIC ERROR (%d): control variable type is '%s' and loop bounds types are '%s'.\n",
+        line,
+        leftType.toString(),
+        rightType.toString()
+      );
+
+      System.exit(1);
+    }
+  }
+
   @Override
   public VariableType visitFor_statement(For_statementContext context) {
     TerminalNode identifier = context.IDENTIFIER();
 
     String variableIdentifier = identifier.getSymbol().getText();
 
+    var beginExpressionValue = visit(context.expression(0));
+    var endExpressionValue = visit(context.expression(1));
+
+    if(!(beginExpressionValue instanceof PrimitiveVariableType) || (beginExpressionValue.basePrimitiveType != endExpressionValue.basePrimitiveType)) {
+      System.out.printf(
+        "SEMANTIC ERROR (%d): incompatible begin and end variable types: %s and %s.\n",
+        context.FOR().getSymbol().getLine(),
+        beginExpressionValue.toString(),
+        endExpressionValue.toString()
+      );
+
+      System.exit(1);
+    }
+
+    PrimitiveVariableType forRangeType = (PrimitiveVariableType) beginExpressionValue;
+
     VariableTableEntry globalVariableEntry = globalVariablesTable.get(identifier.getSymbol().getText()); 
     if (globalVariableEntry != null) {
-      if(!globalVariableEntry.type.isOrdinal()) {
-        System.out.printf(
-          "SEMANTIC ERROR (%d): Variable '%s' should be an ordinal type.\n",
-          identifier.getSymbol().getLine(),
-          variableIdentifier
-        );
+      checkVariableIsOrdinal(identifier.getSymbol(), globalVariableEntry.type);
+      checkPrimitiveTypesAreEqual(context.FOR().getSymbol().getLine(), (PrimitiveVariableType) globalVariableEntry.type, forRangeType);
 
-        System.exit(1);
-      }
-      
       return new PrimitiveVariableType(PrimitiveTypeEnum.NO_TYPE);
     }
 
@@ -687,28 +721,12 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
         ProceduresAndFunctionsEntry paramterEntry = proceduresAndFunctionsTable.get(functionIdentifier);
 
         VariableTableEntry parameterEntry = paramterEntry.parameters.get(variableIdentifier);
-
-        if(!parameterEntry.type.isEquivalent(new PrimitiveVariableType(PrimitiveTypeEnum.INTEGER))) {
-          System.out.printf(
-            "SEMANTIC ERROR (%d): Variable '%s' should be integer type.\n",
-            identifier.getSymbol().getLine(),
-            variableIdentifier
-          );
-
-          System.exit(1);
-        }
+        checkVariableIsOrdinal(identifier.getSymbol(), parameterEntry.type);
+        checkPrimitiveTypesAreEqual(context.FOR().getSymbol().getLine(), (PrimitiveVariableType) parameterEntry.type, forRangeType);
 
         VariableTableEntry localEntry = paramterEntry.localVariables.get(variableIdentifier);
-
-        if(!localEntry.type.isEquivalent(new PrimitiveVariableType(PrimitiveTypeEnum.INTEGER))) {
-          System.out.printf(
-            "SEMANTIC ERROR (%d): Variable '%s' should be integer type.\n",
-            identifier.getSymbol().getLine(),
-            variableIdentifier
-          );
-
-          System.exit(1);
-        }
+        checkVariableIsOrdinal(identifier.getSymbol(), localEntry.type);
+        checkPrimitiveTypesAreEqual(context.FOR().getSymbol().getLine(), (PrimitiveVariableType) localEntry.type, forRangeType);
 
         return new PrimitiveVariableType(PrimitiveTypeEnum.NO_TYPE);
       }
@@ -720,28 +738,13 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
           ProceduresAndFunctionsEntry paramterEntry = proceduresAndFunctionsTable.get(procedureIdentifier);
 
           VariableTableEntry parameterEntry = paramterEntry.parameters.get(variableIdentifier);
-
-          if(!parameterEntry.type.isEquivalent(new PrimitiveVariableType(PrimitiveTypeEnum.INTEGER))) {
-            System.out.printf(
-              "SEMANTIC ERROR (%d): Variable '%s' should be integer type.\n",
-              identifier.getSymbol().getLine(),
-              variableIdentifier
-            );
-
-            System.exit(1);
-          }
+          checkVariableIsOrdinal(identifier.getSymbol(), parameterEntry.type);
+          checkPrimitiveTypesAreEqual(context.FOR().getSymbol().getLine(), (PrimitiveVariableType) parameterEntry.type, forRangeType);
 
           VariableTableEntry localEntry = paramterEntry.localVariables.get(variableIdentifier);
+          checkVariableIsOrdinal(identifier.getSymbol(), localEntry.type);
+          checkPrimitiveTypesAreEqual(context.FOR().getSymbol().getLine(), (PrimitiveVariableType) localEntry.type, forRangeType);
 
-          if(!localEntry.type.isEquivalent(new PrimitiveVariableType(PrimitiveTypeEnum.INTEGER))) {
-            System.out.printf(
-              "SEMANTIC ERROR (%d): Variable '%s' should be integer type.\n",
-              identifier.getSymbol().getLine(),
-              variableIdentifier
-            );
-
-            System.exit(1);
-          }
 
           return new PrimitiveVariableType(PrimitiveTypeEnum.NO_TYPE);
         }

@@ -519,8 +519,6 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     PrimitiveTypeExpressionNode<?> initialValue = (PrimitiveTypeExpressionNode<?>) visit(context.expression(0));
     PrimitiveTypeExpressionNode<?> finalValue = (PrimitiveTypeExpressionNode<?>) visit(context.expression(1));
 
-    IO.println(initialValue.value.getClass());
-
     var controlVariableType = switch (initialValue.value) {
       case Integer _ -> new PrimitiveVariableType(PrimitiveTypeEnum.INTEGER);
       case Double _ -> new PrimitiveVariableType(PrimitiveTypeEnum.REAL);
