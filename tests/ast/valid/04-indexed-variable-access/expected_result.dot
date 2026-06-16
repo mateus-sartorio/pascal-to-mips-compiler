@@ -1,0 +1,37 @@
+digraph AST {
+ProgramNode [label="p4"];
+"VariableDeclarationPartNode#654582261" [label="variables"];
+"VariableDeclarationNode#736709391" [label="(array[0..10] of boolean) arrayVar"];
+"VariableDeclarationPartNode#654582261" -> "VariableDeclarationNode#736709391";
+ProgramNode -> "VariableDeclarationPartNode#654582261" [label="global variables"];
+"CompoundStatementNode#401424608" [label="{ }"];
+"AssignmentStatementNode#1348949648" [label=":="];
+"IndexedVariableAccessExpressionNode#834133664" [label="(boolean) arrayVar[]"];
+"IntegerExpressionNode#985934102" [label="0"];
+"IndexedVariableAccessExpressionNode#834133664" -> "IntegerExpressionNode#985934102" [label="index"] ;
+"AssignmentStatementNode#1348949648" -> "IndexedVariableAccessExpressionNode#834133664" [label="variable"] ;
+"ComparisonOperatorExpressionNode#1205044462" [label="<"];
+"IntegerExpressionNode#761960786" [label="1"];
+"ComparisonOperatorExpressionNode#1205044462" -> "IntegerExpressionNode#761960786";
+"IntegerExpressionNode#581374081" [label="2"];
+"ComparisonOperatorExpressionNode#1205044462" -> "IntegerExpressionNode#581374081";
+"AssignmentStatementNode#1348949648" -> "ComparisonOperatorExpressionNode#1205044462" [label="value"] ;
+"CompoundStatementNode#401424608" -> "AssignmentStatementNode#1348949648";
+"AssignmentStatementNode#959447386" [label=":="];
+"IndexedVariableAccessExpressionNode#1654589030" [label="(boolean) arrayVar[]"];
+"ArithmeticBinaryOperatorExpressionNode#466002798" [label="+"];
+"IntegerExpressionNode#33524623" [label="1"];
+"ArithmeticBinaryOperatorExpressionNode#466002798" -> "IntegerExpressionNode#33524623";
+"IntegerExpressionNode#947679291" [label="1"];
+"ArithmeticBinaryOperatorExpressionNode#466002798" -> "IntegerExpressionNode#947679291";
+"IndexedVariableAccessExpressionNode#1654589030" -> "ArithmeticBinaryOperatorExpressionNode#466002798" [label="index"] ;
+"AssignmentStatementNode#959447386" -> "IndexedVariableAccessExpressionNode#1654589030" [label="variable"] ;
+"ComparisonOperatorExpressionNode#575335780" [label="<"];
+"IntegerExpressionNode#205125520" [label="1"];
+"ComparisonOperatorExpressionNode#575335780" -> "IntegerExpressionNode#205125520";
+"IntegerExpressionNode#1911006827" [label="2"];
+"ComparisonOperatorExpressionNode#575335780" -> "IntegerExpressionNode#1911006827";
+"AssignmentStatementNode#959447386" -> "ComparisonOperatorExpressionNode#575335780" [label="value"] ;
+"CompoundStatementNode#401424608" -> "AssignmentStatementNode#959447386";
+ProgramNode -> "CompoundStatementNode#401424608" [label="main body"];
+}

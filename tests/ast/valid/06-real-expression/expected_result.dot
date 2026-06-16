@@ -1,0 +1,21 @@
+digraph AST {
+ProgramNode [label="p6"];
+"VariableDeclarationPartNode#762152757" [label="variables"];
+"VariableDeclarationNode#761960786" [label="(array[0..10] of real) realArray"];
+"VariableDeclarationPartNode#762152757" -> "VariableDeclarationNode#761960786";
+ProgramNode -> "VariableDeclarationPartNode#762152757" [label="global variables"];
+"CompoundStatementNode#959447386" [label="{ }"];
+"AssignmentStatementNode#1654589030" [label=":="];
+"IndexedVariableAccessExpressionNode#466002798" [label="(real) realArray[]"];
+"IntegerExpressionNode#33524623" [label="0"];
+"IndexedVariableAccessExpressionNode#466002798" -> "IntegerExpressionNode#33524623" [label="index"] ;
+"AssignmentStatementNode#1654589030" -> "IndexedVariableAccessExpressionNode#466002798" [label="variable"] ;
+"ArithmeticBinaryOperatorExpressionNode#947679291" [label="+"];
+"RealExpressionNode#575335780" [label="1.00"];
+"ArithmeticBinaryOperatorExpressionNode#947679291" -> "RealExpressionNode#575335780";
+"RealExpressionNode#1911006827" [label="5.00"];
+"ArithmeticBinaryOperatorExpressionNode#947679291" -> "RealExpressionNode#1911006827";
+"AssignmentStatementNode#1654589030" -> "ArithmeticBinaryOperatorExpressionNode#947679291" [label="value"] ;
+"CompoundStatementNode#959447386" -> "AssignmentStatementNode#1654589030";
+ProgramNode -> "CompoundStatementNode#959447386" [label="main body"];
+}

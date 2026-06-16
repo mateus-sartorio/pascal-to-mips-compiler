@@ -1,0 +1,35 @@
+digraph AST {
+ProgramNode [label="p7"];
+"VariableDeclarationPartNode#475266352" [label="variables"];
+"VariableDeclarationNode#1711574013" [label="(integer) i"];
+"VariableDeclarationPartNode#475266352" -> "VariableDeclarationNode#1711574013";
+ProgramNode -> "VariableDeclarationPartNode#475266352" [label="global variables"];
+"CompoundStatementNode#1146848448" [label="{ }"];
+"ForStatementNode#1638215613" [label="for (downto)"];
+"ForStatementNode#1638215613_var" [label="variable: i"];
+"ForStatementNode#1638215613" -> "ForStatementNode#1638215613_var" [label="controlVariable"];
+"IntegerExpressionNode#591137559" [label="10"];
+"ForStatementNode#1638215613" -> "IntegerExpressionNode#591137559" [label="initialValue"];
+"IntegerExpressionNode#1674896058" [label="1"];
+"ForStatementNode#1638215613" -> "IntegerExpressionNode#1674896058" [label="finalValue"];
+"ProcedureCallStatementNode#2075203460" [label="writeln()"];
+"VariableAccessExpressionNode#866191240" [label="(integer) i"];
+"ProcedureCallStatementNode#2075203460" -> "VariableAccessExpressionNode#866191240" [label="argument"];
+"ForStatementNode#1638215613" -> "ProcedureCallStatementNode#2075203460" [label="body"];
+"CompoundStatementNode#1146848448" -> "ForStatementNode#1638215613";
+"ForStatementNode#1879492184" [label="for (to)"];
+"ForStatementNode#1879492184_var" [label="variable: i"];
+"ForStatementNode#1879492184" -> "ForStatementNode#1879492184_var" [label="controlVariable"];
+"IntegerExpressionNode#872627152" [label="1"];
+"ForStatementNode#1879492184" -> "IntegerExpressionNode#872627152" [label="initialValue"];
+"IntegerExpressionNode#1207769059" [label="10"];
+"ForStatementNode#1879492184" -> "IntegerExpressionNode#1207769059" [label="finalValue"];
+"CompoundStatementNode#2094777811" [label="{ }"];
+"ProcedureCallStatementNode#984213526" [label="writeln()"];
+"VariableAccessExpressionNode#400136488" [label="(integer) i"];
+"ProcedureCallStatementNode#984213526" -> "VariableAccessExpressionNode#400136488" [label="argument"];
+"CompoundStatementNode#2094777811" -> "ProcedureCallStatementNode#984213526";
+"ForStatementNode#1879492184" -> "CompoundStatementNode#2094777811" [label="body"];
+"CompoundStatementNode#1146848448" -> "ForStatementNode#1879492184";
+ProgramNode -> "CompoundStatementNode#1146848448" [label="main body"];
+}
