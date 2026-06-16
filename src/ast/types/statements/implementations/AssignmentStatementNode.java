@@ -1,14 +1,13 @@
 package ast.types.statements.implementations;
 
 import ast.types.expressions.contracts.ExpressionNode;
-import ast.types.expressions.implementations.VariableAccessExpressionNode;
 import ast.types.statements.contract.StatementNode;
 
 public class AssignmentStatementNode extends StatementNode {
-  public final VariableAccessExpressionNode variableAccessExpressionNode;
+  public final ExpressionNode variableAccessExpressionNode;
   public final ExpressionNode expression;
 
-  public AssignmentStatementNode(VariableAccessExpressionNode variableAccessExpressionNode, ExpressionNode expression) {
+  public AssignmentStatementNode(ExpressionNode variableAccessExpressionNode, ExpressionNode expression) {
     this.variableAccessExpressionNode = variableAccessExpressionNode;
     this.expression = expression;
   }

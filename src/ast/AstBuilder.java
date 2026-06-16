@@ -22,12 +22,15 @@ import ast.types.expressions.implementations.LogicOperatorExpressionNode;
 import ast.types.expressions.implementations.NotOperatorExpressionNode;
 import ast.types.expressions.implementations.PrimitiveTypeExpressionNode;
 import ast.types.expressions.implementations.VariableAccessExpressionNode;
+import ast.types.expressions.implementations.FunctionReturnAssignmentExpressionNode;
 import ast.types.statements.contract.StatementNode;
 import ast.types.statements.implementations.AssignmentStatementNode;
 import ast.types.statements.implementations.CompoundStatementNode;
 import ast.types.statements.implementations.ForStatementNode;
 import ast.types.statements.implementations.IfStatementNode;
 import ast.types.statements.implementations.ProcedureCallStatementNode;
+import ast.types.statements.implementations.ReturnStatementNode;
+
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import parser.PascalParser.Actual_parameter_listContext;
@@ -152,7 +155,7 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
   }
 
   @Override
-  public VariableAccessExpressionNode visitVariable_access(Variable_accessContext context) {
+  public ExpressionNode visitVariable_access(Variable_accessContext context) {
     String variableIdentifier;
     boolean isIndexedVariable = false;
     if(context.IDENTIFIER() == null) {
@@ -173,21 +176,19 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
       return new VariableAccessExpressionNode(variableIdentifier, globalVariableEntry.type);
     }
 
-    VariableTableEntry procedureOrLocalVariableEntry = proceduresAndFunctionsTable.getParameterOrLocalVariableFromAnyProcedureOrFunction(variableIdentifier);
-    if(procedureOrLocalVariableEntry != null) {
-      if(procedureOrLocalVariableEntry != null) {
-        if(isIndexedVariable) {
-          ExpressionNode indexExpressionNode = (ExpressionNode) visit(context.indexed_variable().expression());
-          return new IndexedVariableAccessExpressionNode(variableIdentifier, procedureOrLocalVariableEntry.type, indexExpressionNode);
-        }
-
-        return new VariableAccessExpressionNode(variableIdentifier, procedureOrLocalVariableEntry.type);
+    VariableTableEntry procedureFunctionParameterOrLocalVariableEntry = proceduresAndFunctionsTable.getParameterOrLocalVariableFromAnyProcedureOrFunction(variableIdentifier);
+    if(procedureFunctionParameterOrLocalVariableEntry != null) {
+      if(isIndexedVariable) {
+        ExpressionNode indexExpressionNode = (ExpressionNode) visit(context.indexed_variable().expression());
+        return new IndexedVariableAccessExpressionNode(variableIdentifier, procedureFunctionParameterOrLocalVariableEntry.type, indexExpressionNode);
       }
+
+      return new VariableAccessExpressionNode(variableIdentifier, procedureFunctionParameterOrLocalVariableEntry.type);
     }
 
     ProceduresAndFunctionsEntry functionEntry = proceduresAndFunctionsTable.get(variableIdentifier);
     if(functionEntry != null) {
-      return new VariableAccessExpressionNode(variableIdentifier, new PrimitiveVariableType(functionEntry.returnType));
+      return new FunctionReturnAssignmentExpressionNode(functionEntry.identifier, new PrimitiveVariableType(functionEntry.returnType));
     }
 
     throw new RuntimeException("Variable " + variableIdentifier + " not found in symbol tables");
@@ -360,8 +361,8 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
   }
 
   @Override
-  public VariableAccessExpressionNode visitVariableAccess(VariableAccessContext context) {
-    return (VariableAccessExpressionNode) visit(context.variable_access());
+  public ExpressionNode visitVariableAccess(VariableAccessContext context) {
+    return (ExpressionNode) visit(context.variable_access());
   }
 
   @Override
@@ -474,11 +475,15 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
   }
 
   @Override
-  public AssignmentStatementNode visitAssignment_statement(Assignment_statementContext context) {
+  public StatementNode visitAssignment_statement(Assignment_statementContext context) {
     Variable_accessContext variableAccess = context.variable_access();
 
-    VariableAccessExpressionNode variableAccessExpressionNode = (VariableAccessExpressionNode) visit(variableAccess);
+    ExpressionNode variableAccessExpressionNode = (ExpressionNode) visit(variableAccess);
     ExpressionNode expressionNode = (ExpressionNode) visit(context.expression());
+
+    if(variableAccessExpressionNode instanceof FunctionReturnAssignmentExpressionNode) {
+      return new ReturnStatementNode((FunctionReturnAssignmentExpressionNode) variableAccessExpressionNode);
+    }
 
     return new AssignmentStatementNode(variableAccessExpressionNode, expressionNode);
   }
