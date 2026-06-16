@@ -42,7 +42,7 @@ public class ProgramNode extends AstNode {
     
     proceduresAndFunctions.ifPresent(proceduresAndFunctions -> {
       sb.append(proceduresAndFunctions.toDotNotation());
-      sb.append("%s -> %s [label=\"parocedure and function declarations\"] ;\n".formatted(getDotNotationIdentifier(), proceduresAndFunctions.getDotNotationIdentifier()));
+      sb.append("%s -> %s [label=\"procedure and function declarations\"] ;\n".formatted(getDotNotationIdentifier(), proceduresAndFunctions.getDotNotationIdentifier()));
     });
 
     sb.append(compoundStatement.toDotNotation());

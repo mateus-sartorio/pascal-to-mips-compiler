@@ -27,8 +27,15 @@ public class ForStatementNode extends StatementNode {
   @Override
   public String toDotNotation() {
     StringBuilder sb = new StringBuilder();
-    
-    sb.append("%s [label=\"for\"];\n".formatted(getDotNotationIdentifier()));
+
+    String direction = isDownto ? "downto" : "to";
+    sb.append("%s [label=\"for (%s)\"];\n".formatted(getDotNotationIdentifier(), direction));
+
+    String pureId = getDotNotationIdentifier().replace("\"", "");
+    String varNodeId = "\"%s_var\"".formatted(pureId);
+
+    sb.append("%s [label=\"variable: %s\"];\n".formatted(varNodeId, controlVariableIdentifier));
+    sb.append("%s -> %s [label=\"controlVariable\"];\n".formatted(getDotNotationIdentifier(), varNodeId));
 
     sb.append(initialValue.toDotNotation());
     sb.append("%s -> %s [label=\"initialValue\"];\n".formatted(getDotNotationIdentifier(), initialValue.getDotNotationIdentifier()));
