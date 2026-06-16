@@ -4,7 +4,9 @@ java_bin/**/*
 src/parser/**/*
 
 # Result files from test runs
-tests/**/**/**/actual_result.*
+tests/**/**/**/actual_result.txt
+tests/**/**/**/actual_result.dot
+tests/**/**/**/actual_result.png
 tests/**/**/**/diff.diff
 tests/**/**/**/*.png
 
@@ -12,3 +14,5 @@ tests/**/**/**/*.png
 bin/**/*
 src/target
 
+# Fragments
+**.png
