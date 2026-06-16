@@ -4,4 +4,6 @@ public abstract class VariableType {
   public PrimitiveTypeEnum basePrimitiveType;
 
   public abstract boolean isEquivalent(VariableType other);
+
+  public abstract boolean isOrdinal();
 }

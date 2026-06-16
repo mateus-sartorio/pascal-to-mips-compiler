@@ -365,9 +365,15 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
   }
 
   @Override
-  public PrimitiveTypeExpressionNode<String> visitStringConstant(StringConstantContext context) {
+  public PrimitiveTypeExpressionNode<?> visitStringConstant(StringConstantContext context) {
     String stringLiteral = context.CHARACTER_STRING().getText();
-    return new PrimitiveTypeExpressionNode<>(stringLiteral.substring(1, stringLiteral.length() - 1));
+    String croppedStringLiteral = stringLiteral.substring(1, stringLiteral.length() - 1);
+
+    if(croppedStringLiteral.length() == 1) {
+      return new PrimitiveTypeExpressionNode<Character>(croppedStringLiteral.charAt(0));
+    }
+
+    return new PrimitiveTypeExpressionNode<String>(croppedStringLiteral);
   }
 
   @Override
@@ -513,12 +519,14 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     PrimitiveTypeExpressionNode<?> initialValue = (PrimitiveTypeExpressionNode<?>) visit(context.expression(0));
     PrimitiveTypeExpressionNode<?> finalValue = (PrimitiveTypeExpressionNode<?>) visit(context.expression(1));
 
+    IO.println(initialValue.value.getClass());
+
     var controlVariableType = switch (initialValue.value) {
       case Integer _ -> new PrimitiveVariableType(PrimitiveTypeEnum.INTEGER);
       case Double _ -> new PrimitiveVariableType(PrimitiveTypeEnum.REAL);
       case Character _ -> new PrimitiveVariableType(PrimitiveTypeEnum.CHAR);
       case Boolean _ -> new PrimitiveVariableType(PrimitiveTypeEnum.BOOLEAN);
-      default -> throw new RuntimeException("Control variable of for statement must be of type integer or real");
+      default -> throw new RuntimeException("Control variable of for statement must be an ordinal type");
     };
 
     var controlVariableNode = new VariableDeclarationNode(variableIdentifier, controlVariableType);

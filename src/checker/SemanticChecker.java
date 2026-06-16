@@ -665,9 +665,9 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
     VariableTableEntry globalVariableEntry = globalVariablesTable.get(identifier.getSymbol().getText()); 
     if (globalVariableEntry != null) {
-      if(!globalVariableEntry.type.isEquivalent(new PrimitiveVariableType(PrimitiveTypeEnum.INTEGER))) {
+      if(!globalVariableEntry.type.isOrdinal()) {
         System.out.printf(
-          "SEMANTIC ERROR (%d): Variable '%s' should be integer type.\n",
+          "SEMANTIC ERROR (%d): Variable '%s' should be an ordinal type.\n",
           identifier.getSymbol().getLine(),
           variableIdentifier
         );

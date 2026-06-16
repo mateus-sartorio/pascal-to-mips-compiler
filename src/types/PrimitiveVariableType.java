@@ -26,4 +26,13 @@ public class PrimitiveVariableType extends VariableType {
   public String toString() {
     return basePrimitiveType.toString();
   }
+
+  @Override
+  public boolean isOrdinal() {
+    return (
+      basePrimitiveType == PrimitiveTypeEnum.INTEGER ||
+      basePrimitiveType == PrimitiveTypeEnum.CHAR ||
+      basePrimitiveType == PrimitiveTypeEnum.BOOLEAN
+    );
+  }
 }
