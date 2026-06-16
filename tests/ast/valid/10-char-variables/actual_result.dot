@@ -1,0 +1,15 @@
+digraph AST {
+"ProgramNode" [label="p10"];
+"VariableDeclarationPartNode#2054881392" [label="variables"];
+"VariableDeclarationNode#116211441" [label="(char) a"];
+"VariableDeclarationPartNode#2054881392" -> "VariableDeclarationNode#116211441";
+"ProgramNode" -> "VariableDeclarationPartNode#2054881392" [label="global variables"];
+"CompoundStatementNode#529116035" [label="{ }"];
+"AssignmentStatementNode#242481580" [label=":="];
+"VariableAccessExpressionNode#1627800613" [label="(char) a"];
+"AssignmentStatementNode#242481580" -> "VariableAccessExpressionNode#1627800613" [label="variable"] ;
+"PrimitiveTypeExpressionNode#476800120" [label="'x'"];
+"AssignmentStatementNode#242481580" -> "PrimitiveTypeExpressionNode#476800120" [label="value"] ;
+"CompoundStatementNode#529116035" -> "AssignmentStatementNode#242481580";
+"ProgramNode" -> "CompoundStatementNode#529116035" [label="main body"];
+}

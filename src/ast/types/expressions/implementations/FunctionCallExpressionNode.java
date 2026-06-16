@@ -6,9 +6,9 @@ import ast.types.expressions.contracts.ExpressionNode;
 import types.PrimitiveTypeEnum;
 
 public class FunctionCallExpressionNode extends ExpressionNode {
-  String procedureIdentifier;
-  List<ExpressionNode> arguments;
-  PrimitiveTypeEnum returnType;
+  public final String procedureIdentifier;
+  public final List<ExpressionNode> arguments;
+  public final PrimitiveTypeEnum returnType;
 
   public FunctionCallExpressionNode(String procedureIdentifier, List<ExpressionNode> arguments, PrimitiveTypeEnum returnType) {
     this.procedureIdentifier = procedureIdentifier;

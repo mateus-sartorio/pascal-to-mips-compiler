@@ -510,15 +510,25 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
   public ForStatementNode visitFor_statement(For_statementContext context) {
     String variableIdentifier = context.IDENTIFIER().getText();
 
-    ExpressionNode initialValue = (ExpressionNode) visit(context.expression(0));
-    ExpressionNode finalValue = (ExpressionNode) visit(context.expression(1));
+    PrimitiveTypeExpressionNode<?> initialValue = (PrimitiveTypeExpressionNode<?>) visit(context.expression(0));
+    PrimitiveTypeExpressionNode<?> finalValue = (PrimitiveTypeExpressionNode<?>) visit(context.expression(1));
+
+    var controlVariableType = switch (initialValue.value) {
+      case Integer _ -> new PrimitiveVariableType(PrimitiveTypeEnum.INTEGER);
+      case Double _ -> new PrimitiveVariableType(PrimitiveTypeEnum.REAL);
+      case Character _ -> new PrimitiveVariableType(PrimitiveTypeEnum.CHAR);
+      case Boolean _ -> new PrimitiveVariableType(PrimitiveTypeEnum.BOOLEAN);
+      default -> throw new RuntimeException("Control variable of for statement must be of type integer or real");
+    };
+
+    var controlVariableNode = new VariableDeclarationNode(variableIdentifier, controlVariableType);
 
     StatementNode statement = (StatementNode) visit(context.statement());
 
     boolean isDownto = context.DOWNTO() != null;
 
     return new ForStatementNode(
-      variableIdentifier,
+      controlVariableNode,
       initialValue,
       finalValue,
       isDownto,

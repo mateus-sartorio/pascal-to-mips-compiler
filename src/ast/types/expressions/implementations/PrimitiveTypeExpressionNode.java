@@ -15,6 +15,7 @@ public class PrimitiveTypeExpressionNode<T> extends ExpressionNode {
 
     switch (value) {
       case String s -> sb.append("%s [label=\"'%s'\"];\n".formatted(getDotNotationIdentifier(), s));
+      case Character c -> sb.append("%s [label=\"'%s'\"];\n".formatted(getDotNotationIdentifier(), c));
       case Double d -> sb.append("%s [label=\"%.2f\"];\n".formatted(getDotNotationIdentifier(), d));
       default -> sb.append("%s [label=\"%s\"];\n".formatted(getDotNotationIdentifier(), value.toString()));
     }

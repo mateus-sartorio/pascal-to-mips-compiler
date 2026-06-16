@@ -1,0 +1,37 @@
+digraph AST {
+"ProgramNode" [label="p4"];
+"VariableDeclarationPartNode#697960108" [label="variables"];
+"VariableDeclarationNode#2066940133" [label="(array[0..10] of boolean) arrayVar"];
+"VariableDeclarationPartNode#697960108" -> "VariableDeclarationNode#2066940133";
+"ProgramNode" -> "VariableDeclarationPartNode#697960108" [label="global variables"];
+"CompoundStatementNode#325333723" [label="{ }"];
+"AssignmentStatementNode#1937962514" [label=":="];
+"IndexedVariableAccessExpressionNode#274064559" [label="(boolean) arrayVar[]"];
+"PrimitiveTypeExpressionNode#1837543557" [label="0"];
+"IndexedVariableAccessExpressionNode#274064559" -> "PrimitiveTypeExpressionNode#1837543557" [label="index"] ;
+"AssignmentStatementNode#1937962514" -> "IndexedVariableAccessExpressionNode#274064559" [label="variable"] ;
+"ComparisonOperatorExpressionNode#1971489295" [label="<"];
+"PrimitiveTypeExpressionNode#985655350" [label="1"];
+"ComparisonOperatorExpressionNode#1971489295" -> "PrimitiveTypeExpressionNode#985655350";
+"PrimitiveTypeExpressionNode#804611486" [label="2"];
+"ComparisonOperatorExpressionNode#1971489295" -> "PrimitiveTypeExpressionNode#804611486";
+"AssignmentStatementNode#1937962514" -> "ComparisonOperatorExpressionNode#1971489295" [label="value"] ;
+"CompoundStatementNode#325333723" -> "AssignmentStatementNode#1937962514";
+"AssignmentStatementNode#2008017533" [label=":="];
+"IndexedVariableAccessExpressionNode#370988149" [label="(boolean) arrayVar[]"];
+"ArithmeticOperatorExpressionNode#1395089624" [label="+"];
+"PrimitiveTypeExpressionNode#1476011703" [label="1"];
+"ArithmeticOperatorExpressionNode#1395089624" -> "PrimitiveTypeExpressionNode#1476011703";
+"PrimitiveTypeExpressionNode#1603195447" [label="1"];
+"ArithmeticOperatorExpressionNode#1395089624" -> "PrimitiveTypeExpressionNode#1603195447";
+"IndexedVariableAccessExpressionNode#370988149" -> "ArithmeticOperatorExpressionNode#1395089624" [label="index"] ;
+"AssignmentStatementNode#2008017533" -> "IndexedVariableAccessExpressionNode#370988149" [label="variable"] ;
+"ComparisonOperatorExpressionNode#792791759" [label="<"];
+"PrimitiveTypeExpressionNode#1191747167" [label="1"];
+"ComparisonOperatorExpressionNode#792791759" -> "PrimitiveTypeExpressionNode#1191747167";
+"PrimitiveTypeExpressionNode#1094834071" [label="2"];
+"ComparisonOperatorExpressionNode#792791759" -> "PrimitiveTypeExpressionNode#1094834071";
+"AssignmentStatementNode#2008017533" -> "ComparisonOperatorExpressionNode#792791759" [label="value"] ;
+"CompoundStatementNode#325333723" -> "AssignmentStatementNode#2008017533";
+"ProgramNode" -> "CompoundStatementNode#325333723" [label="main body"];
+}

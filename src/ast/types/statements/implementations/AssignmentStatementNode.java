@@ -5,8 +5,8 @@ import ast.types.expressions.implementations.VariableAccessExpressionNode;
 import ast.types.statements.contract.StatementNode;
 
 public class AssignmentStatementNode extends StatementNode {
-  VariableAccessExpressionNode variableAccessExpressionNode;
-  ExpressionNode expression;
+  public final VariableAccessExpressionNode variableAccessExpressionNode;
+  public final ExpressionNode expression;
 
   public AssignmentStatementNode(VariableAccessExpressionNode variableAccessExpressionNode, ExpressionNode expression) {
     this.variableAccessExpressionNode = variableAccessExpressionNode;

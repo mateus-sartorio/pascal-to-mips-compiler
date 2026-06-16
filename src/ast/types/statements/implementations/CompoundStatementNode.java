@@ -5,7 +5,7 @@ import java.util.List;
 import ast.types.statements.contract.StatementNode;
 
 public class CompoundStatementNode extends StatementNode {
-  List<StatementNode> statements;
+  public final List<StatementNode> statements;
 
   public CompoundStatementNode(List<StatementNode> statements) {
     this.statements = statements;

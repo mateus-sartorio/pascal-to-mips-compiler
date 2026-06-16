@@ -4,7 +4,7 @@ import ast.types.expressions.contracts.BinaryOperatorExpressionNode;
 import ast.types.expressions.contracts.ExpressionNode;
 
 public class ArithmeticOperatorExpressionNode extends BinaryOperatorExpressionNode {
-  String operator;
+  public final String operator;
 
   public ArithmeticOperatorExpressionNode(ExpressionNode left, ExpressionNode right, String operator) {
     super(left, right);

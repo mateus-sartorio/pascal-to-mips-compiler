@@ -6,8 +6,8 @@ import ast.types.expressions.contracts.ExpressionNode;
 import ast.types.statements.contract.StatementNode;
 
 public class ProcedureCallStatementNode extends StatementNode {
-  String procedureIdentifier;
-  List<ExpressionNode> arguments;
+  public final String procedureIdentifier;
+  public final List<ExpressionNode> arguments;
 
   public ProcedureCallStatementNode(String procedureIdentifier, List<ExpressionNode> arguments) {
     this.procedureIdentifier = procedureIdentifier;

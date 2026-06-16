@@ -4,8 +4,8 @@ import ast.types.declarations.contracts.DeclarationNode;
 import types.VariableType;
 
 public class VariableDeclarationNode extends DeclarationNode {
-  String identifier;
-  VariableType type;
+  public final String identifier;
+  public final VariableType type;
 
   public VariableDeclarationNode(String identifier, VariableType type) {
     this.identifier = identifier;

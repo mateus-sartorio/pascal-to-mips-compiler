@@ -6,9 +6,9 @@ import ast.types.expressions.contracts.ExpressionNode;
 import ast.types.statements.contract.StatementNode;
 
 public class IfStatementNode extends StatementNode {
-  ExpressionNode condition;
-  StatementNode thenStatement;
-  Optional<StatementNode> elseStatement;
+  public final ExpressionNode condition;
+  public final StatementNode thenStatement;
+  public final Optional<StatementNode> elseStatement;
 
   public IfStatementNode(
     ExpressionNode condition,

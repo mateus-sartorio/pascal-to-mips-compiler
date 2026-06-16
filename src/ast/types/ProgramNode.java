@@ -7,10 +7,10 @@ import ast.types.declarations.implementations.VariableDeclarationPartNode;
 import ast.types.statements.implementations.CompoundStatementNode;
 
 public class ProgramNode extends AstNode {
-  String programIdentifier;
-  Optional<VariableDeclarationPartNode> variableDeclarationPart;
-  Optional<ProcedureAndFunctionDeclarationPartNode> proceduresAndFunctions;
-  CompoundStatementNode compoundStatement;
+  public final String programIdentifier;
+  public final Optional<VariableDeclarationPartNode> variableDeclarationPart;
+  public final Optional<ProcedureAndFunctionDeclarationPartNode> proceduresAndFunctions;
+  public final CompoundStatementNode compoundStatement;
 
   public ProgramNode(
     String programIdentifier,
@@ -26,7 +26,7 @@ public class ProgramNode extends AstNode {
 
   @Override
   public String getDotNotationIdentifier() {
-    return "ProgramNode";
+    return "\"ProgramNode\"";
   }
 
   @Override

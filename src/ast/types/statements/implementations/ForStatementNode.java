@@ -1,23 +1,24 @@
 package ast.types.statements.implementations;
 
+import ast.types.declarations.implementations.VariableDeclarationNode;
 import ast.types.expressions.contracts.ExpressionNode;
 import ast.types.statements.contract.StatementNode;
 
 public class ForStatementNode extends StatementNode {
-  String controlVariableIdentifier;
-  ExpressionNode initialValue;
-  ExpressionNode finalValue;
-  boolean isDownto;
-  StatementNode body;
+  public final VariableDeclarationNode controlVariable;
+  public final ExpressionNode initialValue;
+  public final ExpressionNode finalValue;
+  public final boolean isDownto;
+  public final StatementNode body;
 
   public ForStatementNode(
-    String controlVariableIdentifier,
+    VariableDeclarationNode controlVariable,
     ExpressionNode initialValue,
     ExpressionNode finalValue,
     boolean isDownto,
     StatementNode body
   ) {
-    this.controlVariableIdentifier = controlVariableIdentifier;
+    this.controlVariable = controlVariable;
     this.initialValue = initialValue;
     this.finalValue = finalValue;
     this.isDownto = isDownto;
@@ -31,11 +32,8 @@ public class ForStatementNode extends StatementNode {
     String direction = isDownto ? "downto" : "to";
     sb.append("%s [label=\"for (%s)\"];\n".formatted(getDotNotationIdentifier(), direction));
 
-    String pureId = getDotNotationIdentifier().replace("\"", "");
-    String varNodeId = "\"%s_var\"".formatted(pureId);
-
-    sb.append("%s [label=\"variable: %s\"];\n".formatted(varNodeId, controlVariableIdentifier));
-    sb.append("%s -> %s [label=\"controlVariable\"];\n".formatted(getDotNotationIdentifier(), varNodeId));
+    sb.append("%s [label=\"(%s) %s\"];\n".formatted(controlVariable.getDotNotationIdentifier(), controlVariable.type.toString(), controlVariable.identifier));
+    sb.append("%s -> %s [label=\"controlVariable\"];\n".formatted(getDotNotationIdentifier(), controlVariable.getDotNotationIdentifier()));
 
     sb.append(initialValue.toDotNotation());
     sb.append("%s -> %s [label=\"initialValue\"];\n".formatted(getDotNotationIdentifier(), initialValue.getDotNotationIdentifier()));

@@ -5,7 +5,7 @@ import ast.types.statements.implementations.CompoundStatementNode;
 import types.PrimitiveTypeEnum;
 
 public class FunctionDeclarationNode extends ProcedureOrFunctionDeclarationNode {
-  PrimitiveTypeEnum returnType;
+  public final PrimitiveTypeEnum returnType;
 
   public FunctionDeclarationNode(
     String identifier,

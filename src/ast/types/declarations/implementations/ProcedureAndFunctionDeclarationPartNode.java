@@ -6,7 +6,7 @@ import ast.types.AstNode;
 import ast.types.declarations.contracts.ProcedureOrFunctionDeclarationNode;
 
 public class ProcedureAndFunctionDeclarationPartNode extends AstNode {
-  public List<ProcedureOrFunctionDeclarationNode> procedureOrFunctionDeclarations;
+  public final List<ProcedureOrFunctionDeclarationNode> procedureOrFunctionDeclarations;
 
   public ProcedureAndFunctionDeclarationPartNode(List<ProcedureOrFunctionDeclarationNode> procedureOrFunctionDeclarations) {
     this.procedureOrFunctionDeclarations = procedureOrFunctionDeclarations;
@@ -14,7 +14,7 @@ public class ProcedureAndFunctionDeclarationPartNode extends AstNode {
 
   @Override
   public String getDotNotationIdentifier() {
-    return "ProcedureAndFunctionDeclarationPartNode";
+    return "\"ProcedureAndFunctionDeclarationPartNode\"";
   }
 
   @Override
