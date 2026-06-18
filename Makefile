@@ -24,8 +24,8 @@ PARSER_NAME=$(GRAMAR_NAME)Parser
 
 # Project paths
 SRC_DIR=src
-LEXER_FILE=$(SRC_DIR)/$(LEXER_NAME).g
-PARSER_FILE=$(SRC_DIR)/$(PARSER_NAME).g
+LEXER_FILE=$(SRC_DIR)/$(LEXER_NAME).g4
+PARSER_FILE=$(SRC_DIR)/$(PARSER_NAME).g4
 
 # Pascal Compiler Configuration
 FPC=fpc
