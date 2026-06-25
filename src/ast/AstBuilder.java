@@ -15,9 +15,11 @@ import ast.types.declarations.implementations.VariableDeclarationPartNode;
 import ast.types.expressions.contracts.BinaryOperatorExpressionNode;
 import ast.types.expressions.contracts.ExpressionNode;
 import ast.types.expressions.implementations.ArithmeticOperatorExpressionNode;
+import ast.types.expressions.implementations.CharToStringExpressionNode;
 import ast.types.expressions.implementations.ComparisonOperatorExpressionNode;
 import ast.types.expressions.implementations.FunctionCallExpressionNode;
 import ast.types.expressions.implementations.IndexedVariableAccessExpressionNode;
+import ast.types.expressions.implementations.IntegerToRealExpressionNode;
 import ast.types.expressions.implementations.LogicOperatorExpressionNode;
 import ast.types.expressions.implementations.NotOperatorExpressionNode;
 import ast.types.expressions.implementations.PrimitiveTypeExpressionNode;
@@ -484,6 +486,28 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
 
     ExpressionNode variableAccessExpressionNode = (ExpressionNode) visit(variableAccess);
     ExpressionNode expressionNode = (ExpressionNode) visit(context.expression());
+
+    if(variableAccessExpressionNode instanceof VariableAccessExpressionNode p && expressionNode instanceof PrimitiveTypeExpressionNode q) {
+      if(p.type instanceof PrimitiveVariableType) {
+        if(p.type.basePrimitiveType == PrimitiveTypeEnum.REAL && q.value instanceof Integer) {
+          return new AssignmentStatementNode(currentId++, variableAccessExpressionNode, new IntegerToRealExpressionNode(currentId++, expressionNode));
+        }
+        else if(p.type.basePrimitiveType == PrimitiveTypeEnum.STRING && q.value instanceof Character) {
+          return new AssignmentStatementNode(currentId++, variableAccessExpressionNode, new CharToStringExpressionNode(currentId++, expressionNode));
+        }
+      }
+    }
+
+    if(variableAccessExpressionNode instanceof VariableAccessExpressionNode p && expressionNode instanceof VariableAccessExpressionNode q) {
+      if(p.type instanceof PrimitiveVariableType) {
+        if(p.type.basePrimitiveType == PrimitiveTypeEnum.REAL && q.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
+          return new AssignmentStatementNode(currentId++, variableAccessExpressionNode, new IntegerToRealExpressionNode(currentId++, expressionNode));
+        }
+        else if(p.type.basePrimitiveType == PrimitiveTypeEnum.STRING && q.type.basePrimitiveType == PrimitiveTypeEnum.CHAR) {
+          return new AssignmentStatementNode(currentId++, variableAccessExpressionNode, new CharToStringExpressionNode(currentId++, expressionNode));
+        }
+      }
+    }
 
     if(variableAccessExpressionNode instanceof FunctionReturnAssignmentExpressionNode) {
       return new ReturnStatementNode(currentId++, (FunctionReturnAssignmentExpressionNode) variableAccessExpressionNode);

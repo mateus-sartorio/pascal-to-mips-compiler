@@ -1,0 +1,33 @@
+digraph AST {
+"ProgramNode" [label="p12"];
+"VariableDeclarationPartNode#3" [label="variables"];
+"VariableDeclarationNode#1" [label="(char) c"];
+"VariableDeclarationPartNode#3" -> "VariableDeclarationNode#1";
+"VariableDeclarationNode#2" [label="(string) s"];
+"VariableDeclarationPartNode#3" -> "VariableDeclarationNode#2";
+"ProgramNode" -> "VariableDeclarationPartNode#3" [label="global variables"];
+"CompoundStatementNode#16" [label="{ }"];
+"AssignmentStatementNode#7" [label=":="];
+"VariableAccessExpressionNode#5" [label="(char) c"];
+"AssignmentStatementNode#7" -> "VariableAccessExpressionNode#5" [label="variable"] ;
+"PrimitiveTypeExpressionNode#6" [label="'a'"];
+"AssignmentStatementNode#7" -> "PrimitiveTypeExpressionNode#6" [label="value"] ;
+"CompoundStatementNode#16" -> "AssignmentStatementNode#7";
+"AssignmentStatementNode#10" [label=":="];
+"VariableAccessExpressionNode#8" [label="(string) s"];
+"AssignmentStatementNode#10" -> "VariableAccessExpressionNode#8" [label="variable"] ;
+"CharToStringExpressionNode#11" [label="(char) -> (string)"];
+"VariableAccessExpressionNode#9" [label="(char) c"];
+"CharToStringExpressionNode#11" -> "VariableAccessExpressionNode#9";
+"AssignmentStatementNode#10" -> "CharToStringExpressionNode#11" [label="value"] ;
+"CompoundStatementNode#16" -> "AssignmentStatementNode#10";
+"AssignmentStatementNode#14" [label=":="];
+"VariableAccessExpressionNode#12" [label="(string) s"];
+"AssignmentStatementNode#14" -> "VariableAccessExpressionNode#12" [label="variable"] ;
+"CharToStringExpressionNode#15" [label="(char) -> (string)"];
+"PrimitiveTypeExpressionNode#13" [label="'a'"];
+"CharToStringExpressionNode#15" -> "PrimitiveTypeExpressionNode#13";
+"AssignmentStatementNode#14" -> "CharToStringExpressionNode#15" [label="value"] ;
+"CompoundStatementNode#16" -> "AssignmentStatementNode#14";
+"ProgramNode" -> "CompoundStatementNode#16" [label="main body"];
+}
