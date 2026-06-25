@@ -52,6 +52,7 @@ import tables.BuiltInProceduresAndFunctionsTable;
 import tables.ProceduresAndFunctionsTable;
 import tables.ProceduresAndFunctionsTable.ProceduresAndFunctionsEntry;
 import types.ArrayVariableType;
+import types.ConstantPrimitiveVariableType;
 import types.PrimitiveTypeEnum;
 import types.PrimitiveVariableType;
 import types.ProcedureOrFunctionEnum;
@@ -688,26 +689,66 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
     String variableIdentifier = identifier.getSymbol().getText();
 
-    var beginExpressionValue = visit(context.expression(0));
-    var endExpressionValue = visit(context.expression(1));
+    VariableType beginExpression = visit(context.expression(0));
+    VariableType endExpression = visit(context.expression(1));
 
-    if(!(beginExpressionValue instanceof PrimitiveVariableType) || (beginExpressionValue.basePrimitiveType != endExpressionValue.basePrimitiveType)) {
+    if(!(beginExpression instanceof PrimitiveVariableType) || (beginExpression.basePrimitiveType != endExpression.basePrimitiveType)) {
       System.out.printf(
         "SEMANTIC ERROR (%d): incompatible begin and end variable types: %s and %s.\n",
         context.FOR().getSymbol().getLine(),
-        beginExpressionValue.toString(),
-        endExpressionValue.toString()
+        beginExpression.toString(),
+        endExpression.toString()
       );
 
       System.exit(1);
     }
 
-    PrimitiveVariableType forRangeType = (PrimitiveVariableType) beginExpressionValue;
+    boolean isDownTo = context.DOWNTO() != null;
+    
+    ConstantPrimitiveVariableType<?> beginExpressionWithValue = (ConstantPrimitiveVariableType<?>) beginExpression;
+    ConstantPrimitiveVariableType<?> endExpressionWithValue = (ConstantPrimitiveVariableType<?>) endExpression;
+
+    boolean isBeginSmallerThanEnd = switch (beginExpressionWithValue.value) {
+      case Integer _ -> (int) beginExpressionWithValue.value < (int) endExpressionWithValue.value;
+      case Double _ -> (double) beginExpressionWithValue.value < (double) endExpressionWithValue.value;
+      case Character _ -> (char) beginExpressionWithValue.value < (char) endExpressionWithValue.value;
+      case Boolean _ -> !((boolean) beginExpressionWithValue.value) && (boolean) endExpressionWithValue.value;
+      default -> throw new RuntimeException("Control variable of for statement must be an ordinal type");
+    };
+
+    boolean isBeginBiggerThanEnd = switch (beginExpressionWithValue.value) {
+      case Integer _ -> (int) beginExpressionWithValue.value > (int) endExpressionWithValue.value;
+      case Double _ -> (double) beginExpressionWithValue.value > (double) endExpressionWithValue.value;
+      case Character _ -> (char) beginExpressionWithValue.value > (char) endExpressionWithValue.value;
+      case Boolean _ -> (boolean) beginExpressionWithValue.value && !((boolean) endExpressionWithValue.value);
+      default -> throw new RuntimeException("Control variable of for statement must be an ordinal type");
+    };
+
+    if(isDownTo && !isBeginBiggerThanEnd) {
+      System.out.printf(
+        "SEMANTIC ERROR (%d): incompatible begin and end variable values: %s downto %s.\n",
+        context.FOR().getSymbol().getLine(),
+        beginExpressionWithValue.value.toString(),
+        endExpressionWithValue.value.toString()
+      );
+
+      System.exit(1);
+    }
+    else if(!isDownTo  && !isBeginSmallerThanEnd) {
+      System.out.printf(
+        "SEMANTIC ERROR (%d): incompatible begin and end variable values: %s to %s.\n",
+        context.FOR().getSymbol().getLine(),
+        beginExpressionWithValue.value.toString(),
+        endExpressionWithValue.value.toString()
+      );
+
+      System.exit(1);
+    }
 
     VariableTableEntry globalVariableEntry = globalVariablesTable.get(identifier.getSymbol().getText()); 
     if (globalVariableEntry != null) {
       checkVariableIsOrdinal(identifier.getSymbol(), globalVariableEntry.type);
-      checkPrimitiveTypesAreEqual(context.FOR().getSymbol().getLine(), (PrimitiveVariableType) globalVariableEntry.type, forRangeType);
+      checkPrimitiveTypesAreEqual(context.FOR().getSymbol().getLine(), (PrimitiveVariableType) globalVariableEntry.type, beginExpressionWithValue);
 
       return new PrimitiveVariableType(PrimitiveTypeEnum.NO_TYPE);
     }
@@ -722,11 +763,11 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
         VariableTableEntry parameterEntry = paramterEntry.parameters.get(variableIdentifier);
         checkVariableIsOrdinal(identifier.getSymbol(), parameterEntry.type);
-        checkPrimitiveTypesAreEqual(context.FOR().getSymbol().getLine(), (PrimitiveVariableType) parameterEntry.type, forRangeType);
+        checkPrimitiveTypesAreEqual(context.FOR().getSymbol().getLine(), (PrimitiveVariableType) parameterEntry.type, beginExpressionWithValue);
 
         VariableTableEntry localEntry = paramterEntry.localVariables.get(variableIdentifier);
         checkVariableIsOrdinal(identifier.getSymbol(), localEntry.type);
-        checkPrimitiveTypesAreEqual(context.FOR().getSymbol().getLine(), (PrimitiveVariableType) localEntry.type, forRangeType);
+        checkPrimitiveTypesAreEqual(context.FOR().getSymbol().getLine(), (PrimitiveVariableType) localEntry.type, beginExpressionWithValue);
 
         return new PrimitiveVariableType(PrimitiveTypeEnum.NO_TYPE);
       }
@@ -739,11 +780,11 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
           VariableTableEntry parameterEntry = paramterEntry.parameters.get(variableIdentifier);
           checkVariableIsOrdinal(identifier.getSymbol(), parameterEntry.type);
-          checkPrimitiveTypesAreEqual(context.FOR().getSymbol().getLine(), (PrimitiveVariableType) parameterEntry.type, forRangeType);
+          checkPrimitiveTypesAreEqual(context.FOR().getSymbol().getLine(), (PrimitiveVariableType) parameterEntry.type, beginExpressionWithValue);
 
           VariableTableEntry localEntry = paramterEntry.localVariables.get(variableIdentifier);
           checkVariableIsOrdinal(identifier.getSymbol(), localEntry.type);
-          checkPrimitiveTypesAreEqual(context.FOR().getSymbol().getLine(), (PrimitiveVariableType) localEntry.type, forRangeType);
+          checkPrimitiveTypesAreEqual(context.FOR().getSymbol().getLine(), (PrimitiveVariableType) localEntry.type, beginExpressionWithValue);
 
 
           return new PrimitiveVariableType(PrimitiveTypeEnum.NO_TYPE);
@@ -1175,7 +1216,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
   }
 
   @Override
-  public VariableType visitStringConstant(StringConstantContext context) {
+  public ConstantPrimitiveVariableType<?> visitStringConstant(StringConstantContext context) {
     String stringLiteral = context.CHARACTER_STRING().getText();
 
     String croppedStringLiteral = stringLiteral.substring(1, stringLiteral.length() - 1);
@@ -1183,36 +1224,44 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
     stringLiteralsTable.addStringLiteral(croppedStringLiteral);
 
     if(croppedStringLiteral.length() == 1) {
-      return new PrimitiveVariableType(PrimitiveTypeEnum.CHAR);
+      return new ConstantPrimitiveVariableType<Character>(PrimitiveTypeEnum.CHAR, croppedStringLiteral.charAt(0));
     }
 
-    return new PrimitiveVariableType(PrimitiveTypeEnum.STRING);
+    return new ConstantPrimitiveVariableType<String>(PrimitiveTypeEnum.STRING, croppedStringLiteral);
   }
 
   @Override
-  public VariableType visitNumeric_constant(Numeric_constantContext context) {
+  public ConstantPrimitiveVariableType<?> visitNumeric_constant(Numeric_constantContext context) {
+    boolean signal = context.MINUS() != null;
+    
     if(context.UNSIGNED_INTEGER() != null) {
-      return new PrimitiveVariableType(PrimitiveTypeEnum.INTEGER);
+      int unsignedInteger = Integer.parseInt(context.UNSIGNED_INTEGER().getText());
+      return new ConstantPrimitiveVariableType<Integer>(PrimitiveTypeEnum.INTEGER, signal ? -unsignedInteger : unsignedInteger);
     }
 
-    return new PrimitiveVariableType(PrimitiveTypeEnum.REAL);
+    double unsignedReal = Double.parseDouble(context.UNSIGNED_REAL().getText());
+    return new ConstantPrimitiveVariableType<Double>(PrimitiveTypeEnum.REAL, signal ? -unsignedReal : unsignedReal);
   }
 
   @Override
-  public VariableType visitBoolean_constant(Boolean_constantContext context) {
-    return new PrimitiveVariableType(PrimitiveTypeEnum.BOOLEAN);
+  public ConstantPrimitiveVariableType<Boolean> visitBoolean_constant(Boolean_constantContext context) {
+    if(context.TRUE() != null) {
+      return new ConstantPrimitiveVariableType<Boolean>(PrimitiveTypeEnum.BOOLEAN, true);
+    }
+
+    return new ConstantPrimitiveVariableType<Boolean>(PrimitiveTypeEnum.BOOLEAN, false);
   }
 
   @Override
-  public VariableType visitNumericConstant(NumericConstantContext context) {
+  public ConstantPrimitiveVariableType<?> visitNumericConstant(NumericConstantContext context) {
     Numeric_constantContext numericConstant = context.numeric_constant();
-    return visit(numericConstant);
+    return (ConstantPrimitiveVariableType<?>) visit(numericConstant);
   }
 
   @Override
-  public VariableType visitBooleanConstant(BooleanConstantContext context) {
+  public ConstantPrimitiveVariableType<Boolean> visitBooleanConstant(BooleanConstantContext context) {
     Boolean_constantContext booleanConstant = context.boolean_constant();
-    return visit(booleanConstant);
+    return visitBoolean_constant(booleanConstant);
   }
 
   @Override
