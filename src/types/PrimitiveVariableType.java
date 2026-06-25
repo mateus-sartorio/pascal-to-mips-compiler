@@ -11,15 +11,13 @@ public class PrimitiveVariableType extends VariableType {
       return false;
     }
 
-    if(this.basePrimitiveType == PrimitiveTypeEnum.INTEGER && other.basePrimitiveType == PrimitiveTypeEnum.REAL) {
-      return true;
-    }
+    PrimitiveTypeEnum resultType = TypeRules.getResultType(
+      TypeRules.ASSIGNMENT_TABLE,
+      other.basePrimitiveType,
+      this.basePrimitiveType
+    );
 
-    if(this.basePrimitiveType == PrimitiveTypeEnum.CHAR && other.basePrimitiveType == PrimitiveTypeEnum.STRING) {
-      return true;
-    }
-    
-    return this.basePrimitiveType == other.basePrimitiveType;
+    return resultType != PrimitiveTypeEnum.NO_TYPE;
   }
 
   @Override

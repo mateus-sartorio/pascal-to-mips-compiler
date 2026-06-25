@@ -1,5 +1,7 @@
 package ast.types.declarations.implementations;
 
+import java.util.Optional;
+
 import ast.types.declarations.contracts.ProcedureOrFunctionDeclarationNode;
 import ast.types.statements.implementations.CompoundStatementNode;
 
@@ -7,8 +9,8 @@ public class ProcedureDeclarationNode extends ProcedureOrFunctionDeclarationNode
   public ProcedureDeclarationNode(
     int id,
     String identifier,
-    VariableDeclarationPartNode parameters,
-    VariableDeclarationPartNode localVariables,
+    Optional<VariableDeclarationPartNode> parameters,
+    Optional<VariableDeclarationPartNode> localVariables,
     CompoundStatementNode compoundStatement
   ) {
     super(id, identifier, parameters, localVariables, compoundStatement);
@@ -20,11 +22,15 @@ public class ProcedureDeclarationNode extends ProcedureOrFunctionDeclarationNode
     
     sb.append("%s [label=\"procedure: '%s'\"];\n".formatted(getDotNotationIdentifier(), identifier));
     
-    sb.append(parameters.toDotNotation());
-    sb.append(getDotNotationIdentifier() + " -> " + parameters.getDotNotationIdentifier() + " [label=\"parameters\"];\n");
+    parameters.ifPresent(param -> {
+      sb.append(param.toDotNotation());
+      sb.append(getDotNotationIdentifier() + " -> " + param.getDotNotationIdentifier() + " [label=\"parameters\"];\n");
+    });
 
-    sb.append(localVariables.toDotNotation());
-    sb.append(getDotNotationIdentifier() + " -> " + localVariables.getDotNotationIdentifier() + " [label=\"local variables\"];\n");
+    localVariables.ifPresent(localVar -> {
+      sb.append(localVar.toDotNotation());
+      sb.append(getDotNotationIdentifier() + " -> " + localVar.getDotNotationIdentifier() + " [label=\"local variables\"];\n");
+    });
 
     sb.append(compoundStatement.toDotNotation());
     sb.append(getDotNotationIdentifier() + " -> " + compoundStatement.getDotNotationIdentifier() + " [label=\"body\"];\n");

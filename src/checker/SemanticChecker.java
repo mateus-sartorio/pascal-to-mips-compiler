@@ -705,50 +705,54 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
     boolean isDownTo = context.DOWNTO() != null;
     
-    ConstantPrimitiveVariableType<?> beginExpressionWithValue = (ConstantPrimitiveVariableType<?>) beginExpression;
-    ConstantPrimitiveVariableType<?> endExpressionWithValue = (ConstantPrimitiveVariableType<?>) endExpression;
-
-    boolean isBeginSmallerThanEnd = switch (beginExpressionWithValue.value) {
-      case Integer _ -> (int) beginExpressionWithValue.value < (int) endExpressionWithValue.value;
-      case Double _ -> (double) beginExpressionWithValue.value < (double) endExpressionWithValue.value;
-      case Character _ -> (char) beginExpressionWithValue.value < (char) endExpressionWithValue.value;
-      case Boolean _ -> !((boolean) beginExpressionWithValue.value) && (boolean) endExpressionWithValue.value;
-      default -> throw new RuntimeException("Control variable of for statement must be an ordinal type");
-    };
-
-    boolean isBeginBiggerThanEnd = switch (beginExpressionWithValue.value) {
-      case Integer _ -> (int) beginExpressionWithValue.value > (int) endExpressionWithValue.value;
-      case Double _ -> (double) beginExpressionWithValue.value > (double) endExpressionWithValue.value;
-      case Character _ -> (char) beginExpressionWithValue.value > (char) endExpressionWithValue.value;
-      case Boolean _ -> (boolean) beginExpressionWithValue.value && !((boolean) endExpressionWithValue.value);
-      default -> throw new RuntimeException("Control variable of for statement must be an ordinal type");
-    };
-
-    if(isDownTo && !isBeginBiggerThanEnd) {
-      System.out.printf(
-        "SEMANTIC ERROR (%d): incompatible begin and end variable values: %s downto %s.\n",
-        context.FOR().getSymbol().getLine(),
-        beginExpressionWithValue.value.toString(),
-        endExpressionWithValue.value.toString()
-      );
-
-      System.exit(1);
+    if(
+      beginExpression instanceof ConstantPrimitiveVariableType beginExpressionWithValue &&
+      endExpression instanceof ConstantPrimitiveVariableType endExpressionWithValue
+    ) {
+      boolean isBeginSmallerThanEnd = switch (beginExpressionWithValue.value) {
+        case Integer _ -> (int) beginExpressionWithValue.value < (int) endExpressionWithValue.value;
+        case Double _ -> (double) beginExpressionWithValue.value < (double) endExpressionWithValue.value;
+        case Character _ -> (char) beginExpressionWithValue.value < (char) endExpressionWithValue.value;
+        case Boolean _ -> !((boolean) beginExpressionWithValue.value) && (boolean) endExpressionWithValue.value;
+        default -> throw new RuntimeException("Control variable of for statement must be an ordinal type");
+      };
+  
+      boolean isBeginBiggerThanEnd = switch (beginExpressionWithValue.value) {
+        case Integer _ -> (int) beginExpressionWithValue.value > (int) endExpressionWithValue.value;
+        case Double _ -> (double) beginExpressionWithValue.value > (double) endExpressionWithValue.value;
+        case Character _ -> (char) beginExpressionWithValue.value > (char) endExpressionWithValue.value;
+        case Boolean _ -> (boolean) beginExpressionWithValue.value && !((boolean) endExpressionWithValue.value);
+        default -> throw new RuntimeException("Control variable of for statement must be an ordinal type");
+      };
+  
+      if(isDownTo && !isBeginBiggerThanEnd) {
+        System.out.printf(
+          "SEMANTIC ERROR (%d): incompatible begin and end variable values: %s downto %s.\n",
+          context.FOR().getSymbol().getLine(),
+          beginExpressionWithValue.value.toString(),
+          endExpressionWithValue.value.toString()
+        );
+  
+        System.exit(1);
+      }
+      else if(!isDownTo  && !isBeginSmallerThanEnd) {
+        System.out.printf(
+          "SEMANTIC ERROR (%d): incompatible begin and end variable values: %s to %s.\n",
+          context.FOR().getSymbol().getLine(),
+          beginExpressionWithValue.value.toString(),
+          endExpressionWithValue.value.toString()
+        );
+  
+        System.exit(1);
+      }
     }
-    else if(!isDownTo  && !isBeginSmallerThanEnd) {
-      System.out.printf(
-        "SEMANTIC ERROR (%d): incompatible begin and end variable values: %s to %s.\n",
-        context.FOR().getSymbol().getLine(),
-        beginExpressionWithValue.value.toString(),
-        endExpressionWithValue.value.toString()
-      );
 
-      System.exit(1);
-    }
+    PrimitiveVariableType forLoopType = (PrimitiveVariableType) beginExpression;
 
     VariableTableEntry globalVariableEntry = globalVariablesTable.get(identifier.getSymbol().getText()); 
     if (globalVariableEntry != null) {
       checkVariableIsOrdinal(identifier.getSymbol(), globalVariableEntry.type);
-      checkPrimitiveTypesAreEqual(context.FOR().getSymbol().getLine(), (PrimitiveVariableType) globalVariableEntry.type, beginExpressionWithValue);
+      checkPrimitiveTypesAreEqual(context.FOR().getSymbol().getLine(), (PrimitiveVariableType) globalVariableEntry.type, forLoopType);
 
       return new PrimitiveVariableType(PrimitiveTypeEnum.NO_TYPE);
     }
@@ -763,11 +767,11 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
         VariableTableEntry parameterEntry = paramterEntry.parameters.get(variableIdentifier);
         checkVariableIsOrdinal(identifier.getSymbol(), parameterEntry.type);
-        checkPrimitiveTypesAreEqual(context.FOR().getSymbol().getLine(), (PrimitiveVariableType) parameterEntry.type, beginExpressionWithValue);
+        checkPrimitiveTypesAreEqual(context.FOR().getSymbol().getLine(), (PrimitiveVariableType) parameterEntry.type, forLoopType);
 
         VariableTableEntry localEntry = paramterEntry.localVariables.get(variableIdentifier);
         checkVariableIsOrdinal(identifier.getSymbol(), localEntry.type);
-        checkPrimitiveTypesAreEqual(context.FOR().getSymbol().getLine(), (PrimitiveVariableType) localEntry.type, beginExpressionWithValue);
+        checkPrimitiveTypesAreEqual(context.FOR().getSymbol().getLine(), (PrimitiveVariableType) localEntry.type, forLoopType);
 
         return new PrimitiveVariableType(PrimitiveTypeEnum.NO_TYPE);
       }
@@ -780,11 +784,11 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
           VariableTableEntry parameterEntry = paramterEntry.parameters.get(variableIdentifier);
           checkVariableIsOrdinal(identifier.getSymbol(), parameterEntry.type);
-          checkPrimitiveTypesAreEqual(context.FOR().getSymbol().getLine(), (PrimitiveVariableType) parameterEntry.type, beginExpressionWithValue);
+          checkPrimitiveTypesAreEqual(context.FOR().getSymbol().getLine(), (PrimitiveVariableType) parameterEntry.type, forLoopType);
 
           VariableTableEntry localEntry = paramterEntry.localVariables.get(variableIdentifier);
           checkVariableIsOrdinal(identifier.getSymbol(), localEntry.type);
-          checkPrimitiveTypesAreEqual(context.FOR().getSymbol().getLine(), (PrimitiveVariableType) localEntry.type, beginExpressionWithValue);
+          checkPrimitiveTypesAreEqual(context.FOR().getSymbol().getLine(), (PrimitiveVariableType) localEntry.type, forLoopType);
 
 
           return new PrimitiveVariableType(PrimitiveTypeEnum.NO_TYPE);

@@ -5,12 +5,10 @@ import types.VariableType;
 
 public class VariableAccessExpressionNode extends ExpressionNode {
   public final String identifier;
-  public final VariableType type;
 
   public VariableAccessExpressionNode(int id, String identifier, VariableType type) {
-    super(id);
+    super(id, type);
     this.identifier = identifier;
-    this.type = type;
   }
 
   @Override

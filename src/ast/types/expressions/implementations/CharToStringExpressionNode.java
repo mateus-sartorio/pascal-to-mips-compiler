@@ -1,12 +1,14 @@
 package ast.types.expressions.implementations;
 
 import ast.types.expressions.contracts.ExpressionNode;
+import types.PrimitiveTypeEnum;
+import types.PrimitiveVariableType;
 
 public class CharToStringExpressionNode extends ExpressionNode {
   public final ExpressionNode expression;
 
   public CharToStringExpressionNode(int id, ExpressionNode expression) {
-    super(id);
+    super(id, new PrimitiveVariableType(PrimitiveTypeEnum.STRING));
     this.expression = expression;
   }
 

@@ -5,12 +5,10 @@ import types.VariableType;
 
 public class FunctionReturnAssignmentExpressionNode extends ExpressionNode {
   public final String functionIdentifier;
-  public final VariableType type;
 
   public FunctionReturnAssignmentExpressionNode(int id, String functionIdentifier, VariableType type) {
-    super(id);
+    super(id, type);
     this.functionIdentifier = functionIdentifier;
-    this.type = type;
   }
 
   @Override

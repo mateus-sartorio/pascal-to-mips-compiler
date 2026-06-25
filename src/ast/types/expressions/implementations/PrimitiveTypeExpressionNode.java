@@ -1,12 +1,24 @@
 package ast.types.expressions.implementations;
 
 import ast.types.expressions.contracts.ExpressionNode;
+import types.PrimitiveTypeEnum;
+import types.PrimitiveVariableType;
+import types.VariableType;
 
 public class PrimitiveTypeExpressionNode<T> extends ExpressionNode {
   public final T value;
 
   public PrimitiveTypeExpressionNode(int id, T value) {
-    super(id);
+    VariableType expressionType = switch (value) {
+      case Integer _ -> new PrimitiveVariableType(PrimitiveTypeEnum.INTEGER);
+      case Double _ -> new PrimitiveVariableType(PrimitiveTypeEnum.REAL);
+      case String _ -> new PrimitiveVariableType(PrimitiveTypeEnum.STRING);
+      case Boolean _ -> new PrimitiveVariableType(PrimitiveTypeEnum.BOOLEAN);
+      case Character _ -> new PrimitiveVariableType(PrimitiveTypeEnum.CHAR);
+      default -> throw new RuntimeException("Unsupported primitive type: " + value.getClass().getSimpleName());
+    };
+
+    super(id, expressionType);
     this.value = value;
   }
 

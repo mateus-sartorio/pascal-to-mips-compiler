@@ -2,12 +2,14 @@ package ast.types.expressions.implementations;
 
 import ast.types.expressions.contracts.BinaryOperatorExpressionNode;
 import ast.types.expressions.contracts.ExpressionNode;
+import types.PrimitiveTypeEnum;
+import types.PrimitiveVariableType;
 
 public class LogicOperatorExpressionNode extends BinaryOperatorExpressionNode {
   public final String operator;
 
   public LogicOperatorExpressionNode(int id, ExpressionNode left, ExpressionNode right, String operator) {
-    super(id, left, right);
+    super(id, left, right, new PrimitiveVariableType(PrimitiveTypeEnum.BOOLEAN));
     this.operator = operator;
   }
 
