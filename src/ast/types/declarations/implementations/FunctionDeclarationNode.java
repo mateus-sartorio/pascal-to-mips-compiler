@@ -8,13 +8,14 @@ public class FunctionDeclarationNode extends ProcedureOrFunctionDeclarationNode 
   public final PrimitiveTypeEnum returnType;
 
   public FunctionDeclarationNode(
+    int id,
     String identifier,
     VariableDeclarationPartNode parameters,
     VariableDeclarationPartNode localVariables,
     PrimitiveTypeEnum returnType,
     CompoundStatementNode compoundStatement
   ) {
-    super(identifier, parameters, localVariables, compoundStatement);
+    super(id, identifier, parameters, localVariables, compoundStatement);
     this.returnType = returnType;
   }
 

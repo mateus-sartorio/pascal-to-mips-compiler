@@ -5,7 +5,8 @@ import ast.types.expressions.contracts.ExpressionNode;
 public class PrimitiveTypeExpressionNode<T> extends ExpressionNode {
   public final T value;
 
-  public PrimitiveTypeExpressionNode(T value) {
+  public PrimitiveTypeExpressionNode(int id, T value) {
+    super(id);
     this.value = value;
   }
 

@@ -11,10 +11,12 @@ public class IfStatementNode extends StatementNode {
   public final Optional<StatementNode> elseStatement;
 
   public IfStatementNode(
+    int id,
     ExpressionNode condition,
     StatementNode thenStatement,
     Optional<StatementNode> elseStatement
   ) {
+    super(id);
     this.condition = condition;
     this.thenStatement = thenStatement;
     this.elseStatement = elseStatement;

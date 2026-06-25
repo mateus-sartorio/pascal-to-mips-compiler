@@ -74,12 +74,13 @@ import types.PrimitiveTypeEnum;
 import types.PrimitiveVariableType;
 
 public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
+  private int currentId = 1;
+
   private ProgramNode programNode;
 
   private String programIdentifier;
   private VariablesTable globalVariablesTable;
   private ProceduresAndFunctionsTable proceduresAndFunctionsTable;
-
 
   public AstBuilder(
     String programIdentifier,
@@ -113,12 +114,12 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     List<VariableDeclarationNode> globalVariablesDeclarations = globalVariablesTable
       .toList()
       .stream()
-      .map(AstBuilder::variableTableEntryToAstNode)
+      .map(entry -> variableTableEntryToAstNode(currentId++, entry))
       .toList();
 
     Optional<VariableDeclarationPartNode> variableDeclarationPart = Optional.empty();
     if(!globalVariablesDeclarations.isEmpty()) {
-      variableDeclarationPart = Optional.of(new VariableDeclarationPartNode(globalVariablesDeclarations));
+      variableDeclarationPart = Optional.of(new VariableDeclarationPartNode(currentId++, globalVariablesDeclarations));
     }
 
     ProcedureAndFunctionDeclarationPartNode procedureAndFunctionDeclarationPartNode = (ProcedureAndFunctionDeclarationPartNode) visit(procedureAndFunctionDeclarations);
@@ -130,6 +131,7 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     CompoundStatementNode compoundStatementNode = (CompoundStatementNode) visit(block.compound_statement());
 
     programNode = new ProgramNode(
+      currentId++,
       programIdentifier,
       variableDeclarationPart,
       proceduresAndFunctionsDeclarations,
@@ -151,7 +153,7 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
       procedureOrFunctionDeclarationNodes.add((FunctionDeclarationNode) visit(functionDeclaration));
     }
 
-    return new ProcedureAndFunctionDeclarationPartNode(procedureOrFunctionDeclarationNodes);
+    return new ProcedureAndFunctionDeclarationPartNode(currentId++, procedureOrFunctionDeclarationNodes);
   }
 
   @Override
@@ -170,25 +172,25 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     if(globalVariableEntry != null) {
       if(isIndexedVariable) {
         ExpressionNode indexExpressionNode = (ExpressionNode) visit(context.indexed_variable().expression());
-        return new IndexedVariableAccessExpressionNode(variableIdentifier, globalVariableEntry.type, indexExpressionNode);
+        return new IndexedVariableAccessExpressionNode(currentId++, variableIdentifier, globalVariableEntry.type, indexExpressionNode);
       }
 
-      return new VariableAccessExpressionNode(variableIdentifier, globalVariableEntry.type);
+      return new VariableAccessExpressionNode(currentId++, variableIdentifier, globalVariableEntry.type);
     }
 
     VariableTableEntry procedureFunctionParameterOrLocalVariableEntry = proceduresAndFunctionsTable.getParameterOrLocalVariableFromAnyProcedureOrFunction(variableIdentifier);
     if(procedureFunctionParameterOrLocalVariableEntry != null) {
       if(isIndexedVariable) {
         ExpressionNode indexExpressionNode = (ExpressionNode) visit(context.indexed_variable().expression());
-        return new IndexedVariableAccessExpressionNode(variableIdentifier, procedureFunctionParameterOrLocalVariableEntry.type, indexExpressionNode);
+        return new IndexedVariableAccessExpressionNode(currentId++, variableIdentifier, procedureFunctionParameterOrLocalVariableEntry.type, indexExpressionNode);
       }
 
-      return new VariableAccessExpressionNode(variableIdentifier, procedureFunctionParameterOrLocalVariableEntry.type);
+      return new VariableAccessExpressionNode(currentId++, variableIdentifier, procedureFunctionParameterOrLocalVariableEntry.type);
     }
 
     ProceduresAndFunctionsEntry functionEntry = proceduresAndFunctionsTable.get(variableIdentifier);
     if(functionEntry != null) {
-      return new FunctionReturnAssignmentExpressionNode(functionEntry.identifier, new PrimitiveVariableType(functionEntry.returnType));
+      return new FunctionReturnAssignmentExpressionNode(currentId++, functionEntry.identifier, new PrimitiveVariableType(functionEntry.returnType));
     }
 
     throw new RuntimeException("Variable " + variableIdentifier + " not found in symbol tables");
@@ -205,23 +207,24 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
       .parameters
       .toList()
       .stream()
-      .map(AstBuilder::variableTableEntryToAstNode)
+      .map(e -> variableTableEntryToAstNode(currentId++, e))
       .toList();
 
-    VariableDeclarationPartNode parametersNode = new VariableDeclarationPartNode(parameters);
+    VariableDeclarationPartNode parametersNode = new VariableDeclarationPartNode(currentId++, parameters);
 
     List<VariableDeclarationNode> localVariables = entry
       .localVariables
       .toList()
       .stream()
-      .map(AstBuilder::variableTableEntryToAstNode)
+      .map(e -> variableTableEntryToAstNode(currentId++, e))
       .toList();
 
-    VariableDeclarationPartNode localVariablesNode = new VariableDeclarationPartNode(localVariables);
+    VariableDeclarationPartNode localVariablesNode = new VariableDeclarationPartNode(currentId++, localVariables);
 
     CompoundStatementNode compoundStatement = (CompoundStatementNode) visit(context.compound_statement());
 
     return new ProcedureDeclarationNode(
+      currentId++,
       procedureIdentifier,
       parametersNode,
       localVariablesNode,
@@ -241,23 +244,24 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
       .parameters
       .toList()
       .stream()
-      .map(AstBuilder::variableTableEntryToAstNode)
+      .map(e -> variableTableEntryToAstNode(currentId++, e))
       .toList();
 
-    VariableDeclarationPartNode parametersNode = new VariableDeclarationPartNode(parameters);
+    VariableDeclarationPartNode parametersNode = new VariableDeclarationPartNode(currentId++, parameters);
 
     List<VariableDeclarationNode> localVariables = entry
       .localVariables
       .toList()
       .stream()
-      .map(AstBuilder::variableTableEntryToAstNode)
+      .map(e -> variableTableEntryToAstNode(currentId++, e))
       .toList();
 
-    VariableDeclarationPartNode localVariablesNode = new VariableDeclarationPartNode(localVariables);
+    VariableDeclarationPartNode localVariablesNode = new VariableDeclarationPartNode(currentId++, localVariables);
 
     CompoundStatementNode compoundStatement = (CompoundStatementNode) visit(context.compound_statement());
 
     return new FunctionDeclarationNode(
+      currentId++,
       procedureIdentifier,
       parametersNode,
       localVariablesNode,
@@ -297,7 +301,7 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
       operator = ">=";
     }
 
-    return new ComparisonOperatorExpressionNode(left, right, operator);
+    return new ComparisonOperatorExpressionNode(currentId++, left, right, operator);
   }
 
   @Override
@@ -314,13 +318,13 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
       ExpressionNode rightExpression = (ExpressionNode) visit(context.term(i));
 
       if(operator.PLUS() != null) {
-        returnExpression = new ArithmeticOperatorExpressionNode(leftExpression, rightExpression, "+");
+        returnExpression = new ArithmeticOperatorExpressionNode(currentId++, leftExpression, rightExpression, "+");
       }
       else if(operator.MINUS() != null) {
-        returnExpression = new ArithmeticOperatorExpressionNode(leftExpression, rightExpression, "-");
+        returnExpression = new ArithmeticOperatorExpressionNode(currentId++, leftExpression, rightExpression, "-");
       }
       else {
-        returnExpression = new LogicOperatorExpressionNode(leftExpression, rightExpression, "or");
+        returnExpression = new LogicOperatorExpressionNode(currentId++, leftExpression, rightExpression, "or");
       }
 
       leftExpression = returnExpression;
@@ -344,13 +348,13 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
       ExpressionNode rightExpression = (ExpressionNode) visit(context.factor(i));
 
       if(operator.MULTIPLICATION() != null) {
-        returnExpression = new ArithmeticOperatorExpressionNode(leftExpression, rightExpression, "*");
+        returnExpression = new ArithmeticOperatorExpressionNode(currentId++, leftExpression, rightExpression, "*");
       }
       else if(operator.DIVISION() != null) {
-        returnExpression = new ArithmeticOperatorExpressionNode(leftExpression, rightExpression, "/");
+        returnExpression = new ArithmeticOperatorExpressionNode(currentId++, leftExpression, rightExpression, "/");
       }
       else {
-        returnExpression = new LogicOperatorExpressionNode(leftExpression, rightExpression, "and");
+        returnExpression = new LogicOperatorExpressionNode(currentId++, leftExpression, rightExpression, "and");
       }
 
       leftExpression = returnExpression;
@@ -371,10 +375,10 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     String croppedStringLiteral = stringLiteral.substring(1, stringLiteral.length() - 1);
 
     if(croppedStringLiteral.length() == 1) {
-      return new PrimitiveTypeExpressionNode<Character>(croppedStringLiteral.charAt(0));
+      return new PrimitiveTypeExpressionNode<Character>(currentId++, croppedStringLiteral.charAt(0));
     }
 
-    return new PrimitiveTypeExpressionNode<String>(croppedStringLiteral);
+    return new PrimitiveTypeExpressionNode<String>(currentId++, croppedStringLiteral);
   }
 
   @Override
@@ -391,7 +395,7 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
         value = -value;
       }
 
-      return new PrimitiveTypeExpressionNode<Integer>(value);
+      return new PrimitiveTypeExpressionNode<Integer>(currentId++, value);
     }
 
     double value = Double.parseDouble(realValue.getText());
@@ -400,7 +404,7 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
       value = -value;
     }
 
-    return new PrimitiveTypeExpressionNode<Double>(value);
+    return new PrimitiveTypeExpressionNode<Double>(currentId++, value);
   }
 
   @Override
@@ -412,10 +416,10 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
   @Override
   public PrimitiveTypeExpressionNode<Boolean> visitBoolean_constant(Boolean_constantContext context) {
     if(context.FALSE() != null) {
-      return new PrimitiveTypeExpressionNode<>(false);
+      return new PrimitiveTypeExpressionNode<>(currentId++, false);
     }
 
-    return new PrimitiveTypeExpressionNode<>(true);
+    return new PrimitiveTypeExpressionNode<>(currentId++, true);
   }
 
   @Override
@@ -441,7 +445,7 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     ProceduresAndFunctionsEntry entry = proceduresAndFunctionsTable.get(functionIdentifier);
     PrimitiveTypeEnum returnType = entry.returnType;
 
-    return new FunctionCallExpressionNode(functionIdentifier, actualParameters, returnType);
+    return new FunctionCallExpressionNode(currentId++, functionIdentifier, actualParameters, returnType);
   }
 
   @Override
@@ -452,7 +456,7 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
   @Override
   public NotOperatorExpressionNode visitNotFactor(NotFactorContext context) {
     ExpressionNode expression = (ExpressionNode) visit(context.factor());
-    return new NotOperatorExpressionNode(expression);
+    return new NotOperatorExpressionNode(currentId++, expression);
   }
 
   @Override
@@ -466,7 +470,7 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
       .filter(statement -> statement != null)
       .toList();
 
-    return new CompoundStatementNode(statements);
+    return new CompoundStatementNode(currentId++, statements);
   }
 
   @Override
@@ -482,10 +486,10 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     ExpressionNode expressionNode = (ExpressionNode) visit(context.expression());
 
     if(variableAccessExpressionNode instanceof FunctionReturnAssignmentExpressionNode) {
-      return new ReturnStatementNode((FunctionReturnAssignmentExpressionNode) variableAccessExpressionNode);
+      return new ReturnStatementNode(currentId++, (FunctionReturnAssignmentExpressionNode) variableAccessExpressionNode);
     }
 
-    return new AssignmentStatementNode(variableAccessExpressionNode, expressionNode);
+    return new AssignmentStatementNode(currentId++, variableAccessExpressionNode, expressionNode);
   }
 
   @Override
@@ -500,7 +504,7 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
       .map(actualParameter -> (ExpressionNode) visit(actualParameter))
       .toList();
 
-    return new ProcedureCallStatementNode(procedureIdentifier, actualParameters);
+    return new ProcedureCallStatementNode(currentId++, procedureIdentifier, actualParameters);
   }
 
   @Override
@@ -514,7 +518,7 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
       elseStatement = Optional.of((StatementNode) visit(context.else_part().statement()));
     }
 
-    return new IfStatementNode(condition, thenStatement, elseStatement);
+    return new IfStatementNode(currentId++, condition, thenStatement, elseStatement);
   }
 
   @Override
@@ -532,13 +536,14 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
       default -> throw new RuntimeException("Control variable of for statement must be an ordinal type");
     };
 
-    var controlVariableNode = new VariableDeclarationNode(variableIdentifier, controlVariableType);
+    var controlVariableNode = new VariableDeclarationNode(currentId++, variableIdentifier, controlVariableType);
 
     StatementNode statement = (StatementNode) visit(context.statement());
 
     boolean isDownto = context.DOWNTO() != null;
 
     return new ForStatementNode(
+      currentId++,
       controlVariableNode,
       initialValue,
       finalValue,
@@ -547,7 +552,7 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     );
   }
 
-  private static VariableDeclarationNode variableTableEntryToAstNode(VariablesTable.VariableTableEntry entry) {
-    return new VariableDeclarationNode(entry.identifier, entry.type);
+  private static VariableDeclarationNode variableTableEntryToAstNode(int id, VariablesTable.VariableTableEntry entry) {
+    return new VariableDeclarationNode(id, entry.identifier, entry.type);
   }
 }

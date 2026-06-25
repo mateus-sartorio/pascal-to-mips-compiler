@@ -8,7 +8,8 @@ import ast.types.declarations.contracts.ProcedureOrFunctionDeclarationNode;
 public class ProcedureAndFunctionDeclarationPartNode extends AstNode {
   public final List<ProcedureOrFunctionDeclarationNode> procedureOrFunctionDeclarations;
 
-  public ProcedureAndFunctionDeclarationPartNode(List<ProcedureOrFunctionDeclarationNode> procedureOrFunctionDeclarations) {
+  public ProcedureAndFunctionDeclarationPartNode(int id, List<ProcedureOrFunctionDeclarationNode> procedureOrFunctionDeclarations) {
+    super(id);
     this.procedureOrFunctionDeclarations = procedureOrFunctionDeclarations;
   }
 

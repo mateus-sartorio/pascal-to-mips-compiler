@@ -7,7 +7,8 @@ public class AssignmentStatementNode extends StatementNode {
   public final ExpressionNode variableAccessExpressionNode;
   public final ExpressionNode expression;
 
-  public AssignmentStatementNode(ExpressionNode variableAccessExpressionNode, ExpressionNode expression) {
+  public AssignmentStatementNode(int id, ExpressionNode variableAccessExpressionNode, ExpressionNode expression) {
+    super(id);
     this.variableAccessExpressionNode = variableAccessExpressionNode;
     this.expression = expression;
   }

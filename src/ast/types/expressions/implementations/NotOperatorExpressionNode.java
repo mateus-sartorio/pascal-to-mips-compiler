@@ -4,8 +4,8 @@ import ast.types.expressions.contracts.ExpressionNode;
 import ast.types.expressions.contracts.UnaryOperatorExpressionNode;
 
 public class NotOperatorExpressionNode extends UnaryOperatorExpressionNode {
-  public NotOperatorExpressionNode(ExpressionNode expression) {
-    super(expression);
+  public NotOperatorExpressionNode(int id, ExpressionNode expression) {
+    super(id, expression);
   }
 
   @Override

@@ -6,8 +6,8 @@ import ast.types.expressions.contracts.ExpressionNode;
 public class LogicOperatorExpressionNode extends BinaryOperatorExpressionNode {
   public final String operator;
 
-  public LogicOperatorExpressionNode(ExpressionNode left, ExpressionNode right, String operator) {
-    super(left, right);
+  public LogicOperatorExpressionNode(int id, ExpressionNode left, ExpressionNode right, String operator) {
+    super(id, left, right);
     this.operator = operator;
   }
 

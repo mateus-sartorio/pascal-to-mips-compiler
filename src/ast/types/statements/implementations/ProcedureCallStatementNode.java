@@ -9,7 +9,8 @@ public class ProcedureCallStatementNode extends StatementNode {
   public final String procedureIdentifier;
   public final List<ExpressionNode> arguments;
 
-  public ProcedureCallStatementNode(String procedureIdentifier, List<ExpressionNode> arguments) {
+  public ProcedureCallStatementNode(int id, String procedureIdentifier, List<ExpressionNode> arguments) {
+    super(id);
     this.procedureIdentifier = procedureIdentifier;
     this.arguments = arguments;
   }

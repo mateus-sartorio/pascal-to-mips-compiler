@@ -7,7 +7,8 @@ import ast.types.statements.contract.StatementNode;
 public class CompoundStatementNode extends StatementNode {
   public final List<StatementNode> statements;
 
-  public CompoundStatementNode(List<StatementNode> statements) {
+  public CompoundStatementNode(int id, List<StatementNode> statements) {
+    super(id);
     this.statements = statements;
   }
 

@@ -6,7 +6,8 @@ import ast.types.statements.contract.StatementNode;
 public class ReturnStatementNode extends StatementNode {
   public final ExpressionNode expression;
 
-  public ReturnStatementNode(ExpressionNode expression) {
+  public ReturnStatementNode(int id, ExpressionNode expression) {
+    super(id);
     this.expression = expression;
   }
 

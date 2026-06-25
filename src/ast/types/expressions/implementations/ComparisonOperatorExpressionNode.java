@@ -7,11 +7,12 @@ public class ComparisonOperatorExpressionNode extends BinaryOperatorExpressionNo
   public final String operator;
   
   public ComparisonOperatorExpressionNode(
+    int id,
     ExpressionNode left,
     ExpressionNode right,
     String operator
   ) {
-    super(left, right);
+    super(id, left, right);
     this.operator = operator;
   }
 

@@ -7,7 +7,8 @@ public class FunctionReturnAssignmentExpressionNode extends ExpressionNode {
   public final String functionIdentifier;
   public final VariableType type;
 
-  public FunctionReturnAssignmentExpressionNode(String functionIdentifier, VariableType type) {
+  public FunctionReturnAssignmentExpressionNode(int id, String functionIdentifier, VariableType type) {
+    super(id);
     this.functionIdentifier = functionIdentifier;
     this.type = type;
   }

@@ -10,11 +10,13 @@ public abstract class ProcedureOrFunctionDeclarationNode extends DeclarationNode
   public final CompoundStatementNode compoundStatement;
 
   public ProcedureOrFunctionDeclarationNode(
+    int id,
     String identifier,
     VariableDeclarationPartNode parameters,
     VariableDeclarationPartNode localVariables,
     CompoundStatementNode compoundStatement
   ) {
+    super(id);
     this.identifier = identifier;
     this.parameters = parameters;
     this.localVariables = localVariables;

@@ -7,7 +7,8 @@ import ast.types.AstNode;
 public class VariableDeclarationPartNode extends AstNode {
   public final List<VariableDeclarationNode> variables;
 
-  public VariableDeclarationPartNode(List<VariableDeclarationNode> variables) {
+  public VariableDeclarationPartNode(int id, List<VariableDeclarationNode> variables) {
+    super(id);
     this.variables = variables;
   }
 

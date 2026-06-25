@@ -7,7 +7,8 @@ public class VariableDeclarationNode extends DeclarationNode {
   public final String identifier;
   public final VariableType type;
 
-  public VariableDeclarationNode(String identifier, VariableType type) {
+  public VariableDeclarationNode(int id, String identifier, VariableType type) {
+    super(id);
     this.identifier = identifier;
     this.type = type;
   }

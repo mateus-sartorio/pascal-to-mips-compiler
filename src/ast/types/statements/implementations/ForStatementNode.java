@@ -12,12 +12,14 @@ public class ForStatementNode extends StatementNode {
   public final StatementNode body;
 
   public ForStatementNode(
+    int id,
     VariableDeclarationNode controlVariable,
     ExpressionNode initialValue,
     ExpressionNode finalValue,
     boolean isDownto,
     StatementNode body
   ) {
+    super(id);
     this.controlVariable = controlVariable;
     this.initialValue = initialValue;
     this.finalValue = finalValue;

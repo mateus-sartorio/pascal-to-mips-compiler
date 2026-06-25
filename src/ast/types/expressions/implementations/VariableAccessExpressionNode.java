@@ -7,7 +7,8 @@ public class VariableAccessExpressionNode extends ExpressionNode {
   public final String identifier;
   public final VariableType type;
 
-  public VariableAccessExpressionNode(String identifier, VariableType type) {
+  public VariableAccessExpressionNode(int id, String identifier, VariableType type) {
+    super(id);
     this.identifier = identifier;
     this.type = type;
   }

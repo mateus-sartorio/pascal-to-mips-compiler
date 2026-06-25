@@ -6,8 +6,8 @@ import types.VariableType;
 public class IndexedVariableAccessExpressionNode extends VariableAccessExpressionNode {
   public final ExpressionNode indexExpressionNode;
 
-  public IndexedVariableAccessExpressionNode(String identifier, VariableType type, ExpressionNode index) {
-    super(identifier, type);
+  public IndexedVariableAccessExpressionNode(int id, String identifier, VariableType type, ExpressionNode index) {
+    super(id, identifier, type);
     this.indexExpressionNode = index;
   }
 

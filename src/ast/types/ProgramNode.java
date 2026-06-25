@@ -13,11 +13,13 @@ public class ProgramNode extends AstNode {
   public final CompoundStatementNode compoundStatement;
 
   public ProgramNode(
+    int id,
     String programIdentifier,
     Optional<VariableDeclarationPartNode> variableDeclarationPart,
     Optional<ProcedureAndFunctionDeclarationPartNode> proceduresAndFunctions,
     CompoundStatementNode compoundStatement
   ) {
+    super(id);
     this.programIdentifier = programIdentifier;
     this.variableDeclarationPart = variableDeclarationPart;
     this.proceduresAndFunctions = proceduresAndFunctions;

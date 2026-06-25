@@ -5,12 +5,13 @@ import ast.types.statements.implementations.CompoundStatementNode;
 
 public class ProcedureDeclarationNode extends ProcedureOrFunctionDeclarationNode {
   public ProcedureDeclarationNode(
+    int id,
     String identifier,
     VariableDeclarationPartNode parameters,
     VariableDeclarationPartNode localVariables,
     CompoundStatementNode compoundStatement
   ) {
-    super(identifier, parameters, localVariables, compoundStatement);
+    super(id, identifier, parameters, localVariables, compoundStatement);
   }
 
   @Override

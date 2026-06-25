@@ -10,7 +10,8 @@ public class FunctionCallExpressionNode extends ExpressionNode {
   public final List<ExpressionNode> arguments;
   public final PrimitiveTypeEnum returnType;
 
-  public FunctionCallExpressionNode(String procedureIdentifier, List<ExpressionNode> arguments, PrimitiveTypeEnum returnType) {
+  public FunctionCallExpressionNode(int id, String procedureIdentifier, List<ExpressionNode> arguments, PrimitiveTypeEnum returnType) {
+    super(id);
     this.procedureIdentifier = procedureIdentifier;
     this.arguments = arguments;
     this.returnType = returnType;
