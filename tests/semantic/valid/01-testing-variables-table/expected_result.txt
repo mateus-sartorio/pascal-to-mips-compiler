@@ -8,15 +8,7 @@ BUILT-IN PROCEDURES AND FUNCTIONS TABLE:
 
 Built-in procedure 'write'
 Parameters:
-0. identifier: 'n', type: integer
-
-Built-in procedure 'write'
-Parameters:
 0. identifier: 'str', type: string
-
-Built-in procedure 'writeln'
-Parameters:
-0. identifier: 'n', type: integer
 
 Built-in procedure 'writeln'
 Parameters:
@@ -24,39 +16,19 @@ Parameters:
 
 Built-in procedure 'read'
 Parameters:
-0. identifier: 'n', type: integer
-
-Built-in procedure 'read'
-Parameters:
 0. identifier: 'str', type: string
 
 Built-in procedure 'readln'
 Parameters:
-0. identifier: 'n', type: integer
-
-Built-in procedure 'readln'
-Parameters:
 0. identifier: 'str', type: string
-
-Built-in function 'abs', return type: integer
-Parameters:
-0. identifier: 'n', type: integer
 
 Built-in function 'abs', return type: real
 Parameters:
 0. identifier: 'n', type: real
 
-Built-in function 'sqr', return type: integer
-Parameters:
-0. identifier: 'n', type: integer
-
 Built-in function 'sqr', return type: real
 Parameters:
 0. identifier: 'n', type: real
-
-Built-in function 'sqrt', return type: real
-Parameters:
-0. identifier: 'n', type: integer
 
 Built-in function 'sqrt', return type: real
 Parameters:

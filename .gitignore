@@ -5,9 +5,14 @@ src/parser/**/*
 
 # Result files from test runs
 tests/**/**/**/actual_result.txt
+tests/**/**/**/actual_result.dot
+tests/**/**/**/actual_result.png
 tests/**/**/**/diff.diff
+tests/**/**/**/*.png
 
 # Compiled binaries
 bin/**/*
 src/target
 
+# Fragments
+**.png

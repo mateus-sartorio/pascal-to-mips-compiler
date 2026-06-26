@@ -1,2 +1,2 @@
-line 4:14 mismatched input ';' expecting {'+', '-', '(', 'not', UNSIGNED_INTEGER, UNSIGNED_REAL, CHARACTER_STRING, IDENTIFIER}
+line 4:14 mismatched input ';' expecting {'+', '-', '(', 'not', 'true', 'false', UNSIGNED_INTEGER, UNSIGNED_REAL, CHARACTER_STRING, IDENTIFIER}
 (program (program_heading program ErrorExpression) ; (block (variable_declaration_part var (variable_declaration (identifier_list x) : (type_denoter (primitive_type integer))) ;) procedure_and_function_declaration_part (compound_statement begin (statement_sequence (statement (simple_statement (assignment_statement (variable_access x) := (expression (simple_expression (term (factor (numeric_constant 10))) (adding_operator +) (term factor)))))) ; (statement (simple_statement empty_statement))) end)) .)

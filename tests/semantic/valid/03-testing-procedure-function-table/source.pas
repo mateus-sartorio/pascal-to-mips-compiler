@@ -27,7 +27,6 @@ end;
 begin
   globalInteger := 5;
   calcularSoma(globalInteger, globalInteger);
-  writeln(1);
   writeln('''');
   
   globalStr := FormatarNome(123, 'Teste');

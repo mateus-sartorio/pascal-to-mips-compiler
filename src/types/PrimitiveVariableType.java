@@ -11,15 +11,26 @@ public class PrimitiveVariableType extends VariableType {
       return false;
     }
 
-    if(this.basePrimitiveType == PrimitiveTypeEnum.INTEGER && other.basePrimitiveType == PrimitiveTypeEnum.REAL) {
-      return true;
-    }
-    
-    return this.basePrimitiveType == other.basePrimitiveType;
+    PrimitiveTypeEnum resultType = TypeRules.getResultType(
+      TypeRules.ASSIGNMENT_TABLE,
+      other.basePrimitiveType,
+      this.basePrimitiveType
+    );
+
+    return resultType != PrimitiveTypeEnum.NO_TYPE;
   }
 
   @Override
   public String toString() {
     return basePrimitiveType.toString();
+  }
+
+  @Override
+  public boolean isOrdinal() {
+    return (
+      basePrimitiveType == PrimitiveTypeEnum.INTEGER ||
+      basePrimitiveType == PrimitiveTypeEnum.CHAR ||
+      basePrimitiveType == PrimitiveTypeEnum.BOOLEAN
+    );
   }
 }

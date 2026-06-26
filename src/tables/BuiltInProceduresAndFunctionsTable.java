@@ -1,6 +1,5 @@
 package tables;
 
-import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,7 +30,7 @@ public final class BuiltInProceduresAndFunctionsTable {
     }
   }
 
-  private Map<String, List<BuiltInProceduresAndFunctionsEntry>> table = new LinkedHashMap<>();
+  private Map<String, BuiltInProceduresAndFunctionsEntry> table = new LinkedHashMap<>();
 
   public boolean isEmpty() {
     return table.isEmpty();
@@ -41,7 +40,7 @@ public final class BuiltInProceduresAndFunctionsTable {
     return table.containsKey(identifier.toLowerCase());
   }
 
-  public List<BuiltInProceduresAndFunctionsEntry> get(String identifier) {
+  public BuiltInProceduresAndFunctionsEntry get(String identifier) {
     return table.get(identifier.toLowerCase());
   }
 
@@ -61,19 +60,7 @@ public final class BuiltInProceduresAndFunctionsTable {
       new VariablesTable(parameterList)
     );
 
-    List<BuiltInProceduresAndFunctionsEntry> entries;
-
-    if(lookProcedureOrFunction(identifier)) {
-      entries = get(identifier);
-      List<BuiltInProceduresAndFunctionsEntry> newEntries = new ArrayList<>(entries);
-      newEntries.add(newEntry);
-      entries = newEntries;
-    }
-    else {
-      entries = List.of(newEntry);
-    }
-    
-    table.put(identifier.toLowerCase(), entries);
+    table.put(identifier.toLowerCase(), newEntry);
   }
 
   @Override
@@ -81,22 +68,20 @@ public final class BuiltInProceduresAndFunctionsTable {
     StringBuilder sb = new StringBuilder();
     Formatter f = new Formatter(sb);
 
-    for(List<BuiltInProceduresAndFunctionsEntry> entriesList : table.values()) {
-      for(BuiltInProceduresAndFunctionsEntry entry : entriesList) {
-        f.format(
-          "%s '%s'%s\n",
-          entry.type == ProcedureOrFunctionEnum.FUNCTION ? "Built-in function" : "Built-in procedure",
-          entry.identifier,
-          entry.type == ProcedureOrFunctionEnum.FUNCTION ? (", return type: " + entry.returnType.toString()) : ""
-        );
-  
-        if(!entry.parameters.isEmpty()) {
-          f.format("Parameters:\n");
-          f.format(entry.parameters.toString());
-        }
+    for(BuiltInProceduresAndFunctionsEntry entry : table.values()) {
+      f.format(
+        "%s '%s'%s\n",
+        entry.type == ProcedureOrFunctionEnum.FUNCTION ? "Built-in function" : "Built-in procedure",
+        entry.identifier,
+        entry.type == ProcedureOrFunctionEnum.FUNCTION ? (", return type: " + entry.returnType.toString()) : ""
+      );
 
-        f.format("\n");
+      if(!entry.parameters.isEmpty()) {
+        f.format("Parameters:\n");
+        f.format(entry.parameters.toString());
       }
+
+      f.format("\n");
     }
 
     f.close();

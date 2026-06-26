@@ -40,4 +40,8 @@ public class ArrayVariableType extends VariableType {
 
     return sb.toString();
   }
+
+  public boolean isOrdinal() {
+    return false;
+  }
 }

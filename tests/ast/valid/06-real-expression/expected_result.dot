@@ -1,0 +1,21 @@
+digraph AST {
+"ProgramNode" [label="p6"];
+"VariableDeclarationPartNode#2" [label="variables"];
+"VariableDeclarationNode#1" [label="(array[0..10] of real) realArray"];
+"VariableDeclarationPartNode#2" -> "VariableDeclarationNode#1";
+"ProgramNode" -> "VariableDeclarationPartNode#2" [label="global variables"];
+"CompoundStatementNode#10" [label="{ }"];
+"AssignmentStatementNode#9" [label=":="];
+"IndexedVariableAccessExpressionNode#5" [label="(real) realArray[]"];
+"PrimitiveTypeExpressionNode#4" [label="0"];
+"IndexedVariableAccessExpressionNode#5" -> "PrimitiveTypeExpressionNode#4" [label="index"] ;
+"AssignmentStatementNode#9" -> "IndexedVariableAccessExpressionNode#5" [label="variable"] ;
+"ArithmeticOperatorExpressionNode#8" [label="+"];
+"PrimitiveTypeExpressionNode#6" [label="1.00"];
+"ArithmeticOperatorExpressionNode#8" -> "PrimitiveTypeExpressionNode#6";
+"PrimitiveTypeExpressionNode#7" [label="5.00"];
+"ArithmeticOperatorExpressionNode#8" -> "PrimitiveTypeExpressionNode#7";
+"AssignmentStatementNode#9" -> "ArithmeticOperatorExpressionNode#8" [label="value"] ;
+"CompoundStatementNode#10" -> "AssignmentStatementNode#9";
+"ProgramNode" -> "CompoundStatementNode#10" [label="main body"];
+}

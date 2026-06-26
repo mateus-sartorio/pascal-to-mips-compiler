@@ -51,6 +51,8 @@ THEN: 'then' ;
 TO: 'to' ;
 TYPE: 'type' ;
 VAR: 'var' ;
+TRUE: 'true' ;
+FALSE: 'false' ;
 
 // 6.1.4. Directives Not needed
 

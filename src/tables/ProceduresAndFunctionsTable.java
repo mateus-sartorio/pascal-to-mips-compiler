@@ -4,6 +4,7 @@ import java.util.Formatter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import tables.VariablesTable.VariableTableEntry;
 import types.PrimitiveTypeEnum;
 import types.ProcedureOrFunctionEnum;
 import types.VariableType;
@@ -47,6 +48,23 @@ public final class ProceduresAndFunctionsTable {
 
   public ProceduresAndFunctionsEntry get(String identifier) {
     return table.get(identifier.toLowerCase());
+  }
+
+  public VariableTableEntry getParameterOrLocalVariableFromAnyProcedureOrFunction(String localVariableIdentifier) {
+    for(ProceduresAndFunctionsEntry entry : table.values()) {
+      var parameter = entry.parameters.get(localVariableIdentifier);
+
+      if(parameter != null) {
+        return parameter;
+      }
+
+      var localVariable = entry.localVariables.get(localVariableIdentifier);
+      if(localVariable != null) {
+        return localVariable;
+      }
+    }
+
+    return null;
   }
 
   public boolean lookupProcedureOrFunctionLocalVariable(

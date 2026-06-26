@@ -1,0 +1,2 @@
+SEMANTIC ERROR (5): incompatible begin and end variable types: integer and boolean.
+make[1]: *** [Makefile:75: run-semantic] Error 1

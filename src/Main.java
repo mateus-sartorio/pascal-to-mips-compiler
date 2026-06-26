@@ -1,13 +1,19 @@
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
+import ast.AstBuilder;
 import parser.PascalLexer;
 import parser.PascalParser;
+import tables.BuiltInProceduresAndFunctionsTable;
+import tables.ProceduresAndFunctionsTable;
+import tables.VariablesTable;
 import checker.*;
 
 public class Main {
@@ -27,9 +33,6 @@ public class Main {
     // Iniciando o processo de parsing (criando a parser tree)
     ParseTree tree = parser.program();
 
-    // Imprimindo a parser tree (opcional, para debug)
-    // System.out.println("Arvore de parsing: " + tree.toStringTree(parser));
-
     if (parser.getNumberOfSyntaxErrors() != 0) {
       return;
     }
@@ -42,5 +45,23 @@ public class Main {
     semanticChecker.printBuiltInProceduresAndFunctionsTable();
     semanticChecker.printGlobalVariablesTable();
     semanticChecker.printProceduresAndFunctionsTable();
+
+    String programIdentifier = semanticChecker.getProgramIdentifier();
+    VariablesTable globalVariablesTable = semanticChecker.getGlobalVariablesTable();
+    BuiltInProceduresAndFunctionsTable builtInProceduresAndFunctionsTable = semanticChecker.getBuiltInProceduresAndFunctionsTable();
+    ProceduresAndFunctionsTable proceduresAndFunctionsTable = semanticChecker.getProceduresAndFunctionsTable();
+
+    AstBuilder astBuilder = new AstBuilder(
+      programIdentifier,
+      globalVariablesTable,
+      builtInProceduresAndFunctionsTable,
+      proceduresAndFunctionsTable
+    );
+
+    astBuilder.visit(tree);
+
+    String dotNotation = astBuilder.toDotNotation();
+
+    Files.writeString(Path.of("test.dot"), dotNotation, StandardCharsets.UTF_8);
   }
 }

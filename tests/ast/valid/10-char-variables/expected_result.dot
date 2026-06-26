@@ -1,0 +1,31 @@
+digraph AST {
+"ProgramNode" [label="p10"];
+"VariableDeclarationPartNode#2" [label="variables"];
+"VariableDeclarationNode#1" [label="(char) a"];
+"VariableDeclarationPartNode#2" -> "VariableDeclarationNode#1";
+"ProgramNode" -> "VariableDeclarationPartNode#2" [label="global variables"];
+"ProcedureAndFunctionDeclarationPartNode" [label="procedures and functions"];
+"ProcedureDeclarationNode#6" [label="procedure: 'p'"];
+"VariableDeclarationPartNode#4" [label="variables"];
+"VariableDeclarationNode#3" [label="(string) b"];
+"VariableDeclarationPartNode#4" -> "VariableDeclarationNode#3";
+"ProcedureDeclarationNode#6" -> "VariableDeclarationPartNode#4" [label="parameters"];
+"CompoundStatementNode#5" [label="{ }"];
+"ProcedureDeclarationNode#6" -> "CompoundStatementNode#5" [label="body"];
+"ProcedureAndFunctionDeclarationPartNode" -> "ProcedureDeclarationNode#6";
+"ProgramNode" -> "ProcedureAndFunctionDeclarationPartNode" [label="procedure and function declarations"] ;
+"CompoundStatementNode#14" [label="{ }"];
+"AssignmentStatementNode#10" [label=":="];
+"VariableAccessExpressionNode#8" [label="(char) a"];
+"AssignmentStatementNode#10" -> "VariableAccessExpressionNode#8" [label="variable"] ;
+"PrimitiveTypeExpressionNode#9" [label="'x'"];
+"AssignmentStatementNode#10" -> "PrimitiveTypeExpressionNode#9" [label="value"] ;
+"CompoundStatementNode#14" -> "AssignmentStatementNode#10";
+"ProcedureCallStatementNode#13" [label="p()"];
+"CharToStringExpressionNode#12" [label="(char) -> (string)"];
+"VariableAccessExpressionNode#11" [label="(char) a"];
+"CharToStringExpressionNode#12" -> "VariableAccessExpressionNode#11";
+"ProcedureCallStatementNode#13" -> "CharToStringExpressionNode#12" [label="argument"];
+"CompoundStatementNode#14" -> "ProcedureCallStatementNode#13";
+"ProgramNode" -> "CompoundStatementNode#14" [label="main body"];
+}

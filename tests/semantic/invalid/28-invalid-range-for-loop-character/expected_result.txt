@@ -1,0 +1,2 @@
+SEMANTIC ERROR (7): incompatible begin and end variable values: z to a.
+make[1]: *** [Makefile:75: run-semantic] Error 1

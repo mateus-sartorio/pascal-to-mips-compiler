@@ -79,12 +79,15 @@ factor:
 	variable_access                                     # VariableAccess
   | CHARACTER_STRING                                  # StringConstant
 	| numeric_constant                                  # NumericConstant
+  | boolean_constant                                  # BooleanConstant
 	| function_designator                               # FunctionCall
 	| OPEN_PARENTHESIS expression CLOSE_PARENTHESIS     # ParenthesisExpression
 	| NOT factor                                        # NotFactor
   ;
 
 numeric_constant: ( PLUS | MINUS )? ( UNSIGNED_INTEGER | UNSIGNED_REAL ) ;
+
+boolean_constant: TRUE | FALSE ;
 
 // 6.7.2 Operators
 

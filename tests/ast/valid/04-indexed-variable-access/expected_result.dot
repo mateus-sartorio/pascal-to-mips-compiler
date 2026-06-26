@@ -1,0 +1,37 @@
+digraph AST {
+"ProgramNode" [label="p4"];
+"VariableDeclarationPartNode#2" [label="variables"];
+"VariableDeclarationNode#1" [label="(array[0..10] of boolean) arrayVar"];
+"VariableDeclarationPartNode#2" -> "VariableDeclarationNode#1";
+"ProgramNode" -> "VariableDeclarationPartNode#2" [label="global variables"];
+"CompoundStatementNode#18" [label="{ }"];
+"AssignmentStatementNode#9" [label=":="];
+"IndexedVariableAccessExpressionNode#5" [label="(boolean) arrayVar[]"];
+"PrimitiveTypeExpressionNode#4" [label="0"];
+"IndexedVariableAccessExpressionNode#5" -> "PrimitiveTypeExpressionNode#4" [label="index"] ;
+"AssignmentStatementNode#9" -> "IndexedVariableAccessExpressionNode#5" [label="variable"] ;
+"ComparisonOperatorExpressionNode#8" [label="<"];
+"PrimitiveTypeExpressionNode#6" [label="1"];
+"ComparisonOperatorExpressionNode#8" -> "PrimitiveTypeExpressionNode#6";
+"PrimitiveTypeExpressionNode#7" [label="2"];
+"ComparisonOperatorExpressionNode#8" -> "PrimitiveTypeExpressionNode#7";
+"AssignmentStatementNode#9" -> "ComparisonOperatorExpressionNode#8" [label="value"] ;
+"CompoundStatementNode#18" -> "AssignmentStatementNode#9";
+"AssignmentStatementNode#17" [label=":="];
+"IndexedVariableAccessExpressionNode#13" [label="(boolean) arrayVar[]"];
+"ArithmeticOperatorExpressionNode#12" [label="+"];
+"PrimitiveTypeExpressionNode#10" [label="1"];
+"ArithmeticOperatorExpressionNode#12" -> "PrimitiveTypeExpressionNode#10";
+"PrimitiveTypeExpressionNode#11" [label="1"];
+"ArithmeticOperatorExpressionNode#12" -> "PrimitiveTypeExpressionNode#11";
+"IndexedVariableAccessExpressionNode#13" -> "ArithmeticOperatorExpressionNode#12" [label="index"] ;
+"AssignmentStatementNode#17" -> "IndexedVariableAccessExpressionNode#13" [label="variable"] ;
+"ComparisonOperatorExpressionNode#16" [label="<"];
+"PrimitiveTypeExpressionNode#14" [label="1"];
+"ComparisonOperatorExpressionNode#16" -> "PrimitiveTypeExpressionNode#14";
+"PrimitiveTypeExpressionNode#15" [label="2"];
+"ComparisonOperatorExpressionNode#16" -> "PrimitiveTypeExpressionNode#15";
+"AssignmentStatementNode#17" -> "ComparisonOperatorExpressionNode#16" [label="value"] ;
+"CompoundStatementNode#18" -> "AssignmentStatementNode#17";
+"ProgramNode" -> "CompoundStatementNode#18" [label="main body"];
+}
