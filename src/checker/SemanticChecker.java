@@ -511,13 +511,17 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
         return globalVariableEntry.type;
       }
 
-      if(!(globalVariableEntry.type instanceof ArrayVariableType)) {
+      if(!(globalVariableEntry.type instanceof ArrayVariableType || (globalVariableEntry.type instanceof PrimitiveVariableType && globalVariableEntry.type.basePrimitiveType == PrimitiveTypeEnum.STRING))) {
         System.out.printf(
           "SEMANTIC ERROR (%d): expression must be indexable.\n",
           context.start.getLine()
         );
 
         System.exit(1);
+      }
+
+      if(globalVariableEntry.type instanceof PrimitiveVariableType && globalVariableEntry.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
+        return new PrimitiveVariableType(PrimitiveTypeEnum.CHAR);
       }
 
       return new PrimitiveVariableType(((ArrayVariableType) globalVariableEntry.type).basePrimitiveType);
@@ -543,13 +547,17 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
             return parameterEntry.type;
           }
 
-          if(!(parameterEntry.type instanceof ArrayVariableType)) {
+          if(!(parameterEntry.type instanceof ArrayVariableType || (parameterEntry.type instanceof PrimitiveVariableType && parameterEntry.type.basePrimitiveType == PrimitiveTypeEnum.STRING))) {
             System.out.printf(
               "SEMANTIC ERROR (%d): expression must be indexable.\n",
               context.start.getLine()
             );
-    
+
             System.exit(1);
+          }
+
+          if(parameterEntry.type instanceof PrimitiveVariableType && parameterEntry.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
+            return new PrimitiveVariableType(PrimitiveTypeEnum.CHAR);
           }
 
           return new PrimitiveVariableType(((ArrayVariableType) parameterEntry.type).basePrimitiveType);
@@ -562,13 +570,17 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
             return localEntry.type;
           }
 
-          if(!(localEntry.type instanceof ArrayVariableType)) {
+          if(!(localEntry.type instanceof ArrayVariableType || (localEntry.type instanceof PrimitiveVariableType && localEntry.type.basePrimitiveType == PrimitiveTypeEnum.STRING))) {
             System.out.printf(
               "SEMANTIC ERROR (%d): expression must be indexable.\n",
               context.start.getLine()
             );
     
             System.exit(1);
+          }
+          
+          if(localEntry.type instanceof PrimitiveVariableType && localEntry.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
+            return new PrimitiveVariableType(PrimitiveTypeEnum.CHAR);
           }
 
           return new PrimitiveVariableType(((ArrayVariableType) localEntry.type).basePrimitiveType);
@@ -589,13 +601,17 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
               return parameterEntry.type;
             }
 
-            if(!(parameterEntry.type instanceof ArrayVariableType)) {
+            if(!(parameterEntry.type instanceof ArrayVariableType || (parameterEntry.type instanceof PrimitiveVariableType && parameterEntry.type.basePrimitiveType == PrimitiveTypeEnum.STRING))) {
               System.out.printf(
                 "SEMANTIC ERROR (%d): expression must be indexable.\n",
                 context.start.getLine()
               );
       
               System.exit(1);
+            }
+
+            if(parameterEntry.type instanceof PrimitiveVariableType && parameterEntry.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
+              return new PrimitiveVariableType(PrimitiveTypeEnum.CHAR);
             }
 
             return new PrimitiveVariableType(((ArrayVariableType) parameterEntry.type).basePrimitiveType);
@@ -608,13 +624,17 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
               return localEntry.type;
             }
 
-            if(!(localEntry.type instanceof ArrayVariableType)) {
+            if(!(localEntry.type instanceof ArrayVariableType || (localEntry.type instanceof PrimitiveVariableType && localEntry.type.basePrimitiveType == PrimitiveTypeEnum.STRING))) {
               System.out.printf(
                 "SEMANTIC ERROR (%d): expression must be indexable.\n",
                 context.start.getLine()
               );
       
               System.exit(1);
+            }
+
+            if(localEntry.type instanceof PrimitiveVariableType && localEntry.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
+              return new PrimitiveVariableType(PrimitiveTypeEnum.CHAR);
             }
 
             return new PrimitiveVariableType(((ArrayVariableType) localEntry.type).basePrimitiveType);
