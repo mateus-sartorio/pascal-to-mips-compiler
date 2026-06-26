@@ -15,4 +15,5 @@ begin
   r := 2;
 
   r := f1(i);
+  r := abs(i);
 end.

@@ -11,6 +11,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import ast.AstBuilder;
 import parser.PascalLexer;
 import parser.PascalParser;
+import tables.BuiltInProceduresAndFunctionsTable;
 import tables.ProceduresAndFunctionsTable;
 import tables.VariablesTable;
 import checker.*;
@@ -47,11 +48,13 @@ public class Main {
 
     String programIdentifier = semanticChecker.getProgramIdentifier();
     VariablesTable globalVariablesTable = semanticChecker.getGlobalVariablesTable();
+    BuiltInProceduresAndFunctionsTable builtInProceduresAndFunctionsTable = semanticChecker.getBuiltInProceduresAndFunctionsTable();
     ProceduresAndFunctionsTable proceduresAndFunctionsTable = semanticChecker.getProceduresAndFunctionsTable();
 
     AstBuilder astBuilder = new AstBuilder(
       programIdentifier,
       globalVariablesTable,
+      builtInProceduresAndFunctionsTable,
       proceduresAndFunctionsTable
     );
 

@@ -65,12 +65,12 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
   // Table to store string literals found in the code
   private final StringLiteralsTable stringLiteralsTable = new StringLiteralsTable();
-
-  // Symbol table to store pre-declared procedures and functions and their parameters
-  private final BuiltInProceduresAndFunctionsTable builtInProceduresAndFunctionsTable = new BuiltInProceduresAndFunctionsTable();
-
+  
   // Symbol table to store variables declared in the code
   private final VariablesTable globalVariablesTable = new VariablesTable();
+  
+  // Symbol table to store pre-declared procedures and functions and their parameters
+  private final BuiltInProceduresAndFunctionsTable builtInProceduresAndFunctionsTable = new BuiltInProceduresAndFunctionsTable();
 
   // Symbol table to store declared procedures and functions, their local variables and parameters
   private final ProceduresAndFunctionsTable proceduresAndFunctionsTable = new ProceduresAndFunctionsTable();
@@ -83,12 +83,12 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
     return stringLiteralsTable;
   }
 
-  public BuiltInProceduresAndFunctionsTable getBuiltInProceduresAndFunctionsTable() {
-    return builtInProceduresAndFunctionsTable;
-  }
-
   public VariablesTable getGlobalVariablesTable() {
     return globalVariablesTable;
+  }
+
+  public BuiltInProceduresAndFunctionsTable getBuiltInProceduresAndFunctionsTable() {
+    return builtInProceduresAndFunctionsTable;
   }
 
   public ProceduresAndFunctionsTable getProceduresAndFunctionsTable() {

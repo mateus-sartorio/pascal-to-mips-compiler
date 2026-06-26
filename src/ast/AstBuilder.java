@@ -70,6 +70,8 @@ import parser.PascalParser.TermContext;
 import parser.PascalParser.VariableAccessContext;
 import parser.PascalParser.Variable_accessContext;
 import parser.PascalParserBaseVisitor;
+import tables.BuiltInProceduresAndFunctionsTable;
+import tables.BuiltInProceduresAndFunctionsTable.BuiltInProceduresAndFunctionsEntry;
 import tables.ProceduresAndFunctionsTable;
 import tables.ProceduresAndFunctionsTable.ProceduresAndFunctionsEntry;
 import tables.VariablesTable;
@@ -84,15 +86,18 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
 
   private final String programIdentifier;
   private final VariablesTable globalVariablesTable;
+  private final BuiltInProceduresAndFunctionsTable builtInProceduresAndFunctionsTable;
   private final ProceduresAndFunctionsTable proceduresAndFunctionsTable;
 
   public AstBuilder(
     String programIdentifier,
     VariablesTable globalVariablesTable,
+    BuiltInProceduresAndFunctionsTable builtInProceduresAndFunctionsTable,
     ProceduresAndFunctionsTable proceduresAndFunctionsTable
   ) {
     this.programIdentifier = programIdentifier;
     this.globalVariablesTable = globalVariablesTable;
+    this.builtInProceduresAndFunctionsTable = builtInProceduresAndFunctionsTable;
     this.proceduresAndFunctionsTable = proceduresAndFunctionsTable;
   }
 
@@ -465,36 +470,20 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
 
     Actual_parameter_listContext actualParameterList = functionDesignatorContext.actual_parameter_list();
 
-    List<ExpressionNode> actualParameters = new LinkedList<>();
-
-    ProceduresAndFunctionsEntry functionEntry = proceduresAndFunctionsTable.get(functionIdentifier);
+    List<ExpressionNode> actualParameters;
+    PrimitiveTypeEnum returnType;
     
-    if(functionEntry != null) {
-      List<VariableTableEntry> argumentsList = functionEntry.parameters.toList();
-      
-      int i = 0;
-      for(Actual_parameterContext actualParameterContext : actualParameterList.actual_parameter()) {
-        ExpressionNode actualParameterNode = (ExpressionNode) visit(actualParameterContext);
-          
-        VariableTableEntry functionArgumentType = argumentsList.get(i);
-  
-        ExpressionNode finalExpressionNode = actualParameterNode;
-  
-        if(functionArgumentType.type.basePrimitiveType == PrimitiveTypeEnum.REAL && actualParameterNode.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
-          finalExpressionNode = new IntegerToRealExpressionNode(currentId++, actualParameterNode);
-        }
-        else if(functionArgumentType.type.basePrimitiveType == PrimitiveTypeEnum.STRING && actualParameterNode.type.basePrimitiveType == PrimitiveTypeEnum.CHAR) {
-          finalExpressionNode = new CharToStringExpressionNode(currentId++, actualParameterNode);
-        }
-  
-        actualParameters.add(finalExpressionNode);
-        i++;
-      }
+    BuiltInProceduresAndFunctionsEntry builtInProcedureEntry = builtInProceduresAndFunctionsTable.get(functionIdentifier);
+    if(builtInProcedureEntry != null) {
+      actualParameters = createActualParameters(actualParameterList, builtInProcedureEntry.parameters.toList());
+      returnType = builtInProcedureEntry.returnType;
     }
-
-    ProceduresAndFunctionsEntry entry = proceduresAndFunctionsTable.get(functionIdentifier);
-    PrimitiveTypeEnum returnType = entry.returnType;
-
+    else {
+      ProceduresAndFunctionsEntry procedureEntry = proceduresAndFunctionsTable.get(functionIdentifier);
+      actualParameters = createActualParameters(actualParameterList, procedureEntry.parameters.toList());
+      returnType = procedureEntry.returnType;
+    }
+    
     return new FunctionCallExpressionNode(currentId++, functionIdentifier, actualParameters, returnType);
   }
 
@@ -551,37 +540,47 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     return new AssignmentStatementNode(currentId++, variableAccessExpressionNode, finalExpressionNode);
   }
 
+  private List<ExpressionNode> createActualParameters(Actual_parameter_listContext actualParameterList, List<VariableTableEntry> argumentsList) {
+    List<ExpressionNode> actualParameters = new LinkedList<>();
+    
+    int i = 0;
+    for(Actual_parameterContext actualParameterContext : actualParameterList.actual_parameter()) {
+      ExpressionNode actualParameterNode = (ExpressionNode) visit(actualParameterContext);
+        
+      VariableTableEntry procedureArgumentType = argumentsList.get(i);
+
+      ExpressionNode finalExpressionNode = actualParameterNode;
+
+      if(procedureArgumentType.type.basePrimitiveType == PrimitiveTypeEnum.REAL && actualParameterNode.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
+        finalExpressionNode = new IntegerToRealExpressionNode(currentId++, actualParameterNode);
+      }
+      else if(procedureArgumentType.type.basePrimitiveType == PrimitiveTypeEnum.STRING && actualParameterNode.type.basePrimitiveType == PrimitiveTypeEnum.CHAR) {
+        finalExpressionNode = new CharToStringExpressionNode(currentId++, actualParameterNode);
+      }
+
+      actualParameters.add(finalExpressionNode);
+      i++;
+    }
+
+    return actualParameters;
+  } 
+
   @Override
   public ProcedureCallStatementNode visitProcedure_statement(Procedure_statementContext context) {
     String procedureIdentifier = context.IDENTIFIER().getText();
 
     Actual_parameter_listContext actualParameterList = context.actual_parameter_list();
 
-    List<ExpressionNode> actualParameters = new LinkedList<>();
+    List<ExpressionNode> actualParameters;
     
     ProceduresAndFunctionsEntry procedureEntry = proceduresAndFunctionsTable.get(procedureIdentifier);
+    BuiltInProceduresAndFunctionsEntry builtInProcedureEntry = builtInProceduresAndFunctionsTable.get(procedureIdentifier);
     
-    if(procedureEntry != null) {
-      List<VariableTableEntry> argumentsList = procedureEntry.parameters.toList();
-      
-      int i = 0;
-      for(Actual_parameterContext actualParameterContext : actualParameterList.actual_parameter()) {
-        ExpressionNode actualParameterNode = (ExpressionNode) visit(actualParameterContext);
-          
-        VariableTableEntry procedureArgumentType = argumentsList.get(i);
-  
-        ExpressionNode finalExpressionNode = actualParameterNode;
-  
-        if(procedureArgumentType.type.basePrimitiveType == PrimitiveTypeEnum.REAL && actualParameterNode.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
-          finalExpressionNode = new IntegerToRealExpressionNode(currentId++, actualParameterNode);
-        }
-        else if(procedureArgumentType.type.basePrimitiveType == PrimitiveTypeEnum.STRING && actualParameterNode.type.basePrimitiveType == PrimitiveTypeEnum.CHAR) {
-          finalExpressionNode = new CharToStringExpressionNode(currentId++, actualParameterNode);
-        }
-  
-        actualParameters.add(finalExpressionNode);
-        i++;
-      }
+    if(builtInProcedureEntry != null) {
+      actualParameters = createActualParameters(actualParameterList, builtInProcedureEntry.parameters.toList());
+    }
+    else {
+      actualParameters = createActualParameters(actualParameterList, procedureEntry.parameters.toList());
     }
     
     return new ProcedureCallStatementNode(currentId++, procedureIdentifier, actualParameters);

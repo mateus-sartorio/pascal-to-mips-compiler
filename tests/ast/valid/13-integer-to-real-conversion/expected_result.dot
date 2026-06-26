@@ -20,13 +20,13 @@ digraph AST {
 "FunctionDeclarationNode#10" -> "CompoundStatementNode#9" [label="body"];
 "ProcedureAndFunctionDeclarationPartNode" -> "FunctionDeclarationNode#10";
 "ProgramNode" -> "ProcedureAndFunctionDeclarationPartNode" [label="procedure and function declarations"] ;
-"CompoundStatementNode#29" [label="{ }"];
+"CompoundStatementNode#34" [label="{ }"];
 "AssignmentStatementNode#14" [label=":="];
 "VariableAccessExpressionNode#12" [label="(integer) i"];
 "AssignmentStatementNode#14" -> "VariableAccessExpressionNode#12" [label="variable"] ;
 "PrimitiveTypeExpressionNode#13" [label="1"];
 "AssignmentStatementNode#14" -> "PrimitiveTypeExpressionNode#13" [label="value"] ;
-"CompoundStatementNode#29" -> "AssignmentStatementNode#14";
+"CompoundStatementNode#34" -> "AssignmentStatementNode#14";
 "AssignmentStatementNode#18" [label=":="];
 "VariableAccessExpressionNode#15" [label="(real) r"];
 "AssignmentStatementNode#18" -> "VariableAccessExpressionNode#15" [label="variable"] ;
@@ -34,7 +34,7 @@ digraph AST {
 "VariableAccessExpressionNode#16" [label="(integer) i"];
 "IntegerToRealExpressionNode#17" -> "VariableAccessExpressionNode#16";
 "AssignmentStatementNode#18" -> "IntegerToRealExpressionNode#17" [label="value"] ;
-"CompoundStatementNode#29" -> "AssignmentStatementNode#18";
+"CompoundStatementNode#34" -> "AssignmentStatementNode#18";
 "AssignmentStatementNode#22" [label=":="];
 "VariableAccessExpressionNode#19" [label="(real) r"];
 "AssignmentStatementNode#22" -> "VariableAccessExpressionNode#19" [label="variable"] ;
@@ -42,7 +42,7 @@ digraph AST {
 "PrimitiveTypeExpressionNode#20" [label="2"];
 "IntegerToRealExpressionNode#21" -> "PrimitiveTypeExpressionNode#20";
 "AssignmentStatementNode#22" -> "IntegerToRealExpressionNode#21" [label="value"] ;
-"CompoundStatementNode#29" -> "AssignmentStatementNode#22";
+"CompoundStatementNode#34" -> "AssignmentStatementNode#22";
 "AssignmentStatementNode#28" [label=":="];
 "VariableAccessExpressionNode#23" [label="(real) r"];
 "AssignmentStatementNode#28" -> "VariableAccessExpressionNode#23" [label="variable"] ;
@@ -54,6 +54,16 @@ digraph AST {
 "FunctionCallExpressionNode#26" -> "IntegerToRealExpressionNode#25" [label="argument"];
 "IntegerToRealExpressionNode#27" -> "FunctionCallExpressionNode#26";
 "AssignmentStatementNode#28" -> "IntegerToRealExpressionNode#27" [label="value"] ;
-"CompoundStatementNode#29" -> "AssignmentStatementNode#28";
-"ProgramNode" -> "CompoundStatementNode#29" [label="main body"];
+"CompoundStatementNode#34" -> "AssignmentStatementNode#28";
+"AssignmentStatementNode#33" [label=":="];
+"VariableAccessExpressionNode#29" [label="(real) r"];
+"AssignmentStatementNode#33" -> "VariableAccessExpressionNode#29" [label="variable"] ;
+"FunctionCallExpressionNode#32" [label="(real) abs()"];
+"IntegerToRealExpressionNode#31" [label="(integer) -> (real)"];
+"VariableAccessExpressionNode#30" [label="(integer) i"];
+"IntegerToRealExpressionNode#31" -> "VariableAccessExpressionNode#30";
+"FunctionCallExpressionNode#32" -> "IntegerToRealExpressionNode#31" [label="argument"];
+"AssignmentStatementNode#33" -> "FunctionCallExpressionNode#32" [label="value"] ;
+"CompoundStatementNode#34" -> "AssignmentStatementNode#33";
+"ProgramNode" -> "CompoundStatementNode#34" [label="main body"];
 }
