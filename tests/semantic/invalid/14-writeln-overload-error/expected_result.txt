@@ -1,2 +1,2 @@
-SEMANTIC ERROR (4): Built-in procedure 'writeln' does not have a corresponding overload.
+SEMANTIC ERROR (4): Invalid type 'real' for parameter 'str' of procedure 'writeln'.
 make[1]: *** [Makefile:75: run-semantic] Error 1

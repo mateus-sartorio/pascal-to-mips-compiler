@@ -153,29 +153,16 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
     // --- PROCEDURES ---
     // I/O
-    builtInProceduresAndFunctionsTable.addProcedure("write", List.of(intParam));
     builtInProceduresAndFunctionsTable.addProcedure("write", List.of(stringParam));
-    
-    builtInProceduresAndFunctionsTable.addProcedure("writeln", List.of(intParam));
     builtInProceduresAndFunctionsTable.addProcedure("writeln", List.of(stringParam));
-
-    builtInProceduresAndFunctionsTable.addProcedure("read", List.of(intParam));
     builtInProceduresAndFunctionsTable.addProcedure("read", List.of(stringParam));
-
-    builtInProceduresAndFunctionsTable.addProcedure("readln", List.of(intParam));
     builtInProceduresAndFunctionsTable.addProcedure("readln", List.of(stringParam));
 
     // --- FUNCTIONS ---
     // Math
-    builtInProceduresAndFunctionsTable.addFunction("abs", List.of(intParam), PrimitiveTypeEnum.INTEGER);
     builtInProceduresAndFunctionsTable.addFunction("abs", List.of(realParam), PrimitiveTypeEnum.REAL);
-
-    builtInProceduresAndFunctionsTable.addFunction("sqr", List.of(intParam), PrimitiveTypeEnum.INTEGER);
     builtInProceduresAndFunctionsTable.addFunction("sqr", List.of(realParam), PrimitiveTypeEnum.REAL);
-    
-    builtInProceduresAndFunctionsTable.addFunction("sqrt", List.of(intParam), PrimitiveTypeEnum.REAL);
     builtInProceduresAndFunctionsTable.addFunction("sqrt", List.of(realParam), PrimitiveTypeEnum.REAL);
-    
     builtInProceduresAndFunctionsTable.addFunction("trunc", List.of(realParam), PrimitiveTypeEnum.INTEGER);
     builtInProceduresAndFunctionsTable.addFunction("round", List.of(realParam), PrimitiveTypeEnum.INTEGER);
 
@@ -203,16 +190,14 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
       System.exit(1);
     }
 
-    List<BuiltInProceduresAndFunctionsEntry> builtInProceduresAndFunctionsEntry = builtInProceduresAndFunctionsTable.get(identifier);
+    BuiltInProceduresAndFunctionsEntry builtInProceduresAndFunctionsEntry = builtInProceduresAndFunctionsTable.get(identifier);
 
     if (builtInProceduresAndFunctionsEntry != null) {
-      BuiltInProceduresAndFunctionsEntry firstEntry = builtInProceduresAndFunctionsEntry.getFirst();
-
       System.out.printf(
         "SEMANTIC ERROR (%d): '%s' is a built-in %s.\n",
         identifierToken.getLine(),
-        firstEntry.identifier,
-        firstEntry.type.toString()
+        builtInProceduresAndFunctionsEntry.identifier,
+        builtInProceduresAndFunctionsEntry.type.toString()
       );
 
       System.exit(1);
@@ -864,66 +849,75 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
   // Checking usage of procedures and functions
 
+  private PrimitiveVariableType checkParameterList(
+    Actual_parameter_listContext actualParameterList,
+    List<VariableTableEntry> parametersList,
+    PrimitiveTypeEnum returnType,
+    String entryIdentifier,
+    int line,
+    ProcedureOrFunctionEnum type
+  ) {
+    if(actualParameterList == null && parametersList.isEmpty()) {
+      return new PrimitiveVariableType(returnType);
+    }
+
+    List<Actual_parameterContext> actualParameters = actualParameterList.actual_parameter();
+
+    if(actualParameters.size() != parametersList.size()) {
+      System.out.printf(
+        "SEMANTIC ERROR (%d): Invalid number of arguments to procedure '%s'.\n",
+        line,
+        entryIdentifier
+      );
+
+      System.exit(1);
+    }
+
+    int i = 0;
+    for(VariableTableEntry parameter : parametersList) {
+      Actual_parameterContext actualParameter = actualParameters.get(i);
+      VariableType actualParameterType = visit(actualParameter);
+
+      if(!actualParameterType.isEquivalent(parameter.type)) {
+        System.out.printf(
+          "SEMANTIC ERROR (%d): Invalid type '%s' for parameter '%s' of %s '%s'.\n",
+          line,
+          actualParameterType.toString(),
+          parameter.identifier,
+          type.toString(),
+          entryIdentifier
+        );
+
+        System.exit(1);
+      }
+
+      i++;
+    }
+
+    return new PrimitiveVariableType(returnType);
+  }
+
   @Override
-  public VariableType visitProcedure_statement(Procedure_statementContext context) {
+  public PrimitiveVariableType visitProcedure_statement(Procedure_statementContext context) {
     TerminalNode identifier = context.IDENTIFIER();
     Actual_parameter_listContext actualParameterList = context.actual_parameter_list();
 
-    List<BuiltInProceduresAndFunctionsEntry> builtInProceduresAndFunctionsEntries = builtInProceduresAndFunctionsTable.get(identifier.getText());
+    BuiltInProceduresAndFunctionsEntry builtInProcedureEntry = builtInProceduresAndFunctionsTable.get(identifier.getText());
 
-    boolean anyMatched = false;
-    if (builtInProceduresAndFunctionsEntries != null) {
-      for(BuiltInProceduresAndFunctionsEntry entry : builtInProceduresAndFunctionsEntries) {
-        List<VariableTableEntry> parametersList = entry.parameters.toList();
-
-        if(actualParameterList == null && parametersList.isEmpty()) {
-          return new PrimitiveVariableType(entry.returnType);
-        }
-
-        List<Actual_parameterContext> actualParameters = actualParameterList.actual_parameter();
-        
-        if(actualParameters.size() != parametersList.size()) {
-          break;
-        }
-
-        int i = 0;
-        boolean currentMatched = true;
-        for(VariableTableEntry parameter : parametersList) {
-          Actual_parameterContext actualParameter = actualParameters.get(i);
-          VariableType actualParameterType = visit(actualParameter);
-
-          if(!actualParameterType.isEquivalent(parameter.type)) {
-            currentMatched = false;
-            break;
-          }
-
-          i++;
-        }
-
-        if(currentMatched) {
-          anyMatched = true;
-          break;
-        }
-      }
-
-
-      if(!anyMatched) {
-        System.out.printf(
-          "SEMANTIC ERROR (%d): Built-in procedure '%s' does not have a corresponding overload.\n",
-          identifier.getSymbol().getLine(),
-          identifier.getText()
-        );
-  
-        System.exit(1);
-      }
-      else {
-        return new PrimitiveVariableType(PrimitiveTypeEnum.NO_TYPE);
-      }
+    if (builtInProcedureEntry != null) {
+      return checkParameterList(
+        actualParameterList,
+        builtInProcedureEntry.parameters.toList(),
+        builtInProcedureEntry.returnType,
+        builtInProcedureEntry.identifier,
+        identifier.getSymbol().getLine(),
+        ProcedureOrFunctionEnum.PROCEDURE
+      );
     }
 
-    ProceduresAndFunctionsEntry proceduresAndFunctionsEntry = proceduresAndFunctionsTable.get(identifier.getText());
+    ProceduresAndFunctionsEntry procedureEntry = proceduresAndFunctionsTable.get(identifier.getText());
 
-    if (proceduresAndFunctionsEntry == null) {
+    if (procedureEntry == null) {
       System.out.printf(
         "SEMANTIC ERROR (%d): Procedure '%s' is not defined.\n",
         identifier.getSymbol().getLine(),
@@ -933,180 +927,73 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
       System.exit(1);
     }
 
-    List<VariableTableEntry> parametersList = proceduresAndFunctionsEntry.parameters.toList();
-
-    if(actualParameterList == null && parametersList.isEmpty()) {
-      return new PrimitiveVariableType(proceduresAndFunctionsEntry.returnType);
-    }
-
-    List<Actual_parameterContext> actualParameters = actualParameterList.actual_parameter();
-
-    if(actualParameters.size() != parametersList.size()) {
-      System.out.printf(
-        "SEMANTIC ERROR (%d): Invalid number of arguments to procedure '%s'.\n",
-        identifier.getSymbol().getLine(),
-        proceduresAndFunctionsEntry.identifier
-      );
-
-      System.exit(1);
-    }
-
-    int i = 0;
-    for(VariableTableEntry parameter : parametersList) {
-      Actual_parameterContext actualParameter = actualParameters.get(i);
-      VariableType actualParameterType = visit(actualParameter);
-
-      if(!actualParameterType.isEquivalent(parameter.type)) {
-        System.out.printf(
-          "SEMANTIC ERROR (%d): Invalid type '%s' for parameter '%s' of %s '%s'.\n",
-          identifier.getSymbol().getLine(),
-          actualParameterType.toString(),
-          parameter.identifier,
-          proceduresAndFunctionsEntry.type.toString(),
-          proceduresAndFunctionsEntry.identifier
-        );
-
-        System.exit(1);
-      }
-
-      i++;
-    }
-
-    return new PrimitiveVariableType(PrimitiveTypeEnum.NO_TYPE);
+    return checkParameterList(
+      actualParameterList,
+      procedureEntry.parameters.toList(),
+      procedureEntry.returnType,
+      procedureEntry.identifier,
+      identifier.getSymbol().getLine(),
+      ProcedureOrFunctionEnum.PROCEDURE
+    );
   }
 
   @Override
   public VariableType visitFunction_designator(Function_designatorContext context) {
     TerminalNode identifier = context.IDENTIFIER();
-
     Actual_parameter_listContext actualParameterList = context.actual_parameter_list();
 
-    List<BuiltInProceduresAndFunctionsEntry> builtInProceduresAndFunctionsEntries = builtInProceduresAndFunctionsTable.get(identifier.getText());
+    BuiltInProceduresAndFunctionsEntry builtInFunctionEntry = builtInProceduresAndFunctionsTable.get(identifier.getText());
     
-    BuiltInProceduresAndFunctionsEntry matchedEntry = null;
-    
-    boolean anyMatched = false;
-    if (builtInProceduresAndFunctionsEntries != null) {
-      for(BuiltInProceduresAndFunctionsEntry entry : builtInProceduresAndFunctionsEntries) {
-        List<VariableTableEntry> parametersList = entry.parameters.toList();
-
-        if(actualParameterList == null && parametersList.isEmpty()) {
-          return new PrimitiveVariableType(entry.returnType);
-        }
-
-        List<Actual_parameterContext> actualParameters = actualParameterList.actual_parameter();
-        if(actualParameters.size() != parametersList.size()) {
-          break;
-        }
-
-        int i = 0;
-        boolean currentMatched = true;
-        for(VariableTableEntry parameter : parametersList) {
-          Actual_parameterContext actualParameter = actualParameters.get(i);
-          VariableType actualParameterType = visit(actualParameter);
-
-          if(!actualParameterType.isEquivalent(parameter.type)) {
-            currentMatched = false;
-            break;
-          }
-
-          i++;
-        }
-
-        if(currentMatched) {
-          if(entry.type == ProcedureOrFunctionEnum.PROCEDURE) {
-            System.out.printf(
-              "SEMANTIC ERROR (%d): Built-in procedure '%s' invocation is not an expression.\n",
-              identifier.getSymbol().getLine(),
-              identifier.getText()
-            );
-
-            System.exit(1);
-          }
-
-
-          anyMatched = true;
-          matchedEntry = entry;
-          break;
-        }
-      }
-
-      if(!anyMatched) {
-        System.out.printf(
-          "SEMANTIC ERROR (%d): Built-in procedure '%s' does not have a corresponding overload.\n",
-          identifier.getSymbol().getLine(),
-          identifier.getText()
-        );
-  
-        System.exit(1);
-      }
-      else {
-        return new PrimitiveVariableType(matchedEntry.returnType);
-      }
+    if (builtInFunctionEntry != null) {
+    if(builtInFunctionEntry.type == ProcedureOrFunctionEnum.PROCEDURE) {
+      System.out.printf(
+        "SEMANTIC ERROR (%d): Built-in procedure '%s' is not an expression.\n",
+        identifier.getSymbol().getLine(),
+        identifier.getText()
+      );
+      
+      System.exit(1);
+    }
+      
+      return checkParameterList(
+        actualParameterList,
+        builtInFunctionEntry.parameters.toList(),
+        builtInFunctionEntry.returnType,
+        builtInFunctionEntry.identifier,
+        identifier.getSymbol().getLine(),
+        ProcedureOrFunctionEnum.FUNCTION
+      );
     }
 
-    ProceduresAndFunctionsEntry proceduresAndFunctionsEntry = proceduresAndFunctionsTable.get(identifier.getText());
+    ProceduresAndFunctionsEntry functionEntry = proceduresAndFunctionsTable.get(identifier.getText());
 
-    if (proceduresAndFunctionsEntry == null) {
+    if (functionEntry == null) {
       System.out.printf(
         "SEMANTIC ERROR (%d): Function '%s' is not defined.\n",
         identifier.getSymbol().getLine(),
         identifier.getText()
       );
-
+      
       System.exit(1);
     }
-
-    if(proceduresAndFunctionsEntry.type == ProcedureOrFunctionEnum.PROCEDURE) {
+    else if(functionEntry.type == ProcedureOrFunctionEnum.PROCEDURE) {
       System.out.printf(
-        "SEMANTIC ERROR (%d): Procedure '%s' invocation is not an expression.\n",
+        "SEMANTIC ERROR (%d): Procedure '%s' is not an expression.\n",
         identifier.getSymbol().getLine(),
         identifier.getText()
       );
-
-      System.exit(1);
-    }
-    
-    List<VariableTableEntry> parametersList = proceduresAndFunctionsEntry.parameters.toList();
-
-    if(actualParameterList == null  && parametersList.isEmpty()) {
-      return new PrimitiveVariableType(proceduresAndFunctionsEntry.returnType);
-    }
-
-    List<Actual_parameterContext> actualParameters = actualParameterList.actual_parameter();
-
-    if(actualParameters.size() != parametersList.size()) {
-      System.out.printf(
-        "SEMANTIC ERROR (%d): Invalid number of arguments to function '%s'.\n",
-        identifier.getSymbol().getLine(),
-        proceduresAndFunctionsEntry.identifier
-      );
-
+      
       System.exit(1);
     }
 
-    int i = 0;
-    for(VariableTableEntry parameter : parametersList) {
-      Actual_parameterContext actualParameter = actualParameters.get(i);
-      VariableType actualParameterType = visit(actualParameter);
-
-      if(!actualParameterType.isEquivalent(parameter.type)) {
-        System.out.printf(
-          "SEMANTIC ERROR (%d): Invalid type '%s' for parameter '%s' of %s '%s'.\n",
-          identifier.getSymbol().getLine(),
-          actualParameterType.toString(),
-          parameter.identifier,
-          proceduresAndFunctionsEntry.type.toString(),
-          proceduresAndFunctionsEntry.identifier
-        );
-
-        System.exit(1);
-      }
-
-      i++;
-    }
-
-    return new PrimitiveVariableType(proceduresAndFunctionsEntry.returnType);
+    return checkParameterList(
+      actualParameterList,
+      functionEntry.parameters.toList(),
+      functionEntry.returnType,
+      functionEntry.identifier,
+      identifier.getSymbol().getLine(),
+      ProcedureOrFunctionEnum.FUNCTION
+    );
   }
 
   // Checking usage of literals
