@@ -1,21 +1,18 @@
 package ast.types.expressions.implementations;
 
-import ast.types.expressions.contracts.ExpressionNode;
 import types.VariableType;
 
-public class FunctionReturnAssignmentExpressionNode extends ExpressionNode {
-  public final String functionIdentifier;
+public class FunctionReturnAssignmentExpressionNode extends VariableAccessExpressionNode {
 
   public FunctionReturnAssignmentExpressionNode(int id, String functionIdentifier, VariableType type) {
-    super(id, type);
-    this.functionIdentifier = functionIdentifier;
+    super(id, functionIdentifier, type);
   }
 
   @Override
   public String toDotNotation() {
     StringBuilder sb = new StringBuilder();
 
-    sb.append("%s [label=\"(%s) %s\"];\n".formatted(getDotNotationIdentifier(), type, functionIdentifier));
+    sb.append("%s [label=\"(%s) %s\"];\n".formatted(getDotNotationIdentifier(), type, identifier));
     
     return sb.toString();
   }

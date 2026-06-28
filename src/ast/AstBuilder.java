@@ -166,7 +166,7 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
   }
 
   @Override
-  public ExpressionNode visitVariable_access(Variable_accessContext context) {
+  public VariableAccessExpressionNode visitVariable_access(Variable_accessContext context) {
     String variableIdentifier;
     boolean isIndexedVariable = false;
     if(context.IDENTIFIER() == null) {
@@ -518,10 +518,10 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
   }
 
   @Override
-  public StatementNode visitAssignment_statement(Assignment_statementContext context) {
+  public AssignmentStatementNode visitAssignment_statement(Assignment_statementContext context) {
     Variable_accessContext variableAccessContext = context.variable_access();
 
-    ExpressionNode variableAccessExpressionNode = (ExpressionNode) visit(variableAccessContext);
+    VariableAccessExpressionNode variableAccessExpressionNode = (VariableAccessExpressionNode) visit(variableAccessContext);
     ExpressionNode expressionNode = (ExpressionNode) visit(context.expression());
 
     ExpressionNode finalExpressionNode = expressionNode;
@@ -534,7 +534,7 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     }
     
     if(variableAccessExpressionNode instanceof FunctionReturnAssignmentExpressionNode) {
-      return new ReturnStatementNode(currentId++, finalExpressionNode);
+      return new ReturnStatementNode(currentId++, variableAccessExpressionNode, finalExpressionNode);
     }
 
     return new AssignmentStatementNode(currentId++, variableAccessExpressionNode, finalExpressionNode);
