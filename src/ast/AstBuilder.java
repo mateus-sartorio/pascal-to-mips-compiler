@@ -387,6 +387,9 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
       else if(operator.DIVISION() != null) {
         returnExpression = new ArithmeticOperatorExpressionNode(currentId++, leftExpression, rightExpression, "/");
       }
+      else if(operator.DIV() != null) {
+        returnExpression = new ArithmeticOperatorExpressionNode(currentId++, leftExpression, rightExpression, "div");
+      }
       else {
         returnExpression = new LogicOperatorExpressionNode(currentId++, leftExpression, rightExpression, "and");
       }

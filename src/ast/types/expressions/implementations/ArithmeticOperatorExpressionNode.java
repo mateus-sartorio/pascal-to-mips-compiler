@@ -33,6 +33,13 @@ public class ArithmeticOperatorExpressionNode extends BinaryOperatorExpressionNo
         right.type.basePrimitiveType
       ));
     }
+    else if(operator.equals("div")) {
+      resultType = new PrimitiveVariableType(TypeRules.getResultType(
+        TypeRules.INTEGER_DIVISION_TABLE,
+        left.type.basePrimitiveType,
+        right.type.basePrimitiveType
+      ));
+    }
 
     super(id, left, right, resultType);
     this.operator = operator;

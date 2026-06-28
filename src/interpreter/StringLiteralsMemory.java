@@ -11,10 +11,12 @@ public class StringLiteralsMemory {
     this.stringLiteralsList = stringLiteralsTable.toList();
   }
 
-  public void addEntry(String entry) {
+  public int addEntry(String entry) {
     if(!stringLiteralsList.contains(entry)) {
       stringLiteralsList.add(entry);
     }
+
+    return getIndex(entry);
   }
 
   public int getIndex(String entry) {

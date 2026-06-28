@@ -19,6 +19,7 @@ MINUS: '-' ;
 EQUAL_TO: '=' ;
 MULTIPLICATION: '*' ;
 DIVISION: '/' ;
+DIV: 'div';
 LESS_THAN: '<' ;
 GREATER_THAN: '>' ;
 OPEN_BRACKET: '[' | '(.' ;

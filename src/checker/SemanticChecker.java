@@ -690,6 +690,8 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
   @Override
   public VariableType visitFor_statement(For_statementContext context) {
+    visit(context.statement());
+
     TerminalNode identifier = context.IDENTIFIER();
 
     String variableIdentifier = identifier.getSymbol().getText();
@@ -1096,6 +1098,11 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
         PrimitiveTypeEnum result = TypeRules.getResultType(TypeRules.REAL_DIVISION_TABLE, leftType.basePrimitiveType, rightType.basePrimitiveType);
         returnType = new PrimitiveVariableType(result);
       }
+      else if(operator.DIV() != null) {
+        concreteOperator = operator.DIV();
+        PrimitiveTypeEnum result = TypeRules.getResultType(TypeRules.INTEGER_DIVISION_TABLE, leftType.basePrimitiveType, rightType.basePrimitiveType);
+        returnType = new PrimitiveVariableType(result);
+      }
       else {
         concreteOperator = operator.AND();
         PrimitiveTypeEnum result = TypeRules.getResultType(TypeRules.LOGICAL_TABLE, leftType.basePrimitiveType, rightType.basePrimitiveType);
@@ -1203,6 +1210,12 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
   @Override
   public VariableType visitIf_statement(If_statementContext context) {
+    visit(context.statement());
+
+    if(context.else_part() != null) {
+      visit(context.else_part());
+    }
+
     VariableType expressionType = visit(context.expression());
 
     if(!(expressionType instanceof PrimitiveVariableType && expressionType.basePrimitiveType == PrimitiveTypeEnum.BOOLEAN)) {

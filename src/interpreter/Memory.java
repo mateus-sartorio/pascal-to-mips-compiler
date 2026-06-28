@@ -11,19 +11,19 @@ public class Memory extends Vector<Word> {
     }
   }
 
-  public void storei(int addr, int value) {
-    this.set(addr, Word.fromInt(value));
+  public void storei(int addresss, int value) {
+    this.set(addresss, Word.fromInt(value));
   }
 
-  public int loadi(int addr) {
-    return this.get(addr).toInt();
+  public int loadi(int addresss) {
+    return this.get(addresss).toInt();
   }
 
-  public void storef(int addr, float value) {
-    this.set(addr, Word.fromFloat(value));
+  public void storef(int addresss, float value) {
+    this.set(addresss, Word.fromFloat(value));
   }
 
-  public float loadf(int addr) {
-    return this.get(addr).toFloat();
+  public float loadf(int addresss) {
+    return this.get(addresss).toFloat();
   }
 }

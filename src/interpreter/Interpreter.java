@@ -15,7 +15,6 @@ import ast.types.statements.implementations.IfStatementNode;
 import tables.StringLiteralsTable;
 import tables.VariablesTable;
 import types.PrimitiveTypeEnum;
-import types.PrimitiveVariableType;
 
 public class Interpreter  {
   private final DataStack dataStack;
@@ -115,12 +114,50 @@ public class Interpreter  {
     }
   }
 
-  private void handlePlus() {
+  private void handlePlus(ArithmeticOperatorExpressionNode node) {
+    visit(node.right);
+    visit(node.left);
 
+    switch (node.type.basePrimitiveType) {
+      case PrimitiveTypeEnum.REAL -> dataStack.pushf(dataStack.popf() + dataStack.popf());
+      case PrimitiveTypeEnum.INTEGER -> dataStack.pushi(dataStack.popi() + dataStack.popi());
+      case PrimitiveTypeEnum.CHAR -> dataStack.pushi(stringLiteralsMemory.addEntry(String.valueOf((char) dataStack.popi()) + String.valueOf((char) dataStack.popi())));
+      case PrimitiveTypeEnum.STRING -> dataStack.pushi(stringLiteralsMemory.addEntry(stringLiteralsMemory.getEntry(dataStack.popi()) + stringLiteralsMemory.getEntry(dataStack.popi())));
+      default -> throw new RuntimeException("Unsupported primitive type");
+    }
   }
 
-  private void handleMinus() {
+  private void handleMinus(ArithmeticOperatorExpressionNode node) {
+    visit(node.right);
+    visit(node.left);
 
+    switch (node.type.basePrimitiveType) {
+      case PrimitiveTypeEnum.REAL -> dataStack.pushf(dataStack.popf() - dataStack.popf());
+      case PrimitiveTypeEnum.INTEGER -> dataStack.pushi(dataStack.popi() - dataStack.popi());
+      default -> throw new RuntimeException("Unsupported primitive type");
+    }
+  }
+
+  private void handleMultiplication(ArithmeticOperatorExpressionNode node) {
+    visit(node.right);
+    visit(node.left);
+
+    switch (node.type.basePrimitiveType) {
+      case PrimitiveTypeEnum.REAL -> dataStack.pushf(dataStack.popf() / dataStack.popf());
+      case PrimitiveTypeEnum.INTEGER -> dataStack.pushi(dataStack.popi() / dataStack.popi());
+      default -> throw new RuntimeException("Unsupported primitive type");
+    }
+  }
+
+  private void handleDivision(ArithmeticOperatorExpressionNode node) {
+    visit(node.right);
+    visit(node.left);
+
+    switch (node.type.basePrimitiveType) {
+      case PrimitiveTypeEnum.REAL -> dataStack.pushf(dataStack.popf() / dataStack.popf());
+      case PrimitiveTypeEnum.INTEGER -> dataStack.pushi(dataStack.popi() / dataStack.popi());
+      default -> throw new RuntimeException("Unsupported primitive type");
+    }
   }
 
   // private void handleMultiplca
@@ -128,11 +165,34 @@ public class Interpreter  {
   private void visitArithmeticOperatorExpressionNode(ArithmeticOperatorExpressionNode node) {
     String operator = node.operator;
 
-
+    switch (operator) {
+      case "+" -> handlePlus(node);
+      case "-" -> handleMinus(node);
+      case "*" -> handleMultiplication(node);
+      case "/" -> handleDivision(node);
+      default -> throw new RuntimeException("Unsupported operation");
+    }
   }
 
   private void visitLogicOperatorExpressionNode(LogicOperatorExpressionNode node) {
-    
+    String operator = node.operator;
+
+    switch (operator) {
+      case "and" -> {
+        visit(node.left);
+        visit(node.right);
+        dataStack.pushi((dataStack.popi() == 1 && dataStack.popi() == 1) ? 1 : 0);
+      }
+      case "or" -> {
+        visit(node.left);
+        visit(node.right);
+        dataStack.pushi((dataStack.popi() == 1 || dataStack.popi() == 1) ? 1 : 0);
+      }
+
+      default -> throw new RuntimeException("Unsupported operation");
+    }
+
+      
   }
 
   private void visitIntegerToRealExpressionNode(IntegerToRealExpressionNode node) {
@@ -164,6 +224,7 @@ public class Interpreter  {
       case CharToStringExpressionNode concreteTypeNode -> visitCharToStringExpressionNode(concreteTypeNode);
       case ComparisonOperatorExpressionNode concreteTypeNode -> visitComparisonOperatorExpressionNode(concreteTypeNode);
       case AssignmentStatementNode concreteTypeNode -> visitAssignmentStatementNode(concreteTypeNode);
+      case ArithmeticOperatorExpressionNode concreteTypeNode -> visitArithmeticOperatorExpressionNode(concreteTypeNode);
 
       default -> throw new RuntimeException("Unsupported primitive type");
     }
