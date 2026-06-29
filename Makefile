@@ -80,6 +80,10 @@ run-ast:
 	@mv test.dot $(dir $(FILE_ABSOLUTE_PATH))actual_result.dot
 	@dot -Tpng $(dir $(FILE_ABSOLUTE_PATH))actual_result.dot -o $(dir $(FILE_ABSOLUTE_PATH))actual_result.png
 
+# Run the interpreter
+run-interpreter:
+	@$(JAVA) $(CLASS_PATH_OPTION) Main $(FILE_ABSOLUTE_PATH) 
+
 # Run all automated tests
 test:
 	@chmod +x test.sh

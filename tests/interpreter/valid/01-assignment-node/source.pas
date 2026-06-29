@@ -13,6 +13,7 @@ begin
   d := true;
   e := 'a';
 
+  writeln(itos(a));
   writeln(rtos(b));
   writeln(c);
   writeln(btos(d));
