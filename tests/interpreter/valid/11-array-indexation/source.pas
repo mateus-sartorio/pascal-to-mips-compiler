@@ -1,15 +1,20 @@
 program p11;
 var
-  c: char;
-  arr: array[10..15] of char;
+  c: string;
+  arr: array[10..15] of string;
   i: integer;
   s: string;
 begin
-  arr[10] := 'l';
-  arr[11] := 'e';
-  arr[12] := 'g';
-  arr[13] := 'a';
-  arr[14] := 'l';
+  c := 'l';
+  arr[10] := c;
+  c := 'e';
+  arr[11] := c;
+  c := 'g';
+  arr[12] := c;
+  c := 'a';
+  arr[13] := c;
+  c := 'l';
+  arr[14] := c;
 
   for i := 10 to 15 do
   begin

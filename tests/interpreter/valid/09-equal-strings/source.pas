@@ -7,11 +7,11 @@ begin
   b := 'abc';
   c := 'dif';
   res := a = b;
-  res_str := (a + '+' + b + '=');
+  res_str := (a + ' + ' + b + ' = ');
   writeln(res_str);
   writeln(btos(res));
   res := a = c;
-  res_str := (a + '+' + c + '=');
+  res_str := (a + ' + ' + c + ' = ');
   writeln(res_str);
   writeln(btos(res));
   

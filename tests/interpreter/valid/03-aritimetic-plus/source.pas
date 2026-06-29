@@ -6,10 +6,10 @@ begin
   ia := 1;
   ib := 2;
   ic := ia + ib;
-  writeln(itos(ic));
+  writeln('Result ' + itos(ic));
 
   ra := 1.0;
   rb := 2.0;
   rc := ra + rb;
-  writeln(rtos(rc));
+  writeln('Result ' + rtos(rc));
 end.
