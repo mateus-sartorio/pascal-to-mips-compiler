@@ -82,7 +82,7 @@ run-ast:
 
 # Run the interpreter
 run-interpreter:
-	@$(JAVA) $(CLASS_PATH_OPTION) Main $(FILE_ABSOLUTE_PATH) 
+	@$(JAVA) $(CLASS_PATH_OPTION) Main $(FILE_ABSOLUTE_PATH) -interpret
 
 # Run all automated tests
 test:

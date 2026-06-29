@@ -5,5 +5,6 @@ var
   c: char;
 
 begin
+  s := 'abc';
   c := s[1];
 end.

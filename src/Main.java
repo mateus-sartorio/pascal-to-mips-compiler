@@ -67,15 +67,12 @@ public class Main {
     Files.writeString(Path.of("test.dot"), dotNotation, StandardCharsets.UTF_8);
 
     ProgramNode programNode = astBuilder.getProgramNode();
-    
-    Interpreter interpreter = new Interpreter(
-      globalVariablesTable,
-      getStringLiteralsTable,
-      builtInProceduresAndFunctionsTable,
-      proceduresAndFunctionsTable,
-      programNode
-    );
-    
-    interpreter.execute();
+
+    if (args.length > 1 && args[1].equals("-interpret")) {
+      Interpreter interpreter = new Interpreter(globalVariablesTable, getStringLiteralsTable, builtInProceduresAndFunctionsTable, proceduresAndFunctionsTable, programNode);
+
+      interpreter.execute();
+    }
+
   }
 }
