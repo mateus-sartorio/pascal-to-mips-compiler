@@ -39,15 +39,18 @@ public class Main {
     if (parser.getNumberOfSyntaxErrors() != 0) {
       return;
     }
-    
+
     // Criando o analisaador semântico para percorrer a parser tree e fazer as verificações semânticas
     SemanticChecker semanticChecker = new SemanticChecker();
     semanticChecker.visit(tree);
-    
-    semanticChecker.printLiteralsTable();
-    semanticChecker.printBuiltInProceduresAndFunctionsTable();
-    semanticChecker.printGlobalVariablesTable();
-    semanticChecker.printProceduresAndFunctionsTable();
+
+    // Imprimindo as tabelas de símbolos caso o argumento -print-tables seja passado
+    if (args.length > 1 && args[1].equals("-print-tables")) {
+      semanticChecker.printLiteralsTable();
+      semanticChecker.printBuiltInProceduresAndFunctionsTable();
+      semanticChecker.printGlobalVariablesTable();
+      semanticChecker.printProceduresAndFunctionsTable();
+    }
 
     String programIdentifier = semanticChecker.getProgramIdentifier();
     VariablesTable globalVariablesTable = semanticChecker.getGlobalVariablesTable();
@@ -55,12 +58,7 @@ public class Main {
     ProceduresAndFunctionsTable proceduresAndFunctionsTable = semanticChecker.getProceduresAndFunctionsTable();
     StringLiteralsTable getStringLiteralsTable = semanticChecker.getStringLiteralsTable();
 
-    AstBuilder astBuilder = new AstBuilder(
-      programIdentifier,
-      globalVariablesTable,
-      builtInProceduresAndFunctionsTable,
-      proceduresAndFunctionsTable
-    );
+    AstBuilder astBuilder = new AstBuilder(programIdentifier, globalVariablesTable, builtInProceduresAndFunctionsTable, proceduresAndFunctionsTable);
 
     astBuilder.visit(tree);
 
@@ -69,7 +67,7 @@ public class Main {
     Files.writeString(Path.of("test.dot"), dotNotation, StandardCharsets.UTF_8);
 
     Interpreter interpreter = new Interpreter(globalVariablesTable, getStringLiteralsTable);
-    
+
     ProgramNode programNode = astBuilder.getProgramNode();
 
     interpreter.visit(programNode);

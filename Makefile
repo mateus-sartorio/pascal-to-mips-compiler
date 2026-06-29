@@ -72,7 +72,7 @@ run-parser-gui:
 
 # Run the semantic checker
 run-semantic:
-	@$(JAVA) $(CLASS_PATH_OPTION) Main $(FILE_ABSOLUTE_PATH)
+	@$(JAVA) $(CLASS_PATH_OPTION) Main $(FILE_ABSOLUTE_PATH) -print-tables
 
 # Run the AST builder and save outputs as actual_result (.dot and .png) inside the test folder
 run-ast:
