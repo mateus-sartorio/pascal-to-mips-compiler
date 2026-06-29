@@ -3,19 +3,21 @@ package interpreter;
 import java.util.Formatter;
 import java.util.Stack;
 
-public final class DataStack extends Stack<Word> {
+public final class DataStack {
+  private final Stack<Word> stack = new Stack<>();
+
   public void pushInteger(int value) {
-    super.push(Word.fromInt(value));
+    stack.push(Word.fromInt(value));
   }
 
   public void pushIntegerArray(int[] values) {
     for(int value : values) {
-      super.push(Word.fromInt(value));
+      stack.push(Word.fromInt(value));
     }
   }
 
   public int popInteger() {
-    return super.pop().toInt();
+    return stack.pop().toInt();
   }
 
   public int[] popIntegerArray(int size) {
@@ -29,17 +31,17 @@ public final class DataStack extends Stack<Word> {
   }
 
   public void pushFloat(float value) {
-    super.push(Word.fromFloat(value));
+    stack.push(Word.fromFloat(value));
   }
 
   public void pushFloatArray(float[] values) {
     for(float value : values) {
-      super.push(Word.fromFloat(value));
+      stack.push(Word.fromFloat(value));
     }
   }
 
   public float popFloat() {
-    return super.pop().toFloat();
+    return stack.pop().toFloat();
   }
 
   public float[] popFloatArray(int size) {
@@ -58,8 +60,8 @@ public final class DataStack extends Stack<Word> {
     
     f.format("*** STACK: ");
     
-    for (int i = 0; i < this.size(); i++) {
-      f.format("%d ", this.get(i).toInt());
+    for (int i = 0; i < stack.size(); i++) {
+      f.format("%d ", stack.get(i).toInt());
     }
 
     f.format("\n");

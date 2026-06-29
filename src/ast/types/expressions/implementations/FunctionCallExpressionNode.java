@@ -7,12 +7,12 @@ import types.PrimitiveTypeEnum;
 import types.PrimitiveVariableType;
 
 public class FunctionCallExpressionNode extends ExpressionNode {
-  public final String procedureIdentifier;
+  public final String functionIdentifier;
   public final List<ExpressionNode> arguments;
 
   public FunctionCallExpressionNode(int id, String procedureIdentifier, List<ExpressionNode> arguments, PrimitiveTypeEnum returnType) {
     super(id, new PrimitiveVariableType(returnType));
-    this.procedureIdentifier = procedureIdentifier;
+    this.functionIdentifier = procedureIdentifier;
     this.arguments = arguments;
   }
 
@@ -20,7 +20,7 @@ public class FunctionCallExpressionNode extends ExpressionNode {
   public String toDotNotation() {
     StringBuilder sb = new StringBuilder();
     
-    sb.append("%s [label=\"(%s) %s()\"];\n".formatted(getDotNotationIdentifier(), type.basePrimitiveType, procedureIdentifier));
+    sb.append("%s [label=\"(%s) %s()\"];\n".formatted(getDotNotationIdentifier(), type.basePrimitiveType, functionIdentifier));
 
     for(var argument : arguments) {
       sb.append(argument.toDotNotation());

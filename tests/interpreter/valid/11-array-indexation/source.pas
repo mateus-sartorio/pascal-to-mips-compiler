@@ -3,7 +3,6 @@ var
   c: char;
   arr: array[10..15] of char;
   i: integer;
-  s: string;
 begin
   arr[10] := 'l';
   arr[11] := 'e';
