@@ -64,9 +64,11 @@ public class Main {
 
     String dotNotation = astBuilder.toDotNotation();
 
-    Path inputPath = Path.of(args[0]).toAbsolutePath(); 
-    Path outputPath = inputPath.getParent().resolve("actual_result.dot"); 
-    Files.writeString(outputPath, dotNotation, StandardCharsets.UTF_8);
+    if (args.length > 1 && args[1].equals("-print-ast")) {
+      Path inputPath = Path.of(args[0]).toAbsolutePath();
+      Path outputPath = inputPath.getParent().resolve("actual_result.dot");
+      Files.writeString(outputPath, dotNotation, StandardCharsets.UTF_8);
+    }
 
     ProgramNode programNode = astBuilder.getProgramNode();
 

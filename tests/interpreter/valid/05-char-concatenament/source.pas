@@ -8,7 +8,7 @@ a := 'a';
 b := 'b';
 
 res := a + b;
-Write(a + ' - ');
+Write(a + ' + ');
 Writeln(b);
 Writeln(res);
   

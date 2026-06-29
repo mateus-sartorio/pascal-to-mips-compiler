@@ -1,2 +1,2 @@
-3
-3.0
+Result 3
+Result 3.0
