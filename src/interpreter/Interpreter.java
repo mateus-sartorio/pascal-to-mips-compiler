@@ -6,7 +6,6 @@ import ast.types.expressions.implementations.ArithmeticOperatorExpressionNode;
 import ast.types.expressions.implementations.CharToStringExpressionNode;
 import ast.types.expressions.implementations.ComparisonOperatorExpressionNode;
 import ast.types.expressions.implementations.FunctionCallExpressionNode;
-import ast.types.expressions.implementations.FunctionReturnAssignmentExpressionNode;
 import ast.types.expressions.implementations.IndexedVariableAccessExpressionNode;
 import ast.types.expressions.implementations.IntegerToRealExpressionNode;
 import ast.types.expressions.implementations.LogicOperatorExpressionNode;
@@ -18,7 +17,6 @@ import ast.types.statements.implementations.CompoundStatementNode;
 import ast.types.statements.implementations.ForStatementNode;
 import ast.types.statements.implementations.IfStatementNode;
 import ast.types.statements.implementations.ProcedureCallStatementNode;
-import ast.types.statements.implementations.ReturnStatementNode;
 import tables.BuiltInProceduresAndFunctionsTable;
 import tables.ProceduresAndFunctionsTable;
 import tables.StringLiteralsTable;
@@ -286,7 +284,7 @@ public class Interpreter  {
     visit(node.left);
 
     if(node.left.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
-      if(node.left.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
+      if(node.right.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
         dataStack.pushInteger(dataStack.popInteger() * dataStack.popInteger());
       }
       else {
@@ -294,7 +292,7 @@ public class Interpreter  {
       }
     }
     else {
-      if(node.left.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
+      if(node.right.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
         dataStack.pushFloat(dataStack.popFloat() * dataStack.popInteger());
       }
       else {
@@ -483,9 +481,44 @@ public class Interpreter  {
       return;
     }
 
+    for(var argument : node.arguments) {
+      visit(argument);
+    }
+
     memoryStack.pushFrame(node.procedureIdentifier);
+    var currentMemory = memoryStack.peek();
 
     var a = programNode.getDeclaration(node.procedureIdentifier);
+
+    if(a.parameters.isPresent()) {
+      var parameters = a.parameters.get().variables;
+      for (int i = parameters.size() - 1; i >= 0; i--) {
+        var p = parameters.get(i);
+        
+        if(p.type instanceof ArrayVariableType ap) {
+          var size = ap.endIndex - ap.startIndex - 1;
+
+          switch(ap.basePrimitiveType) {
+            case PrimitiveTypeEnum.REAL -> currentMemory.storeFloatArray(p.identifier, dataStack.popFloatArray(size));
+            case PrimitiveTypeEnum.INTEGER -> currentMemory.storeIntegerArray(p.identifier, dataStack.popIntegerArray(size));
+            case PrimitiveTypeEnum.BOOLEAN -> currentMemory.storeIntegerArray(p.identifier, dataStack.popIntegerArray(size));
+            case PrimitiveTypeEnum.CHAR -> currentMemory.storeIntegerArray(p.identifier, dataStack.popIntegerArray(size));
+            case PrimitiveTypeEnum.STRING -> currentMemory.storeIntegerArray(p.identifier, dataStack.popIntegerArray(size));
+            default -> throw new RuntimeException("Unsupported primitive type");
+          }
+        }
+        else {
+          switch(p.type.basePrimitiveType) {
+            case PrimitiveTypeEnum.REAL -> currentMemory.storeFloat(p.identifier, dataStack.popFloat());
+            case PrimitiveTypeEnum.INTEGER -> currentMemory.storeInteger(p.identifier, dataStack.popInteger());
+            case PrimitiveTypeEnum.BOOLEAN -> currentMemory.storeInteger(p.identifier, dataStack.popInteger());
+            case PrimitiveTypeEnum.CHAR -> currentMemory.storeInteger(p.identifier, dataStack.popInteger());
+            case PrimitiveTypeEnum.STRING -> currentMemory.storeInteger(p.identifier, dataStack.popInteger());
+            default -> throw new RuntimeException("Unsupported primitive type");
+          }
+        }
+      }
+    }
 
     visit(a.compoundStatement);
 
@@ -497,19 +530,52 @@ public class Interpreter  {
       for(var argument : node.arguments) {
         visit(argument);
       }
-
+      
       executeBuiltInProcedureOrFunction(node.functionIdentifier);
       return;
     }
+    
+    for(var argument : node.arguments) {
+      visit(argument);
+    }
 
     memoryStack.pushFrame(node.functionIdentifier);
+    var b = memoryStack.peekEntry();
+    var currentMemory = memoryStack.peek();
 
     var a = programNode.getDeclaration(node.functionIdentifier);
 
-    visit(a.compoundStatement);
+    if(a.parameters.isPresent()) {
+      var parameters = a.parameters.get().variables;
+      for (int i = parameters.size() - 1; i >= 0; i--) {
+        var p = parameters.get(i);
+        
+        if(p.type instanceof ArrayVariableType ap) {
+          var size = ap.endIndex - ap.startIndex - 1;
 
-    var b = memoryStack.peekEntry();
-    var currentMemory = memoryStack.peek();
+          switch(ap.basePrimitiveType) {
+            case PrimitiveTypeEnum.REAL -> currentMemory.storeFloatArray(p.identifier, dataStack.popFloatArray(size));
+            case PrimitiveTypeEnum.INTEGER -> currentMemory.storeIntegerArray(p.identifier, dataStack.popIntegerArray(size));
+            case PrimitiveTypeEnum.BOOLEAN -> currentMemory.storeIntegerArray(p.identifier, dataStack.popIntegerArray(size));
+            case PrimitiveTypeEnum.CHAR -> currentMemory.storeIntegerArray(p.identifier, dataStack.popIntegerArray(size));
+            case PrimitiveTypeEnum.STRING -> currentMemory.storeIntegerArray(p.identifier, dataStack.popIntegerArray(size));
+            default -> throw new RuntimeException("Unsupported primitive type");
+          }
+        }
+        else {
+          switch(p.type.basePrimitiveType) {
+            case PrimitiveTypeEnum.REAL -> currentMemory.storeFloat(p.identifier, dataStack.popFloat());
+            case PrimitiveTypeEnum.INTEGER -> currentMemory.storeInteger(p.identifier, dataStack.popInteger());
+            case PrimitiveTypeEnum.BOOLEAN -> currentMemory.storeInteger(p.identifier, dataStack.popInteger());
+            case PrimitiveTypeEnum.CHAR -> currentMemory.storeInteger(p.identifier, dataStack.popInteger());
+            case PrimitiveTypeEnum.STRING -> currentMemory.storeInteger(p.identifier, dataStack.popInteger());
+            default -> throw new RuntimeException("Unsupported primitive type");
+          }
+        }
+      }
+    }
+
+    visit(a.compoundStatement);
 
     switch (b.returnType) {
       case PrimitiveTypeEnum.INTEGER -> dataStack.pushInteger(currentMemory.loadInteger(node.functionIdentifier));
@@ -521,14 +587,6 @@ public class Interpreter  {
     }
 
     memoryStack.popFrame();
-  }
-
-  private void visitFunctionReturnAssignmentExpressionNode(FunctionReturnAssignmentExpressionNode node) {
-
-  }
-
-  private void visitReturnStatementNode(ReturnStatementNode node) {
-
   }
 
   private void visit(AstNode node) {
@@ -543,8 +601,6 @@ public class Interpreter  {
       case IntegerToRealExpressionNode concreteTypeNode -> visitIntegerToRealExpressionNode(concreteTypeNode);
       case CharToStringExpressionNode concreteTypeNode -> visitCharToStringExpressionNode(concreteTypeNode);
       case ComparisonOperatorExpressionNode concreteTypeNode -> visitComparisonOperatorExpressionNode(concreteTypeNode);
-      case FunctionReturnAssignmentExpressionNode concreteTypeNode -> visitFunctionReturnAssignmentExpressionNode(concreteTypeNode);
-      case ReturnStatementNode concreteTypeNode -> visitReturnStatementNode(concreteTypeNode);
       case AssignmentStatementNode concreteTypeNode -> visitAssignmentStatementNode(concreteTypeNode);
       case IndexedVariableAccessExpressionNode concreteTypeNode -> visitIndexedVariableAccessExpressionNode(concreteTypeNode);
       case ArithmeticOperatorExpressionNode concreteTypeNode -> visitArithmeticOperatorExpressionNode(concreteTypeNode);
@@ -562,7 +618,7 @@ public class Interpreter  {
       case "itos" -> dataStack.pushInteger(stringLiteralsMemory.addEntry(String.valueOf(dataStack.popInteger())));
       case "rtos" -> dataStack.pushInteger(stringLiteralsMemory.addEntry(String.valueOf(dataStack.popFloat())));
       case "btos" -> dataStack.pushInteger(stringLiteralsMemory.addEntry(String.valueOf(dataStack.popInteger() == 1 ? true : false)));
-      default   -> throw new RuntimeException("Unsupported built-in procedure or function");
+      default -> throw new RuntimeException("Unsupported built-in procedure or function");
     }
   }
 }

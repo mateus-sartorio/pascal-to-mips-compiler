@@ -1,17 +1,19 @@
 program p13;
 
 var
-  i: integer;
+  i: real;
 
-function d(n : integer) : integer;
-  var x : integer;
+function d(x: integer; y: real) : real;
+  var z : real;
 begin
-  x := 5;
-  writeln(itos(n));
-  d := 2 * n;
+  writeln(itos(x));
+  writeln(rtos(y));
+  z := x * y;
+  writeln(rtos(z));
+  d := z;
 end;
 
 begin
-  i := d(2);
-  writeln(itos(i));
+  i := d(3, 2.5);
+  writeln(rtos(i));
 end.

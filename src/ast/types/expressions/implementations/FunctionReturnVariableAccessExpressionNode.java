@@ -2,9 +2,9 @@ package ast.types.expressions.implementations;
 
 import types.VariableType;
 
-public class FunctionReturnAssignmentExpressionNode extends VariableAccessExpressionNode {
+public class FunctionReturnVariableAccessExpressionNode extends VariableAccessExpressionNode {
 
-  public FunctionReturnAssignmentExpressionNode(int id, String functionIdentifier, VariableType type) {
+  public FunctionReturnVariableAccessExpressionNode(int id, String functionIdentifier, VariableType type) {
     super(id, functionIdentifier, type);
   }
 

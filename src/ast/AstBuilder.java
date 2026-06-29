@@ -25,7 +25,7 @@ import ast.types.expressions.implementations.LogicOperatorExpressionNode;
 import ast.types.expressions.implementations.NotOperatorExpressionNode;
 import ast.types.expressions.implementations.PrimitiveTypeExpressionNode;
 import ast.types.expressions.implementations.VariableAccessExpressionNode;
-import ast.types.expressions.implementations.FunctionReturnAssignmentExpressionNode;
+import ast.types.expressions.implementations.FunctionReturnVariableAccessExpressionNode;
 import ast.types.statements.contract.StatementNode;
 import ast.types.statements.implementations.AssignmentStatementNode;
 import ast.types.statements.implementations.CompoundStatementNode;
@@ -203,7 +203,7 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
 
     ProceduresAndFunctionsEntry functionEntry = proceduresAndFunctionsTable.get(variableIdentifier);
     if(functionEntry != null) {
-      return new FunctionReturnAssignmentExpressionNode(currentId++, functionEntry.identifier, new PrimitiveVariableType(functionEntry.returnType));
+      return new FunctionReturnVariableAccessExpressionNode(currentId++, functionEntry.identifier, new PrimitiveVariableType(functionEntry.returnType));
     }
 
     throw new RuntimeException("Variable " + variableIdentifier + " not found in symbol tables");
@@ -540,7 +540,7 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
       finalExpressionNode = new CharToStringExpressionNode(currentId++, expressionNode);
     }
     
-    if(variableAccessExpressionNode instanceof FunctionReturnAssignmentExpressionNode) {
+    if(variableAccessExpressionNode instanceof FunctionReturnVariableAccessExpressionNode) {
       return new ReturnStatementNode(currentId++, variableAccessExpressionNode, finalExpressionNode);
     }
 
