@@ -141,15 +141,17 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
   private void registerPreDeclaredProceduresAndFunctions() {
     // Reusable primitive types
     VariableType typeString = new PrimitiveVariableType(PrimitiveTypeEnum.STRING);
-    VariableType typeInt = new PrimitiveVariableType(PrimitiveTypeEnum.INTEGER);
+    VariableType typeInteger = new PrimitiveVariableType(PrimitiveTypeEnum.INTEGER);
     VariableType typeReal = new PrimitiveVariableType(PrimitiveTypeEnum.REAL);
     VariableType typeChar = new PrimitiveVariableType(PrimitiveTypeEnum.CHAR);
+    VariableType typeBoolean = new PrimitiveVariableType(PrimitiveTypeEnum.BOOLEAN);
 
     // Standard parameter entries
     VariableTableEntry stringParam = new VariableTableEntry("str", typeString);
-    VariableTableEntry intParam = new VariableTableEntry("n", typeInt);
+    VariableTableEntry integerParam = new VariableTableEntry("n", typeInteger);
     VariableTableEntry realParam = new VariableTableEntry("n", typeReal);
     VariableTableEntry charParam = new VariableTableEntry("c", typeChar);
+    VariableTableEntry booleanParam = new VariableTableEntry("b", typeBoolean);
 
     // --- PROCEDURES ---
     // I/O
@@ -168,13 +170,16 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
     // Ordinal & Character
     builtInProceduresAndFunctionsTable.addFunction("ord", List.of(charParam), PrimitiveTypeEnum.INTEGER);
-    builtInProceduresAndFunctionsTable.addFunction("chr", List.of(intParam), PrimitiveTypeEnum.CHAR);
-    builtInProceduresAndFunctionsTable.addFunction("succ", List.of(intParam), PrimitiveTypeEnum.INTEGER);
-    builtInProceduresAndFunctionsTable.addFunction("pred", List.of(intParam), PrimitiveTypeEnum.INTEGER);
+    builtInProceduresAndFunctionsTable.addFunction("chr", List.of(integerParam), PrimitiveTypeEnum.CHAR);
+    builtInProceduresAndFunctionsTable.addFunction("succ", List.of(integerParam), PrimitiveTypeEnum.INTEGER);
+    builtInProceduresAndFunctionsTable.addFunction("pred", List.of(integerParam), PrimitiveTypeEnum.INTEGER);
 
     // String
     builtInProceduresAndFunctionsTable.addFunction("length", List.of(stringParam), PrimitiveTypeEnum.INTEGER);
     builtInProceduresAndFunctionsTable.addFunction("upcase", List.of(charParam), PrimitiveTypeEnum.CHAR);
+    builtInProceduresAndFunctionsTable.addFunction("itos", List.of(integerParam), PrimitiveTypeEnum.STRING);
+    builtInProceduresAndFunctionsTable.addFunction("rtos", List.of(realParam), PrimitiveTypeEnum.STRING);
+    builtInProceduresAndFunctionsTable.addFunction("btos", List.of(booleanParam), PrimitiveTypeEnum.STRING);
   }
 
   private void checkGlobalIdentifierIsNotDefined(Token identifierToken) {
@@ -506,10 +511,10 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
       }
 
       if(globalVariableEntry.type instanceof PrimitiveVariableType && globalVariableEntry.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
-        return new PrimitiveVariableType(PrimitiveTypeEnum.CHAR);
+        return new PrimitiveVariableType(PrimitiveTypeEnum.CHAR, isIndexedVariable);
       }
 
-      return new PrimitiveVariableType(((ArrayVariableType) globalVariableEntry.type).basePrimitiveType);
+      return new PrimitiveVariableType(((ArrayVariableType) globalVariableEntry.type).basePrimitiveType, isIndexedVariable);
     }
 
     RuleContext parent = context.parent;
@@ -522,7 +527,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
         ProceduresAndFunctionsEntry procedureOrFunctionEntry = proceduresAndFunctionsTable.get(functionIdentifier);
         
         if(variableIdentifier.equalsIgnoreCase(functionIdentifier)) {
-          return new PrimitiveVariableType(procedureOrFunctionEntry.returnType);
+          return new PrimitiveVariableType(procedureOrFunctionEntry.returnType, isIndexedVariable);
         }
 
         VariableTableEntry parameterEntry = procedureOrFunctionEntry.parameters.get(variableIdentifier);
@@ -542,10 +547,10 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
           }
 
           if(parameterEntry.type instanceof PrimitiveVariableType && parameterEntry.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
-            return new PrimitiveVariableType(PrimitiveTypeEnum.CHAR);
+            return new PrimitiveVariableType(PrimitiveTypeEnum.CHAR, isIndexedVariable);
           }
 
-          return new PrimitiveVariableType(((ArrayVariableType) parameterEntry.type).basePrimitiveType);
+          return new PrimitiveVariableType(((ArrayVariableType) parameterEntry.type).basePrimitiveType, isIndexedVariable);
         }
 
         VariableTableEntry localEntry = procedureOrFunctionEntry.localVariables.get(variableIdentifier);
@@ -565,10 +570,10 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
           }
           
           if(localEntry.type instanceof PrimitiveVariableType && localEntry.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
-            return new PrimitiveVariableType(PrimitiveTypeEnum.CHAR);
+            return new PrimitiveVariableType(PrimitiveTypeEnum.CHAR, isIndexedVariable);
           }
 
-          return new PrimitiveVariableType(((ArrayVariableType) localEntry.type).basePrimitiveType);
+          return new PrimitiveVariableType(((ArrayVariableType) localEntry.type).basePrimitiveType, isIndexedVariable);
         }
 
         break;
@@ -596,10 +601,10 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
             }
 
             if(parameterEntry.type instanceof PrimitiveVariableType && parameterEntry.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
-              return new PrimitiveVariableType(PrimitiveTypeEnum.CHAR);
+              return new PrimitiveVariableType(PrimitiveTypeEnum.CHAR, isIndexedVariable);
             }
 
-            return new PrimitiveVariableType(((ArrayVariableType) parameterEntry.type).basePrimitiveType);
+            return new PrimitiveVariableType(((ArrayVariableType) parameterEntry.type).basePrimitiveType, isIndexedVariable);
           }
 
           VariableTableEntry localEntry = paramterEntry.localVariables.get(variableIdentifier);
@@ -619,10 +624,10 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
             }
 
             if(localEntry.type instanceof PrimitiveVariableType && localEntry.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
-              return new PrimitiveVariableType(PrimitiveTypeEnum.CHAR);
+              return new PrimitiveVariableType(PrimitiveTypeEnum.CHAR, isIndexedVariable);
             }
 
-            return new PrimitiveVariableType(((ArrayVariableType) localEntry.type).basePrimitiveType);
+            return new PrimitiveVariableType(((ArrayVariableType) localEntry.type).basePrimitiveType, isIndexedVariable);
           }
 
           break;
@@ -639,7 +644,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
     System.exit(1);
 
-    return new PrimitiveVariableType(PrimitiveTypeEnum.NO_TYPE);
+    return new PrimitiveVariableType(PrimitiveTypeEnum.NO_TYPE, isIndexedVariable);
   }
 
   @Override
@@ -819,6 +824,15 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
   public VariableType visitAssignment_statement(Assignment_statementContext context) {
     VariableType leftType = visit(context.variable_access());
     VariableType rightType = visit(context.expression());
+
+    if(leftType instanceof PrimitiveVariableType && leftType.basePrimitiveType == PrimitiveTypeEnum.CHAR && leftType.isIndexed) {
+      System.out.printf(
+        "SEMANTIC ERROR (%d): string cannot be indexed in lhs expression!\n",
+        context.ASSIGNMENT().getSymbol().getLine()
+      );
+      
+      System.exit(1);
+    }
 
     if(leftType instanceof ArrayVariableType || rightType instanceof ArrayVariableType) {
       if(!rightType.isEquivalent(leftType)) {

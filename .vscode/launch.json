@@ -6,7 +6,7 @@
       "name": "Main",
       "request": "launch",
       "mainClass": "Main",
-      "args": ["${workspaceFolder}/tests/ast/valid/01-if-statement copy/source.pas"]
+      "args": ["${workspaceFolder}/tests/interpreter/valid/11-array-indexation/source.pas"]
     }
   ]
 }

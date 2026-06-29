@@ -9,12 +9,15 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import ast.AstBuilder;
+import ast.types.ProgramNode;
 import parser.PascalLexer;
 import parser.PascalParser;
 import tables.BuiltInProceduresAndFunctionsTable;
 import tables.ProceduresAndFunctionsTable;
+import tables.StringLiteralsTable;
 import tables.VariablesTable;
 import checker.*;
+import interpreter.Interpreter;
 
 public class Main {
   public static void main(String[] args) throws IOException {
@@ -50,6 +53,7 @@ public class Main {
     VariablesTable globalVariablesTable = semanticChecker.getGlobalVariablesTable();
     BuiltInProceduresAndFunctionsTable builtInProceduresAndFunctionsTable = semanticChecker.getBuiltInProceduresAndFunctionsTable();
     ProceduresAndFunctionsTable proceduresAndFunctionsTable = semanticChecker.getProceduresAndFunctionsTable();
+    StringLiteralsTable getStringLiteralsTable = semanticChecker.getStringLiteralsTable();
 
     AstBuilder astBuilder = new AstBuilder(
       programIdentifier,
@@ -63,5 +67,11 @@ public class Main {
     String dotNotation = astBuilder.toDotNotation();
 
     Files.writeString(Path.of("test.dot"), dotNotation, StandardCharsets.UTF_8);
+
+    Interpreter interpreter = new Interpreter(globalVariablesTable, getStringLiteralsTable);
+    
+    ProgramNode programNode = astBuilder.getProgramNode();
+
+    interpreter.visit(programNode);
   }
 }

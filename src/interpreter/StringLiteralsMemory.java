@@ -16,10 +16,10 @@ public class StringLiteralsMemory {
       stringLiteralsList.add(entry);
     }
 
-    return getIndex(entry);
+    return indexOf(entry);
   }
 
-  public int getIndex(String entry) {
+  public int indexOf(String entry) {
     return stringLiteralsList.indexOf(entry);
   }
 

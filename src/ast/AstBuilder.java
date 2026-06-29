@@ -101,6 +101,10 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     this.proceduresAndFunctionsTable = proceduresAndFunctionsTable;
   }
 
+  public ProgramNode getProgramNode() {
+    return programNode;
+  }
+
 	// Imprime a árvore toda em stderr.
 	public String toDotNotation() {
     StringBuilder sb = new StringBuilder();
