@@ -39,12 +39,13 @@ run_module() {
             make -s "run-$module" FILE="$infile" > "$actual" 2>&1
         fi
 
-        diff -u "$expected" "$actual" > "$diff_file"
+        diff -w -u "$expected" "$actual" > "$diff_file"
 
         if [ -s "$diff_file" ]; then
             echo -e "${RED}[FAIL] $case_name${NC}"
         else
             echo -e "${GREEN}[PASS] $case_name${NC}"
+            rm -f "$diff_file" "$actual"
         fi
     done
 }
@@ -62,6 +63,9 @@ case "$1" in
     "--ast")
         run_module "ast"
         ;;
+    "--interpreter")
+        run_module "interpreter"
+        ;;
     "--clean")
         find tests -name "actual_result.txt" -delete
         find tests -name "actual_result.dot" -delete
@@ -74,5 +78,6 @@ case "$1" in
         run_module "parser"
         run_module "semantic"
         run_module "ast"
+        run_module "interpreter"
         ;;
 esac
