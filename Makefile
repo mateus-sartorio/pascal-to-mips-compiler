@@ -76,9 +76,8 @@ run-semantic:
 
 # Run the AST builder and save outputs as actual_result (.dot and .png) inside the test folder
 run-ast:
-	@$(JAVA) $(CLASS_PATH_OPTION) Main $(FILE_ABSOLUTE_PATH)
-	@mv test.dot $(dir $(FILE_ABSOLUTE_PATH))actual_result.dot
-	@dot -Tpng $(dir $(FILE_ABSOLUTE_PATH))actual_result.dot -o $(dir $(FILE_ABSOLUTE_PATH))actual_result.png
+	-@$(JAVA) $(CLASS_PATH_OPTION) Main $(FILE_ABSOLUTE_PATH)
+	@dot -Tpng $(dir $(FILE_ABSOLUTE_PATH))actual_result.dot -o $(dir $(FILE_ABSOLUTE_PATH))actual_result.png 2>/dev/null || true
 
 # Run the interpreter
 run-interpreter:

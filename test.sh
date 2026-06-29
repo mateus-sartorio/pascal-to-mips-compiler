@@ -45,7 +45,7 @@ run_module() {
             echo -e "${RED}[FAIL] $case_name${NC}"
         else
             echo -e "${GREEN}[PASS] $case_name${NC}"
-            rm -f "$diff_file" "$actual"
+            rm -f "$diff_file"
         fi
     done
 }
