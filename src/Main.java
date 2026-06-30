@@ -36,12 +36,15 @@ public class Main {
     // Iniciando o processo de parsing (criando a parser tree)
     ParseTree tree = parser.program();
 
+    // Verificando se houve algum erro de sintaxe durante o parsing
     if (parser.getNumberOfSyntaxErrors() != 0) {
       return;
     }
 
     // Criando o analisaador semântico para percorrer a parser tree e fazer as verificações semânticas
     SemanticChecker semanticChecker = new SemanticChecker();
+
+    // Percorrendo a parser tree para fazer as verificações semânticas
     semanticChecker.visit(tree);
 
     // Imprimindo as tabelas de símbolos caso o argumento -print-tables seja passado
@@ -52,29 +55,39 @@ public class Main {
       semanticChecker.printProceduresAndFunctionsTable();
     }
 
+    // Obtendo as informações necessárias do analisaador semântico para construir a AST
     String programIdentifier = semanticChecker.getProgramIdentifier();
+
+    // Obtendo as tabelas de símbolos do analisaador semântico
     VariablesTable globalVariablesTable = semanticChecker.getGlobalVariablesTable();
+
+    // Obtendo as tabelas de procedimentos e funções do analisaador semântico
     BuiltInProceduresAndFunctionsTable builtInProceduresAndFunctionsTable = semanticChecker.getBuiltInProceduresAndFunctionsTable();
+
+    // Obtendo as tabelas de procedimentos e funções do analisaador semântico
     ProceduresAndFunctionsTable proceduresAndFunctionsTable = semanticChecker.getProceduresAndFunctionsTable();
+
+    // Obtendo a tabela de literais de string do analisaador semântico
     StringLiteralsTable getStringLiteralsTable = semanticChecker.getStringLiteralsTable();
 
+    // Criando o construtor de AST para percorrer a parser tree e construir a AST
     AstBuilder astBuilder = new AstBuilder(programIdentifier, globalVariablesTable, builtInProceduresAndFunctionsTable, proceduresAndFunctionsTable);
 
+    // Percorrendo a parser tree para construir a AST
     astBuilder.visit(tree);
-
-    String dotNotation = astBuilder.toDotNotation();
-
+    
+    // Imprimindo a AST em notação DOT caso o argumento -print-ast seja passado
     if (args.length > 1 && args[1].equals("-print-ast")) {
+      String dotNotation = astBuilder.toDotNotation();
       Path inputPath = Path.of(args[0]).toAbsolutePath();
       Path outputPath = inputPath.getParent().resolve("actual_result.dot");
       Files.writeString(outputPath, dotNotation, StandardCharsets.UTF_8);
     }
 
-    ProgramNode programNode = astBuilder.getProgramNode();
-
+    // Executando o interpretador caso o argumento -interpret seja passado
     if (args.length > 1 && args[1].equals("-interpret")) {
+      ProgramNode programNode = astBuilder.getProgramNode();
       Interpreter interpreter = new Interpreter(globalVariablesTable, getStringLiteralsTable, builtInProceduresAndFunctionsTable, proceduresAndFunctionsTable, programNode);
-
       interpreter.execute();
     }
 

@@ -2,6 +2,8 @@ package interpreter;
 
 import ast.types.AstNode;
 import ast.types.ProgramNode;
+import ast.types.declarations.contracts.ProcedureOrFunctionDeclarationNode;
+import ast.types.expressions.contracts.ExpressionNode;
 import ast.types.expressions.implementations.ArithmeticOperatorExpressionNode;
 import ast.types.expressions.implementations.CharToStringExpressionNode;
 import ast.types.expressions.implementations.ComparisonOperatorExpressionNode;
@@ -21,6 +23,8 @@ import tables.BuiltInProceduresAndFunctionsTable;
 import tables.ProceduresAndFunctionsTable;
 import tables.StringLiteralsTable;
 import tables.VariablesTable;
+import tables.ProceduresAndFunctionsTable.ProceduresAndFunctionsEntry;
+import tables.VariablesTable.VariableTableEntry;
 import types.ArrayVariableType;
 import types.PrimitiveTypeEnum;
 import types.PrimitiveVariableType;
@@ -28,8 +32,6 @@ import types.PrimitiveVariableType;
 public class Interpreter  {
   private final VariablesTable globalVariablesTable;
   private final BuiltInProceduresAndFunctionsTable builtInProceduresAndFunctionsTable;
-  private final ProceduresAndFunctionsTable proceduresAndFunctionsTable;
-
   private final StringLiteralsMemory stringLiteralsMemory;
   private final DataStack dataStack;
   private final Memory globalVariablesMemory;
@@ -46,8 +48,6 @@ public class Interpreter  {
   ) {
     this.globalVariablesTable = globalVariablesTable;
     this.builtInProceduresAndFunctionsTable = builtInProceduresAndFunctionsTable;
-    this.proceduresAndFunctionsTable = proceduresAndFunctionsTable;
-
     this.stringLiteralsMemory = new StringLiteralsMemory(stringLiteralsTable);
     this.dataStack = new DataStack();
     this.globalVariablesMemory = new Memory(globalVariablesTable);
@@ -147,11 +147,11 @@ public class Interpreter  {
         
       if(node.variableAccessExpressionNode instanceof IndexedVariableAccessExpressionNode iven) {
         visit(iven.indexExpressionNode);
-        var i = dataStack.popInteger();
+        var poppedInteger = dataStack.popInteger();
 
-        var b = correctTable.get(variableIdentifier);
-        var a = (ArrayVariableType) b.type;
-        int offset = i - a.startIndex;
+        var variableValue = correctTable.get(variableIdentifier);
+        var arrayVariableType = (ArrayVariableType) variableValue.type;
+        int offset = poppedInteger - arrayVariableType.startIndex;
 
         switch(node.variableAccessExpressionNode.type.basePrimitiveType) {
           case PrimitiveTypeEnum.REAL -> correctMemory.storeFloatAt(variableIdentifier, dataStack.popFloat(), offset);
@@ -190,8 +190,8 @@ public class Interpreter  {
       case Integer value -> dataStack.pushInteger(value);
       case Double value -> dataStack.pushFloat((float) (double) value);
       case String value -> {
-        var v1 = stringLiteralsMemory.indexOf(value);
-        dataStack.pushInteger(v1);
+        var stringLiteralIndex = stringLiteralsMemory.indexOf(value);
+        dataStack.pushInteger(stringLiteralIndex);
       }
       case Boolean value -> dataStack.pushInteger(value ? 1 : 0);
       case Character value -> dataStack.pushInteger((int) (char) value);
@@ -225,22 +225,22 @@ public class Interpreter  {
       }
       else {
         var left = dataStack.popInteger();
-        String str1 = String.valueOf((char) left);
+        String leftCharToString = String.valueOf((char) left);
         var right = dataStack.popInteger();
-        String str2 = stringLiteralsMemory.getEntry(right); 
-        String finalString = str1 + str2;
+        String stringLiteralEntry = stringLiteralsMemory.getEntry(right); 
+        String finalString = leftCharToString + stringLiteralEntry;
 
         dataStack.pushInteger(stringLiteralsMemory.addEntry(finalString));
       }
     }
     else if(node.left.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
       if(node.right.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
-        var v1 = dataStack.popInteger();
-        var v2 = dataStack.popInteger();
-        var v3 = stringLiteralsMemory.getEntry(v1);
-        var v4 = stringLiteralsMemory.getEntry(v2);
-        var v5 = stringLiteralsMemory.addEntry(v3 + v4);
-        dataStack.pushInteger(v5);
+        var rightIndex = dataStack.popInteger();
+        var leftIndex = dataStack.popInteger();
+        String rightString = stringLiteralsMemory.getEntry(rightIndex);
+        String leftString = stringLiteralsMemory.getEntry(leftIndex);
+        var resultIndex = stringLiteralsMemory.addEntry(rightString + leftString);
+        dataStack.pushInteger(resultIndex);
       }
       else {
         var left = dataStack.popInteger();
@@ -357,19 +357,19 @@ public class Interpreter  {
     }
 
     visit(node.indexExpressionNode);
-    var i = dataStack.popInteger();
+    int index = dataStack.popInteger();
     
     if(node.type instanceof PrimitiveVariableType && node.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
       int strIndex = correctMemory.loadInteger(node.identifier);
       String str = stringLiteralsMemory.getEntry(strIndex);
-      char c = str.charAt(i);
+      char c = str.charAt(index);
       dataStack.pushInteger(c);
       return;
     }
 
-    var b = correctTable.get(node.identifier);
-    var a = (ArrayVariableType) b.type;
-    int offset = i - a.startIndex;
+    VariableTableEntry symbol = correctTable.get(node.identifier);
+    ArrayVariableType ArrayType = (ArrayVariableType) symbol.type;
+    int offset = index - ArrayType.startIndex;
 
     switch (node.type.basePrimitiveType) {
       case PrimitiveTypeEnum.INTEGER -> dataStack.pushInteger(correctMemory.loadIntegerAt(node.identifier, offset));
@@ -486,48 +486,48 @@ public class Interpreter  {
     }
 
     memoryStack.pushFrame(node.procedureIdentifier);
-    var currentMemory = memoryStack.peek();
+    Memory currentMemory = memoryStack.peek();
 
-    var a = programNode.getDeclaration(node.procedureIdentifier);
+    ProcedureOrFunctionDeclarationNode procedureDeclaration = programNode.getDeclaration(node.procedureIdentifier);
 
-    if(a.parameters.isPresent()) {
-      var parameters = a.parameters.get().variables;
+    if(procedureDeclaration.parameters.isPresent()) {
+      var parameters = procedureDeclaration.parameters.get().variables;
       for (int i = parameters.size() - 1; i >= 0; i--) {
-        var p = parameters.get(i);
+        var parameter = parameters.get(i);
         
-        if(p.type instanceof ArrayVariableType ap) {
+        if(parameter.type instanceof ArrayVariableType ap) {
           var size = ap.endIndex - ap.startIndex - 1;
 
           switch(ap.basePrimitiveType) {
-            case PrimitiveTypeEnum.REAL -> currentMemory.storeFloatArray(p.identifier, dataStack.popFloatArray(size));
-            case PrimitiveTypeEnum.INTEGER -> currentMemory.storeIntegerArray(p.identifier, dataStack.popIntegerArray(size));
-            case PrimitiveTypeEnum.BOOLEAN -> currentMemory.storeIntegerArray(p.identifier, dataStack.popIntegerArray(size));
-            case PrimitiveTypeEnum.CHAR -> currentMemory.storeIntegerArray(p.identifier, dataStack.popIntegerArray(size));
-            case PrimitiveTypeEnum.STRING -> currentMemory.storeIntegerArray(p.identifier, dataStack.popIntegerArray(size));
+            case PrimitiveTypeEnum.REAL -> currentMemory.storeFloatArray(parameter.identifier, dataStack.popFloatArray(size));
+            case PrimitiveTypeEnum.INTEGER -> currentMemory.storeIntegerArray(parameter.identifier, dataStack.popIntegerArray(size));
+            case PrimitiveTypeEnum.BOOLEAN -> currentMemory.storeIntegerArray(parameter.identifier, dataStack.popIntegerArray(size));
+            case PrimitiveTypeEnum.CHAR -> currentMemory.storeIntegerArray(parameter.identifier, dataStack.popIntegerArray(size));
+            case PrimitiveTypeEnum.STRING -> currentMemory.storeIntegerArray(parameter.identifier, dataStack.popIntegerArray(size));
             default -> throw new RuntimeException("Unsupported primitive type");
           }
         }
         else {
-          switch(p.type.basePrimitiveType) {
-            case PrimitiveTypeEnum.REAL -> currentMemory.storeFloat(p.identifier, dataStack.popFloat());
-            case PrimitiveTypeEnum.INTEGER -> currentMemory.storeInteger(p.identifier, dataStack.popInteger());
-            case PrimitiveTypeEnum.BOOLEAN -> currentMemory.storeInteger(p.identifier, dataStack.popInteger());
-            case PrimitiveTypeEnum.CHAR -> currentMemory.storeInteger(p.identifier, dataStack.popInteger());
-            case PrimitiveTypeEnum.STRING -> currentMemory.storeInteger(p.identifier, dataStack.popInteger());
+          switch(parameter.type.basePrimitiveType) {
+            case PrimitiveTypeEnum.REAL -> currentMemory.storeFloat(parameter.identifier, dataStack.popFloat());
+            case PrimitiveTypeEnum.INTEGER -> currentMemory.storeInteger(parameter.identifier, dataStack.popInteger());
+            case PrimitiveTypeEnum.BOOLEAN -> currentMemory.storeInteger(parameter.identifier, dataStack.popInteger());
+            case PrimitiveTypeEnum.CHAR -> currentMemory.storeInteger(parameter.identifier, dataStack.popInteger());
+            case PrimitiveTypeEnum.STRING -> currentMemory.storeInteger(parameter.identifier, dataStack.popInteger());
             default -> throw new RuntimeException("Unsupported primitive type");
           }
         }
       }
     }
 
-    visit(a.compoundStatement);
+    visit(procedureDeclaration.compoundStatement);
 
     memoryStack.popFrame();
   }
 
   private void visitFunctionCallStatementNode(FunctionCallExpressionNode node) {
     if(builtInProceduresAndFunctionsTable.lookProcedureOrFunction(node.functionIdentifier)) {
-      for(var argument : node.arguments) {
+      for(ExpressionNode argument : node.arguments) {
         visit(argument);
       }
       
@@ -535,49 +535,49 @@ public class Interpreter  {
       return;
     }
     
-    for(var argument : node.arguments) {
+    for(ExpressionNode argument : node.arguments) {
       visit(argument);
     }
 
     memoryStack.pushFrame(node.functionIdentifier);
-    var b = memoryStack.peekEntry();
-    var currentMemory = memoryStack.peek();
+    ProceduresAndFunctionsEntry topMemoryEntry = memoryStack.peekEntry();
+    Memory currentMemory = memoryStack.peek();
 
-    var a = programNode.getDeclaration(node.functionIdentifier);
+    ProcedureOrFunctionDeclarationNode declarationNode = programNode.getDeclaration(node.functionIdentifier);
 
-    if(a.parameters.isPresent()) {
-      var parameters = a.parameters.get().variables;
+    if(declarationNode.parameters.isPresent()) {
+      var parameters = declarationNode.parameters.get().variables;
       for (int i = parameters.size() - 1; i >= 0; i--) {
-        var p = parameters.get(i);
+        var parameter = parameters.get(i);
         
-        if(p.type instanceof ArrayVariableType ap) {
-          var size = ap.endIndex - ap.startIndex - 1;
+        if(parameter.type instanceof ArrayVariableType ap) {
+          int size = ap.endIndex - ap.startIndex - 1;
 
           switch(ap.basePrimitiveType) {
-            case PrimitiveTypeEnum.REAL -> currentMemory.storeFloatArray(p.identifier, dataStack.popFloatArray(size));
-            case PrimitiveTypeEnum.INTEGER -> currentMemory.storeIntegerArray(p.identifier, dataStack.popIntegerArray(size));
-            case PrimitiveTypeEnum.BOOLEAN -> currentMemory.storeIntegerArray(p.identifier, dataStack.popIntegerArray(size));
-            case PrimitiveTypeEnum.CHAR -> currentMemory.storeIntegerArray(p.identifier, dataStack.popIntegerArray(size));
-            case PrimitiveTypeEnum.STRING -> currentMemory.storeIntegerArray(p.identifier, dataStack.popIntegerArray(size));
+            case PrimitiveTypeEnum.REAL -> currentMemory.storeFloatArray(parameter.identifier, dataStack.popFloatArray(size));
+            case PrimitiveTypeEnum.INTEGER -> currentMemory.storeIntegerArray(parameter.identifier, dataStack.popIntegerArray(size));
+            case PrimitiveTypeEnum.BOOLEAN -> currentMemory.storeIntegerArray(parameter.identifier, dataStack.popIntegerArray(size));
+            case PrimitiveTypeEnum.CHAR -> currentMemory.storeIntegerArray(parameter.identifier, dataStack.popIntegerArray(size));
+            case PrimitiveTypeEnum.STRING -> currentMemory.storeIntegerArray(parameter.identifier, dataStack.popIntegerArray(size));
             default -> throw new RuntimeException("Unsupported primitive type");
           }
         }
         else {
-          switch(p.type.basePrimitiveType) {
-            case PrimitiveTypeEnum.REAL -> currentMemory.storeFloat(p.identifier, dataStack.popFloat());
-            case PrimitiveTypeEnum.INTEGER -> currentMemory.storeInteger(p.identifier, dataStack.popInteger());
-            case PrimitiveTypeEnum.BOOLEAN -> currentMemory.storeInteger(p.identifier, dataStack.popInteger());
-            case PrimitiveTypeEnum.CHAR -> currentMemory.storeInteger(p.identifier, dataStack.popInteger());
-            case PrimitiveTypeEnum.STRING -> currentMemory.storeInteger(p.identifier, dataStack.popInteger());
+          switch(parameter.type.basePrimitiveType) {
+            case PrimitiveTypeEnum.REAL -> currentMemory.storeFloat(parameter.identifier, dataStack.popFloat());
+            case PrimitiveTypeEnum.INTEGER -> currentMemory.storeInteger(parameter.identifier, dataStack.popInteger());
+            case PrimitiveTypeEnum.BOOLEAN -> currentMemory.storeInteger(parameter.identifier, dataStack.popInteger());
+            case PrimitiveTypeEnum.CHAR -> currentMemory.storeInteger(parameter.identifier, dataStack.popInteger());
+            case PrimitiveTypeEnum.STRING -> currentMemory.storeInteger(parameter.identifier, dataStack.popInteger());
             default -> throw new RuntimeException("Unsupported primitive type");
           }
         }
       }
     }
 
-    visit(a.compoundStatement);
+    visit(declarationNode.compoundStatement);
 
-    switch (b.returnType) {
+    switch (topMemoryEntry.returnType) {
       case PrimitiveTypeEnum.INTEGER -> dataStack.pushInteger(currentMemory.loadInteger(node.functionIdentifier));
       case PrimitiveTypeEnum.REAL -> dataStack.pushFloat(currentMemory.loadFloat(node.functionIdentifier));
       case PrimitiveTypeEnum.CHAR -> dataStack.pushInteger(currentMemory.loadInteger(node.functionIdentifier));
