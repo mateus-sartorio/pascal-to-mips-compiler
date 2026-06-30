@@ -81,7 +81,11 @@ run-ast:
 
 # Run the interpreter
 run-interpreter:
-	@$(JAVA) $(CLASS_PATH_OPTION) Main $(FILE_ABSOLUTE_PATH) -interpret
+	@if [ -f "$(dir $(FILE_ABSOLUTE_PATH))input.txt" ]; then \
+		$(JAVA) $(CLASS_PATH_OPTION) Main $(FILE_ABSOLUTE_PATH) -interpret < "$(dir $(FILE_ABSOLUTE_PATH))input.txt"; \
+	else \
+		$(JAVA) $(CLASS_PATH_OPTION) Main $(FILE_ABSOLUTE_PATH) -interpret < /dev/null; \
+	fi
 
 # Run all automated tests
 test:
