@@ -6,9 +6,9 @@ var
 begin
   s := 'legal';
 
-  for i := 0 to 5 do
+  for i := 0 to 4 do
   begin
     c := s[i];
-    writeln(c); 
+    writeln(c);
   end;
 end.

@@ -28,9 +28,9 @@ public class Memory {
           i++;
         }
         case ArrayVariableType type -> {
-          this.identifierIndexMap.put(variable.identifier.toLowerCase(), new VariableEntry(i, type.endIndex - type.startIndex - 1));
+          this.identifierIndexMap.put(variable.identifier.toLowerCase(), new VariableEntry(i, type.endIndex - type.startIndex + 1));
           
-          for(int j = type.startIndex; j < type.endIndex; j++) {
+          for(int j = type.startIndex; j <= type.endIndex; j++) {
             this.memory.add(Word.fromInt(0));
             i++;
           }
@@ -93,9 +93,9 @@ public class Memory {
   }
 
   private int[] loadIntegerArray(int baseAddress, int size) {
-    int[] values = {};
+    int[] values = new int[size];
     
-    for(int i = 0; i < size; i++) {
+    for(int i = 0; i < size - 1; i++) {
       values[i] = memory.get(baseAddress + i).toInt(); 
     }
 
@@ -104,7 +104,6 @@ public class Memory {
 
   public int[] loadIntegerArray(String identifier) {
     VariableEntry entry = entryOf(identifier);
-    int baseAddress = addressOf(identifier);
     return loadIntegerArray(entry.index, entry.size);
   }
 
@@ -153,9 +152,9 @@ public class Memory {
   }
 
   private float[] loadFloatArray(int baseAddress, int size) {
-    float[] values = {};
+    float[] values = new float[size];
     
-    for(int i = 0; i < size; i++) {
+    for(int i = 0; i < size - 1; i++) {
       values[i] = memory.get(baseAddress + i).toFloat(); 
     }
 

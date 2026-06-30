@@ -97,9 +97,9 @@ public class Interpreter  {
     do {
       if(node.isDownto) {
         isConditionMet = switch (node.finalValue.type.basePrimitiveType) {
-          case PrimitiveTypeEnum.INTEGER -> initialValue > finalValue;
-          case PrimitiveTypeEnum.CHAR -> initialValue > finalValue;
-          case PrimitiveTypeEnum.BOOLEAN -> initialValue > finalValue;
+          case PrimitiveTypeEnum.INTEGER -> initialValue >= finalValue;
+          case PrimitiveTypeEnum.CHAR -> initialValue >= finalValue;
+          case PrimitiveTypeEnum.BOOLEAN -> initialValue >= finalValue;
           default -> throw new RuntimeException("Unsupported primitive type");
         };
 
@@ -108,9 +108,9 @@ public class Interpreter  {
       }
       else {
         isConditionMet = switch (node.finalValue.type.basePrimitiveType) {
-          case PrimitiveTypeEnum.INTEGER -> initialValue < finalValue;
-          case PrimitiveTypeEnum.CHAR -> initialValue < finalValue;
-          case PrimitiveTypeEnum.BOOLEAN -> initialValue < finalValue;
+          case PrimitiveTypeEnum.INTEGER -> initialValue <= finalValue;
+          case PrimitiveTypeEnum.CHAR -> initialValue <= finalValue;
+          case PrimitiveTypeEnum.BOOLEAN -> initialValue <= finalValue;
           default -> throw new RuntimeException("Unsupported primitive type");
         };
 
