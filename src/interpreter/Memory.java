@@ -95,7 +95,7 @@ public class Memory {
   private int[] loadIntegerArray(int baseAddress, int size) {
     int[] values = new int[size];
     
-    for(int i = 0; i < size - 1; i++) {
+    for(int i = 0; i < size; i++) {
       values[i] = memory.get(baseAddress + i).toInt(); 
     }
 
@@ -154,7 +154,7 @@ public class Memory {
   private float[] loadFloatArray(int baseAddress, int size) {
     float[] values = new float[size];
     
-    for(int i = 0; i < size - 1; i++) {
+    for(int i = 0; i < size; i++) {
       values[i] = memory.get(baseAddress + i).toFloat(); 
     }
 

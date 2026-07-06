@@ -149,33 +149,33 @@ public class Interpreter {
         int offset = poppedInteger - arrayVariableType.startIndex;
 
         switch (node.variableAccessExpressionNode.type.basePrimitiveType) {
-        case PrimitiveTypeEnum.REAL -> correctMemory.storeFloatAt(variableIdentifier, dataStack.popFloat(), offset);
-        case PrimitiveTypeEnum.INTEGER -> correctMemory.storeIntegerAt(variableIdentifier, dataStack.popInteger(), offset);
-        case PrimitiveTypeEnum.BOOLEAN -> correctMemory.storeIntegerAt(variableIdentifier, dataStack.popInteger(), offset);
-        case PrimitiveTypeEnum.CHAR -> correctMemory.storeIntegerAt(variableIdentifier, dataStack.popInteger(), offset);
-        case PrimitiveTypeEnum.STRING -> correctMemory.storeIntegerAt(variableIdentifier, dataStack.popInteger(), offset);
-        default -> throw new RuntimeException("Unsupported primitive type");
+          case PrimitiveTypeEnum.REAL -> correctMemory.storeFloatAt(variableIdentifier, dataStack.popFloat(), offset);
+          case PrimitiveTypeEnum.INTEGER -> correctMemory.storeIntegerAt(variableIdentifier, dataStack.popInteger(), offset);
+          case PrimitiveTypeEnum.BOOLEAN -> correctMemory.storeIntegerAt(variableIdentifier, dataStack.popInteger(), offset);
+          case PrimitiveTypeEnum.CHAR -> correctMemory.storeIntegerAt(variableIdentifier, dataStack.popInteger(), offset);
+          case PrimitiveTypeEnum.STRING -> correctMemory.storeIntegerAt(variableIdentifier, dataStack.popInteger(), offset);
+          default -> throw new RuntimeException("Unsupported primitive type");
         }
       }
       else {
         switch (node.variableAccessExpressionNode.type.basePrimitiveType) {
-        case PrimitiveTypeEnum.REAL -> correctMemory.storeFloatArray(variableIdentifier, dataStack.popFloatArray(size));
-        case PrimitiveTypeEnum.INTEGER -> correctMemory.storeIntegerArray(variableIdentifier, dataStack.popIntegerArray(size));
-        case PrimitiveTypeEnum.BOOLEAN -> correctMemory.storeIntegerArray(variableIdentifier, dataStack.popIntegerArray(size));
-        case PrimitiveTypeEnum.CHAR -> correctMemory.storeIntegerArray(variableIdentifier, dataStack.popIntegerArray(size));
-        case PrimitiveTypeEnum.STRING -> correctMemory.storeIntegerArray(variableIdentifier, dataStack.popIntegerArray(size));
-        default -> throw new RuntimeException("Unsupported primitive type");
+          case PrimitiveTypeEnum.REAL -> correctMemory.storeFloatArray(variableIdentifier, dataStack.popFloatArray(size));
+          case PrimitiveTypeEnum.INTEGER -> correctMemory.storeIntegerArray(variableIdentifier, dataStack.popIntegerArray(size));
+          case PrimitiveTypeEnum.BOOLEAN -> correctMemory.storeIntegerArray(variableIdentifier, dataStack.popIntegerArray(size));
+          case PrimitiveTypeEnum.CHAR -> correctMemory.storeIntegerArray(variableIdentifier, dataStack.popIntegerArray(size));
+          case PrimitiveTypeEnum.STRING -> correctMemory.storeIntegerArray(variableIdentifier, dataStack.popIntegerArray(size));
+          default -> throw new RuntimeException("Unsupported primitive type");
         }
       }
     }
     else {
       switch (node.variableAccessExpressionNode.type.basePrimitiveType) {
-      case PrimitiveTypeEnum.REAL -> correctMemory.storeFloat(variableIdentifier, dataStack.popFloat());
-      case PrimitiveTypeEnum.INTEGER -> correctMemory.storeInteger(variableIdentifier, dataStack.popInteger());
-      case PrimitiveTypeEnum.BOOLEAN -> correctMemory.storeInteger(variableIdentifier, dataStack.popInteger());
-      case PrimitiveTypeEnum.CHAR -> correctMemory.storeInteger(variableIdentifier, dataStack.popInteger());
-      case PrimitiveTypeEnum.STRING -> correctMemory.storeInteger(variableIdentifier, dataStack.popInteger());
-      default -> throw new RuntimeException("Unsupported primitive type");
+        case PrimitiveTypeEnum.REAL -> correctMemory.storeFloat(variableIdentifier, dataStack.popFloat());
+        case PrimitiveTypeEnum.INTEGER -> correctMemory.storeInteger(variableIdentifier, dataStack.popInteger());
+        case PrimitiveTypeEnum.BOOLEAN -> correctMemory.storeInteger(variableIdentifier, dataStack.popInteger());
+        case PrimitiveTypeEnum.CHAR -> correctMemory.storeInteger(variableIdentifier, dataStack.popInteger());
+        case PrimitiveTypeEnum.STRING -> correctMemory.storeInteger(variableIdentifier, dataStack.popInteger());
+        default -> throw new RuntimeException("Unsupported primitive type");
       }
     }
   }
@@ -332,12 +332,12 @@ public class Interpreter {
     String operator = node.operator;
 
     switch (operator) {
-    case "+" -> handlePlus(node);
-    case "-" -> handleMinus(node);
-    case "*" -> handleMultiplication(node);
-    case "/" -> handleRealDivision(node);
-    case "div" -> handleIntegerDivision(node);
-    default -> throw new RuntimeException("Unsupported operation");
+      case "+" -> handlePlus(node);
+      case "-" -> handleMinus(node);
+      case "*" -> handleMultiplication(node);
+      case "/" -> handleRealDivision(node);
+      case "div" -> handleIntegerDivision(node);
+      default -> throw new RuntimeException("Unsupported operation");
     }
   }
 
@@ -370,12 +370,12 @@ public class Interpreter {
     int offset = index - ArrayType.startIndex;
 
     switch (node.type.basePrimitiveType) {
-    case PrimitiveTypeEnum.INTEGER -> dataStack.pushInteger(correctMemory.loadIntegerAt(node.identifier, offset));
-    case PrimitiveTypeEnum.REAL -> dataStack.pushFloat(correctMemory.loadFloatAt(node.identifier, offset));
-    case PrimitiveTypeEnum.CHAR -> dataStack.pushInteger(correctMemory.loadIntegerAt(node.identifier, offset));
-    case PrimitiveTypeEnum.BOOLEAN -> dataStack.pushInteger(correctMemory.loadIntegerAt(node.identifier, offset));
-    case PrimitiveTypeEnum.STRING -> dataStack.pushInteger(correctMemory.loadIntegerAt(node.identifier, offset));
-    default -> throw new RuntimeException("Unsupported primitive type");
+      case PrimitiveTypeEnum.INTEGER -> dataStack.pushInteger(correctMemory.loadIntegerAt(node.identifier, offset));
+      case PrimitiveTypeEnum.REAL -> dataStack.pushFloat(correctMemory.loadFloatAt(node.identifier, offset));
+      case PrimitiveTypeEnum.CHAR -> dataStack.pushInteger(correctMemory.loadIntegerAt(node.identifier, offset));
+      case PrimitiveTypeEnum.BOOLEAN -> dataStack.pushInteger(correctMemory.loadIntegerAt(node.identifier, offset));
+      case PrimitiveTypeEnum.STRING -> dataStack.pushInteger(correctMemory.loadIntegerAt(node.identifier, offset));
+      default -> throw new RuntimeException("Unsupported primitive type");
     }
   }
 
@@ -392,22 +392,22 @@ public class Interpreter {
     switch (node.type) {
     case PrimitiveVariableType _ -> {
       switch (node.type.basePrimitiveType) {
-      case PrimitiveTypeEnum.INTEGER -> dataStack.pushInteger(correctMemory.loadInteger(node.identifier));
-      case PrimitiveTypeEnum.REAL -> dataStack.pushFloat(correctMemory.loadFloat(node.identifier));
-      case PrimitiveTypeEnum.CHAR -> dataStack.pushInteger(correctMemory.loadInteger(node.identifier));
-      case PrimitiveTypeEnum.BOOLEAN -> dataStack.pushInteger(correctMemory.loadInteger(node.identifier));
-      case PrimitiveTypeEnum.STRING -> dataStack.pushInteger(correctMemory.loadInteger(node.identifier));
-      default -> throw new RuntimeException("Unsupported primitive type");
+        case PrimitiveTypeEnum.INTEGER -> dataStack.pushInteger(correctMemory.loadInteger(node.identifier));
+        case PrimitiveTypeEnum.REAL -> dataStack.pushFloat(correctMemory.loadFloat(node.identifier));
+        case PrimitiveTypeEnum.CHAR -> dataStack.pushInteger(correctMemory.loadInteger(node.identifier));
+        case PrimitiveTypeEnum.BOOLEAN -> dataStack.pushInteger(correctMemory.loadInteger(node.identifier));
+        case PrimitiveTypeEnum.STRING -> dataStack.pushInteger(correctMemory.loadInteger(node.identifier));
+        default -> throw new RuntimeException("Unsupported primitive type");
       }
     }
     case ArrayVariableType _ -> {
       switch (node.type.basePrimitiveType) {
-      case PrimitiveTypeEnum.INTEGER -> dataStack.pushIntegerArray(correctMemory.loadIntegerArray(node.identifier));
-      case PrimitiveTypeEnum.REAL -> dataStack.pushFloatArray(correctMemory.loadFloatArray(node.identifier));
-      case PrimitiveTypeEnum.CHAR -> dataStack.pushIntegerArray(correctMemory.loadIntegerArray(node.identifier));
-      case PrimitiveTypeEnum.BOOLEAN -> dataStack.pushIntegerArray(correctMemory.loadIntegerArray(node.identifier));
-      case PrimitiveTypeEnum.STRING -> dataStack.pushIntegerArray(correctMemory.loadIntegerArray(node.identifier));
-      default -> throw new RuntimeException("Unsupported primitive type of array type");
+        case PrimitiveTypeEnum.INTEGER -> dataStack.pushIntegerArray(correctMemory.loadIntegerArray(node.identifier));
+        case PrimitiveTypeEnum.REAL -> dataStack.pushFloatArray(correctMemory.loadFloatArray(node.identifier));
+        case PrimitiveTypeEnum.CHAR -> dataStack.pushIntegerArray(correctMemory.loadIntegerArray(node.identifier));
+        case PrimitiveTypeEnum.BOOLEAN -> dataStack.pushIntegerArray(correctMemory.loadIntegerArray(node.identifier));
+        case PrimitiveTypeEnum.STRING -> dataStack.pushIntegerArray(correctMemory.loadIntegerArray(node.identifier));
+        default -> throw new RuntimeException("Unsupported primitive type of array type");
       }
     }
     default -> throw new RuntimeException("Unsupported type");
@@ -472,48 +472,48 @@ public class Interpreter {
 
   private void visitProcedureCallStatementNode(ProcedureCallStatementNode node) {
     if (builtInProceduresAndFunctionsTable.lookProcedureOrFunction(node.procedureIdentifier)) {
-
       String procName = node.procedureIdentifier.toLowerCase();
 
       if (procName.equals("read") || procName.equals("readln")) {
-    // 1. Tratamento para "readln;" puro (sem argumentos), usado para pausar o programa
-    if (node.arguments.isEmpty()) {
-        if (procName.equals("readln")) {
+        if (node.arguments.isEmpty()) {
+          if (procName.equals("readln")) {
             scanner.nextLine();
+          }
+
+          return;
         }
-        return;
-    }
 
-    VariableAccessExpressionNode varNode = (VariableAccessExpressionNode) node.arguments.get(0);
-    String varId = varNode.identifier;
-    
-    Memory correctMemory = globalVariablesTable.lookupVariable(varId) ? globalVariablesMemory : memoryStack.peek();
-    PrimitiveTypeEnum varType = varNode.type.basePrimitiveType;
-
-    switch (varType) {
-        case INTEGER -> correctMemory.storeInteger(varId, scanner.nextInt());
-        case REAL -> correctMemory.storeFloat(varId, scanner.nextFloat());
-        case CHAR -> correctMemory.storeInteger(varId, (int) scanner.next().charAt(0));
+        VariableAccessExpressionNode varNode = (VariableAccessExpressionNode) node.arguments.get(0);
+        String varId = varNode.identifier;
         
-        case STRING -> {
+        Memory correctMemory = globalVariablesTable.lookupVariable(varId) ? globalVariablesMemory : memoryStack.peek();
+        PrimitiveTypeEnum varType = varNode.type.basePrimitiveType;
+
+        switch (varType) {
+          case INTEGER -> correctMemory.storeInteger(varId, scanner.nextInt());
+          case REAL -> correctMemory.storeFloat(varId, scanner.nextFloat());
+          case CHAR -> correctMemory.storeInteger(varId, (int) scanner.next().charAt(0));
+          case STRING -> {
             String input = scanner.next();
             if (procName.equals("readln")) {
+              input = scanner.nextLine();
+              if (input.isEmpty()) {
                 input = scanner.nextLine();
-                if (input.isEmpty()) {
-                    input = scanner.nextLine();
-                }
+              }
             }
+
             int strIdx = stringLiteralsMemory.addEntry(input);
             correctMemory.storeInteger(varId, strIdx);
+          }
+          default -> throw new RuntimeException("Unsupported variable type for read/readln");
         }
-        default -> throw new RuntimeException("Unsupported variable type for read/readln");
-    }
 
-    if (procName.equals("readln") && varType != PrimitiveTypeEnum.STRING) {
-        scanner.nextLine(); 
-    }
-    return;
-}
+        if (procName.equals("readln") && varType != PrimitiveTypeEnum.STRING) {
+          scanner.nextLine();
+        }
+
+        return;
+      }
 
       for (ExpressionNode argument : node.arguments) {
         visit(argument);
@@ -540,25 +540,25 @@ public class Interpreter {
         var parameter = parameters.get(i);
 
         if (parameter.type instanceof ArrayVariableType ap) {
-          var size = ap.endIndex - ap.startIndex - 1;
+          var size = ap.endIndex - ap.startIndex + 1;
 
           switch (ap.basePrimitiveType) {
-          case PrimitiveTypeEnum.REAL -> currentMemory.storeFloatArray(parameter.identifier, dataStack.popFloatArray(size));
-          case PrimitiveTypeEnum.INTEGER -> currentMemory.storeIntegerArray(parameter.identifier, dataStack.popIntegerArray(size));
-          case PrimitiveTypeEnum.BOOLEAN -> currentMemory.storeIntegerArray(parameter.identifier, dataStack.popIntegerArray(size));
-          case PrimitiveTypeEnum.CHAR -> currentMemory.storeIntegerArray(parameter.identifier, dataStack.popIntegerArray(size));
-          case PrimitiveTypeEnum.STRING -> currentMemory.storeIntegerArray(parameter.identifier, dataStack.popIntegerArray(size));
-          default -> throw new RuntimeException("Unsupported primitive type");
+            case PrimitiveTypeEnum.REAL -> currentMemory.storeFloatArray(parameter.identifier, dataStack.popFloatArray(size));
+            case PrimitiveTypeEnum.INTEGER -> currentMemory.storeIntegerArray(parameter.identifier, dataStack.popIntegerArray(size));
+            case PrimitiveTypeEnum.BOOLEAN -> currentMemory.storeIntegerArray(parameter.identifier, dataStack.popIntegerArray(size));
+            case PrimitiveTypeEnum.CHAR -> currentMemory.storeIntegerArray(parameter.identifier, dataStack.popIntegerArray(size));
+            case PrimitiveTypeEnum.STRING -> currentMemory.storeIntegerArray(parameter.identifier, dataStack.popIntegerArray(size));
+            default -> throw new RuntimeException("Unsupported primitive type");
           }
         }
         else {
           switch (parameter.type.basePrimitiveType) {
-          case PrimitiveTypeEnum.REAL -> currentMemory.storeFloat(parameter.identifier, dataStack.popFloat());
-          case PrimitiveTypeEnum.INTEGER -> currentMemory.storeInteger(parameter.identifier, dataStack.popInteger());
-          case PrimitiveTypeEnum.BOOLEAN -> currentMemory.storeInteger(parameter.identifier, dataStack.popInteger());
-          case PrimitiveTypeEnum.CHAR -> currentMemory.storeInteger(parameter.identifier, dataStack.popInteger());
-          case PrimitiveTypeEnum.STRING -> currentMemory.storeInteger(parameter.identifier, dataStack.popInteger());
-          default -> throw new RuntimeException("Unsupported primitive type");
+            case PrimitiveTypeEnum.REAL -> currentMemory.storeFloat(parameter.identifier, dataStack.popFloat());
+            case PrimitiveTypeEnum.INTEGER -> currentMemory.storeInteger(parameter.identifier, dataStack.popInteger());
+            case PrimitiveTypeEnum.BOOLEAN -> currentMemory.storeInteger(parameter.identifier, dataStack.popInteger());
+            case PrimitiveTypeEnum.CHAR -> currentMemory.storeInteger(parameter.identifier, dataStack.popInteger());
+            case PrimitiveTypeEnum.STRING -> currentMemory.storeInteger(parameter.identifier, dataStack.popInteger());
+            default -> throw new RuntimeException("Unsupported primitive type");
           }
         }
       }
@@ -597,25 +597,25 @@ public class Interpreter {
         var parameter = parameters.get(i);
 
         if (parameter.type instanceof ArrayVariableType ap) {
-          int size = ap.endIndex - ap.startIndex - 1;
+          int size = ap.endIndex - ap.startIndex + 1;
 
           switch (ap.basePrimitiveType) {
-          case PrimitiveTypeEnum.REAL -> currentMemory.storeFloatArray(parameter.identifier, dataStack.popFloatArray(size));
-          case PrimitiveTypeEnum.INTEGER -> currentMemory.storeIntegerArray(parameter.identifier, dataStack.popIntegerArray(size));
-          case PrimitiveTypeEnum.BOOLEAN -> currentMemory.storeIntegerArray(parameter.identifier, dataStack.popIntegerArray(size));
-          case PrimitiveTypeEnum.CHAR -> currentMemory.storeIntegerArray(parameter.identifier, dataStack.popIntegerArray(size));
-          case PrimitiveTypeEnum.STRING -> currentMemory.storeIntegerArray(parameter.identifier, dataStack.popIntegerArray(size));
-          default -> throw new RuntimeException("Unsupported primitive type");
+            case PrimitiveTypeEnum.REAL -> currentMemory.storeFloatArray(parameter.identifier, dataStack.popFloatArray(size));
+            case PrimitiveTypeEnum.INTEGER -> currentMemory.storeIntegerArray(parameter.identifier, dataStack.popIntegerArray(size));
+            case PrimitiveTypeEnum.BOOLEAN -> currentMemory.storeIntegerArray(parameter.identifier, dataStack.popIntegerArray(size));
+            case PrimitiveTypeEnum.CHAR -> currentMemory.storeIntegerArray(parameter.identifier, dataStack.popIntegerArray(size));
+            case PrimitiveTypeEnum.STRING -> currentMemory.storeIntegerArray(parameter.identifier, dataStack.popIntegerArray(size));
+            default -> throw new RuntimeException("Unsupported primitive type");
           }
         }
         else {
           switch (parameter.type.basePrimitiveType) {
-          case PrimitiveTypeEnum.REAL -> currentMemory.storeFloat(parameter.identifier, dataStack.popFloat());
-          case PrimitiveTypeEnum.INTEGER -> currentMemory.storeInteger(parameter.identifier, dataStack.popInteger());
-          case PrimitiveTypeEnum.BOOLEAN -> currentMemory.storeInteger(parameter.identifier, dataStack.popInteger());
-          case PrimitiveTypeEnum.CHAR -> currentMemory.storeInteger(parameter.identifier, dataStack.popInteger());
-          case PrimitiveTypeEnum.STRING -> currentMemory.storeInteger(parameter.identifier, dataStack.popInteger());
-          default -> throw new RuntimeException("Unsupported primitive type");
+            case PrimitiveTypeEnum.REAL -> currentMemory.storeFloat(parameter.identifier, dataStack.popFloat());
+            case PrimitiveTypeEnum.INTEGER -> currentMemory.storeInteger(parameter.identifier, dataStack.popInteger());
+            case PrimitiveTypeEnum.BOOLEAN -> currentMemory.storeInteger(parameter.identifier, dataStack.popInteger());
+            case PrimitiveTypeEnum.CHAR -> currentMemory.storeInteger(parameter.identifier, dataStack.popInteger());
+            case PrimitiveTypeEnum.STRING -> currentMemory.storeInteger(parameter.identifier, dataStack.popInteger());
+            default -> throw new RuntimeException("Unsupported primitive type");
           }
         }
       }
@@ -624,12 +624,12 @@ public class Interpreter {
     visit(declarationNode.compoundStatement);
 
     switch (topMemoryEntry.returnType) {
-    case PrimitiveTypeEnum.INTEGER -> dataStack.pushInteger(currentMemory.loadInteger(node.functionIdentifier));
-    case PrimitiveTypeEnum.REAL -> dataStack.pushFloat(currentMemory.loadFloat(node.functionIdentifier));
-    case PrimitiveTypeEnum.CHAR -> dataStack.pushInteger(currentMemory.loadInteger(node.functionIdentifier));
-    case PrimitiveTypeEnum.BOOLEAN -> dataStack.pushInteger(currentMemory.loadInteger(node.functionIdentifier));
-    case PrimitiveTypeEnum.STRING -> dataStack.pushInteger(currentMemory.loadInteger(node.functionIdentifier));
-    default -> throw new RuntimeException("Unsupported primitive type of array type");
+      case PrimitiveTypeEnum.INTEGER -> dataStack.pushInteger(currentMemory.loadInteger(node.functionIdentifier));
+      case PrimitiveTypeEnum.REAL -> dataStack.pushFloat(currentMemory.loadFloat(node.functionIdentifier));
+      case PrimitiveTypeEnum.CHAR -> dataStack.pushInteger(currentMemory.loadInteger(node.functionIdentifier));
+      case PrimitiveTypeEnum.BOOLEAN -> dataStack.pushInteger(currentMemory.loadInteger(node.functionIdentifier));
+      case PrimitiveTypeEnum.STRING -> dataStack.pushInteger(currentMemory.loadInteger(node.functionIdentifier));
+      default -> throw new RuntimeException("Unsupported primitive type of array type");
     }
 
     memoryStack.popFrame();

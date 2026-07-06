@@ -1,7 +1,7 @@
 program p11;
 var
   c: char;
-  arr: array[10..15] of char;
+  arr: array[10..14] of char;
   i: integer;
   s: string;
 begin
@@ -11,7 +11,7 @@ begin
   arr[13] := 'a';
   arr[14] := 'l';
 
-  for i := 10 to 15 do
+  for i := 10 to 14 do
   begin
     c := arr[i];
     writeln(c); 

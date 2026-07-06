@@ -23,7 +23,7 @@ public final class DataStack {
   public int[] popIntegerArray(int size) {
     int[] values = new int[size];
 
-    for(int i = 0; i < size; i++) {
+    for(int i = size - 1; i >= 0; i--) {
       values[i] = popInteger(); 
     }
 
@@ -47,7 +47,7 @@ public final class DataStack {
   public float[] popFloatArray(int size) {
     float[] values = new float[size];
 
-    for(int i = 0; i < size; i++) {
+    for(int i = size - 1; i >= 0; i--) {
       values[i] = popFloat(); 
     }
 
