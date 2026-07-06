@@ -88,10 +88,48 @@ public class Interpreter {
 
     int initialValue = dataStack.popInteger();
     int finalValue = dataStack.popInteger();
+    boolean isDownTo = node.isDownto;
+
+    String initialValueParsed = switch(node.controlVariable.type.basePrimitiveType) {
+      case PrimitiveTypeEnum.INTEGER -> String.valueOf(initialValue);
+      case PrimitiveTypeEnum.BOOLEAN -> initialValue == 1 ? "true" : "false";
+      case PrimitiveTypeEnum.CHAR -> String.valueOf((char) initialValue);
+      default -> throw new RuntimeException("Unsupported primitive type");
+    };
+
+    String finalValueParsed = switch(node.controlVariable.type.basePrimitiveType) {
+      case PrimitiveTypeEnum.INTEGER -> String.valueOf(finalValue);
+      case PrimitiveTypeEnum.BOOLEAN -> finalValue == 1 ? "true" : "false";
+      case PrimitiveTypeEnum.CHAR -> String.valueOf((char) finalValue);
+      default -> throw new RuntimeException("Unsupported primitive type");
+    };
+
+    if(isDownTo) {
+      if(finalValue > initialValue) {
+        System.out.printf(
+          "RUNTIME ERROR: incompatible begin and end values: %s downto %s.\n",
+          initialValueParsed,
+          finalValueParsed
+        );
+  
+        System.exit(1);
+      }
+    }
+    else {
+      if(finalValue < initialValue) {
+        System.out.printf(
+          "RUNTIME ERROR: incompatible begin and end values: %s to %s.\n",
+          initialValueParsed,
+          finalValueParsed
+        );
+  
+        System.exit(1);
+      }    
+    }
 
     boolean isConditionMet;
     do {
-      if (node.isDownto) {
+      if (isDownTo) {
         isConditionMet = switch (node.finalValue.type.basePrimitiveType) {
           case PrimitiveTypeEnum.INTEGER -> initialValue >= finalValue;
           case PrimitiveTypeEnum.CHAR -> initialValue >= finalValue;
@@ -138,15 +176,27 @@ public class Interpreter {
     }
 
     if (node.variableAccessExpressionNode instanceof IndexedVariableAccessExpressionNode) {
-      var size = correctMemory.entryOf(variableIdentifier).size();
+      int size = correctMemory.entryOf(variableIdentifier).size();
 
       if (node.variableAccessExpressionNode instanceof IndexedVariableAccessExpressionNode iven) {
         visit(iven.indexExpressionNode);
-        var poppedInteger = dataStack.popInteger();
+        int index = dataStack.popInteger();
 
         var variableValue = correctTable.get(variableIdentifier);
         var arrayVariableType = (ArrayVariableType) variableValue.type;
-        int offset = poppedInteger - arrayVariableType.startIndex;
+        
+        if((index < arrayVariableType.startIndex) || (index > arrayVariableType.endIndex)) {
+          System.out.printf(
+            "RUNTIME ERROR: index [%d] is out of bounds for array '%s' of type '%s'!\n",
+            index,
+            iven.identifier,
+            arrayVariableType.toString()
+          );
+          
+          System.exit(1);
+        }
+
+        int offset = index - arrayVariableType.startIndex;
 
         switch (node.variableAccessExpressionNode.type.basePrimitiveType) {
           case PrimitiveTypeEnum.REAL -> correctMemory.storeFloatAt(variableIdentifier, dataStack.popFloat(), offset);
@@ -182,15 +232,15 @@ public class Interpreter {
 
   private void visitPrimitiveTypeExpressionNode(PrimitiveTypeExpressionNode<?> node) {
     switch (node.value) {
-    case Integer value -> dataStack.pushInteger(value);
-    case Double value -> dataStack.pushFloat((float) (double) value);
-    case String value -> {
-      var stringLiteralIndex = stringLiteralsMemory.indexOf(value);
-      dataStack.pushInteger(stringLiteralIndex);
-    }
-    case Boolean value -> dataStack.pushInteger(value ? 1 : 0);
-    case Character value -> dataStack.pushInteger((int) (char) value);
-    default -> throw new RuntimeException("Unsupported primitive type");
+      case Integer value -> dataStack.pushInteger(value);
+      case Double value -> dataStack.pushFloat((float) (double) value);
+      case String value -> {
+        var stringLiteralIndex = stringLiteralsMemory.indexOf(value);
+        dataStack.pushInteger(stringLiteralIndex);
+      }
+      case Boolean value -> dataStack.pushInteger(value ? 1 : 0);
+      case Character value -> dataStack.pushInteger((int) (char) value);
+      default -> throw new RuntimeException("Unsupported primitive type");
     }
   }
 
@@ -305,18 +355,50 @@ public class Interpreter {
 
     if (node.left.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
       if (node.left.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
-        dataStack.pushFloat(dataStack.popInteger() / dataStack.popInteger());
+        int dividend = dataStack.popInteger();
+        int divisor = dataStack.popInteger();
+
+        if(divisor == 0) {
+          System.out.printf("RUNTIME ERROR: division by zero!\n");
+          System.exit(1);
+        }
+
+        dataStack.pushFloat(dividend / divisor);
       }
       else {
-        dataStack.pushFloat(dataStack.popInteger() / dataStack.popFloat());
+        int dividend = dataStack.popInteger();
+        float divisor = dataStack.popFloat();
+        
+        if(divisor == 0) {
+          System.out.printf("RUNTIME ERROR: division by zero!\n");
+          System.exit(1);
+        }
+        
+        dataStack.pushFloat(dividend / divisor);
       }
     }
     else {
       if (node.left.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
-        dataStack.pushFloat(dataStack.popFloat() / dataStack.popInteger());
+        float dividend = dataStack.popFloat();
+        int divisor = dataStack.popInteger();
+        
+        if(divisor == 0) {
+          System.out.printf("RUNTIME ERROR: division by zero!\n");
+          System.exit(1);
+        }
+        
+        dataStack.pushFloat(dividend / divisor);
       }
       else {
-        dataStack.pushFloat(dataStack.popFloat() / dataStack.popFloat());
+        float dividend = dataStack.popFloat();
+        float divisor = dataStack.popFloat();
+        
+        if(divisor == 0) {
+          System.out.printf("RUNTIME ERROR: division by zero!\n");
+          System.exit(1);
+        }
+
+        dataStack.pushFloat(dividend / divisor);
       }
     }
   }
@@ -325,7 +407,15 @@ public class Interpreter {
     visit(node.right);
     visit(node.left);
 
-    dataStack.pushInteger(dataStack.popInteger() / dataStack.popInteger());
+    int dividend = dataStack.popInteger();
+    int divisor = dataStack.popInteger();
+
+    if(divisor == 0) {
+      System.out.printf("RUNTIME ERROR: division by zero!\n");
+      System.exit(1);
+    }
+
+    dataStack.pushInteger(dividend / divisor);
   }
 
   private void visitArithmeticOperatorExpressionNode(ArithmeticOperatorExpressionNode node) {
@@ -360,14 +450,38 @@ public class Interpreter {
     if (node.type instanceof PrimitiveVariableType && node.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
       int strIndex = correctMemory.loadInteger(node.identifier);
       String str = stringLiteralsMemory.getEntry(strIndex);
+
+      if(index < 0 || index > (str.length() - 1)) {
+        System.out.printf(
+          "RUNTIME ERROR: index [%d] is out of bounds for string '%s'!\n",
+          index,
+          str
+        );
+
+        System.exit(1);
+      }
+
       char c = str.charAt(index);
       dataStack.pushInteger(c);
+      
       return;
     }
 
     VariableTableEntry symbol = correctTable.get(node.identifier);
-    ArrayVariableType ArrayType = (ArrayVariableType) symbol.type;
-    int offset = index - ArrayType.startIndex;
+    ArrayVariableType arrayType = (ArrayVariableType) symbol.type;
+    
+    if((index < arrayType.startIndex) || (index > arrayType.endIndex)) {
+      System.out.printf(
+        "RUNTIME ERROR: index [%d] is out of bounds for array '%s' of type '%s'!\n",
+        index,
+        node.identifier,
+        arrayType.toString()
+      );
+      
+      System.exit(1);
+    }
+    
+    int offset = index - arrayType.startIndex;
 
     switch (node.type.basePrimitiveType) {
       case PrimitiveTypeEnum.INTEGER -> dataStack.pushInteger(correctMemory.loadIntegerAt(node.identifier, offset));
@@ -390,27 +504,27 @@ public class Interpreter {
     }
 
     switch (node.type) {
-    case PrimitiveVariableType _ -> {
-      switch (node.type.basePrimitiveType) {
-        case PrimitiveTypeEnum.INTEGER -> dataStack.pushInteger(correctMemory.loadInteger(node.identifier));
-        case PrimitiveTypeEnum.REAL -> dataStack.pushFloat(correctMemory.loadFloat(node.identifier));
-        case PrimitiveTypeEnum.CHAR -> dataStack.pushInteger(correctMemory.loadInteger(node.identifier));
-        case PrimitiveTypeEnum.BOOLEAN -> dataStack.pushInteger(correctMemory.loadInteger(node.identifier));
-        case PrimitiveTypeEnum.STRING -> dataStack.pushInteger(correctMemory.loadInteger(node.identifier));
-        default -> throw new RuntimeException("Unsupported primitive type");
+      case PrimitiveVariableType _ -> {
+        switch (node.type.basePrimitiveType) {
+          case PrimitiveTypeEnum.INTEGER -> dataStack.pushInteger(correctMemory.loadInteger(node.identifier));
+          case PrimitiveTypeEnum.REAL -> dataStack.pushFloat(correctMemory.loadFloat(node.identifier));
+          case PrimitiveTypeEnum.CHAR -> dataStack.pushInteger(correctMemory.loadInteger(node.identifier));
+          case PrimitiveTypeEnum.BOOLEAN -> dataStack.pushInteger(correctMemory.loadInteger(node.identifier));
+          case PrimitiveTypeEnum.STRING -> dataStack.pushInteger(correctMemory.loadInteger(node.identifier));
+          default -> throw new RuntimeException("Unsupported primitive type");
+        }
       }
-    }
-    case ArrayVariableType _ -> {
-      switch (node.type.basePrimitiveType) {
-        case PrimitiveTypeEnum.INTEGER -> dataStack.pushIntegerArray(correctMemory.loadIntegerArray(node.identifier));
-        case PrimitiveTypeEnum.REAL -> dataStack.pushFloatArray(correctMemory.loadFloatArray(node.identifier));
-        case PrimitiveTypeEnum.CHAR -> dataStack.pushIntegerArray(correctMemory.loadIntegerArray(node.identifier));
-        case PrimitiveTypeEnum.BOOLEAN -> dataStack.pushIntegerArray(correctMemory.loadIntegerArray(node.identifier));
-        case PrimitiveTypeEnum.STRING -> dataStack.pushIntegerArray(correctMemory.loadIntegerArray(node.identifier));
-        default -> throw new RuntimeException("Unsupported primitive type of array type");
+      case ArrayVariableType _ -> {
+        switch (node.type.basePrimitiveType) {
+          case PrimitiveTypeEnum.INTEGER -> dataStack.pushIntegerArray(correctMemory.loadIntegerArray(node.identifier));
+          case PrimitiveTypeEnum.REAL -> dataStack.pushFloatArray(correctMemory.loadFloatArray(node.identifier));
+          case PrimitiveTypeEnum.CHAR -> dataStack.pushIntegerArray(correctMemory.loadIntegerArray(node.identifier));
+          case PrimitiveTypeEnum.BOOLEAN -> dataStack.pushIntegerArray(correctMemory.loadIntegerArray(node.identifier));
+          case PrimitiveTypeEnum.STRING -> dataStack.pushIntegerArray(correctMemory.loadIntegerArray(node.identifier));
+          default -> throw new RuntimeException("Unsupported primitive type of array type");
+        }
       }
-    }
-    default -> throw new RuntimeException("Unsupported type");
+      default -> throw new RuntimeException("Unsupported type");
     }
   }
 
@@ -418,17 +532,17 @@ public class Interpreter {
     String operator = node.operator;
 
     switch (operator) {
-    case "and" -> {
-      visit(node.right);
-      visit(node.left);
-      dataStack.pushInteger((dataStack.popInteger() == 1 && dataStack.popInteger() == 1) ? 1 : 0);
-    }
-    case "or" -> {
-      visit(node.right);
-      visit(node.left);
-      dataStack.pushInteger((dataStack.popInteger() == 1 || dataStack.popInteger() == 1) ? 1 : 0);
-    }
-    default -> throw new RuntimeException("Unsupported operation");
+      case "and" -> {
+        visit(node.right);
+        visit(node.left);
+        dataStack.pushInteger((dataStack.popInteger() == 1 && dataStack.popInteger() == 1) ? 1 : 0);
+      }
+      case "or" -> {
+        visit(node.right);
+        visit(node.left);
+        dataStack.pushInteger((dataStack.popInteger() == 1 || dataStack.popInteger() == 1) ? 1 : 0);
+      }
+      default -> throw new RuntimeException("Unsupported operation");
     }
   }
 
@@ -459,15 +573,14 @@ public class Interpreter {
     int leftValue = dataStack.popInteger();
 
     switch (operator) {
-    case "=" -> dataStack.pushInteger(leftValue == rightValue ? 1 : 0);
-    case "<>" -> dataStack.pushInteger(leftValue != rightValue ? 1 : 0);
-    case "<" -> dataStack.pushInteger(leftValue < rightValue ? 1 : 0);
-    case ">" -> dataStack.pushInteger(leftValue > rightValue ? 1 : 0);
-    case "<=" -> dataStack.pushInteger(leftValue <= rightValue ? 1 : 0);
-    case ">=" -> dataStack.pushInteger(leftValue >= rightValue ? 1 : 0);
-    default -> throw new RuntimeException("Unsupported operation");
+      case "=" -> dataStack.pushInteger(leftValue == rightValue ? 1 : 0);
+      case "<>" -> dataStack.pushInteger(leftValue != rightValue ? 1 : 0);
+      case "<" -> dataStack.pushInteger(leftValue < rightValue ? 1 : 0);
+      case ">" -> dataStack.pushInteger(leftValue > rightValue ? 1 : 0);
+      case "<=" -> dataStack.pushInteger(leftValue <= rightValue ? 1 : 0);
+      case ">=" -> dataStack.pushInteger(leftValue >= rightValue ? 1 : 0);
+      default -> throw new RuntimeException("Unsupported operation");
     }
-    ;
   }
 
   private void visitProcedureCallStatementNode(ProcedureCallStatementNode node) {
@@ -637,63 +750,60 @@ public class Interpreter {
 
   private void visit(AstNode node) {
     switch (node) {
-    case ProgramNode concreteTypeNode -> visitProgramNode(concreteTypeNode);
-    case CompoundStatementNode concreteTypeNode -> visitCompoundStatementNode(concreteTypeNode);
-    case IfStatementNode concreteTypeNode -> visitIfStatementNode(concreteTypeNode);
-    case ForStatementNode concreteTypeNode -> visitForStatementNode(concreteTypeNode);
-    case PrimitiveTypeExpressionNode<?> concreteTypeNode -> visitPrimitiveTypeExpressionNode(concreteTypeNode);
-    case LogicOperatorExpressionNode concreteTypeNode -> visitLogicOperatorExpressionNode(concreteTypeNode);
-    case NotOperatorExpressionNode concreteTypeNode -> visitNotOperatorExpressionNode(concreteTypeNode);
-    case IntegerToRealExpressionNode concreteTypeNode -> visitIntegerToRealExpressionNode(concreteTypeNode);
-    case CharToStringExpressionNode concreteTypeNode -> visitCharToStringExpressionNode(concreteTypeNode);
-    case ComparisonOperatorExpressionNode concreteTypeNode -> visitComparisonOperatorExpressionNode(concreteTypeNode);
-    case AssignmentStatementNode concreteTypeNode -> visitAssignmentStatementNode(concreteTypeNode);
-    case IndexedVariableAccessExpressionNode concreteTypeNode -> visitIndexedVariableAccessExpressionNode(concreteTypeNode);
-    case ArithmeticOperatorExpressionNode concreteTypeNode -> visitArithmeticOperatorExpressionNode(concreteTypeNode);
-    case VariableAccessExpressionNode concreteTypeNode -> visitVariableAccessExpressionNode(concreteTypeNode);
-    case ProcedureCallStatementNode concreteTypeNode -> visitProcedureCallStatementNode(concreteTypeNode);
-    case FunctionCallExpressionNode concreteTypeNode -> visitFunctionCallStatementNode(concreteTypeNode);
-    default -> throw new RuntimeException("Unsupported primitive type");
+      case ProgramNode concreteTypeNode -> visitProgramNode(concreteTypeNode);
+      case CompoundStatementNode concreteTypeNode -> visitCompoundStatementNode(concreteTypeNode);
+      case IfStatementNode concreteTypeNode -> visitIfStatementNode(concreteTypeNode);
+      case ForStatementNode concreteTypeNode -> visitForStatementNode(concreteTypeNode);
+      case PrimitiveTypeExpressionNode<?> concreteTypeNode -> visitPrimitiveTypeExpressionNode(concreteTypeNode);
+      case LogicOperatorExpressionNode concreteTypeNode -> visitLogicOperatorExpressionNode(concreteTypeNode);
+      case NotOperatorExpressionNode concreteTypeNode -> visitNotOperatorExpressionNode(concreteTypeNode);
+      case IntegerToRealExpressionNode concreteTypeNode -> visitIntegerToRealExpressionNode(concreteTypeNode);
+      case CharToStringExpressionNode concreteTypeNode -> visitCharToStringExpressionNode(concreteTypeNode);
+      case ComparisonOperatorExpressionNode concreteTypeNode -> visitComparisonOperatorExpressionNode(concreteTypeNode);
+      case AssignmentStatementNode concreteTypeNode -> visitAssignmentStatementNode(concreteTypeNode);
+      case IndexedVariableAccessExpressionNode concreteTypeNode -> visitIndexedVariableAccessExpressionNode(concreteTypeNode);
+      case ArithmeticOperatorExpressionNode concreteTypeNode -> visitArithmeticOperatorExpressionNode(concreteTypeNode);
+      case VariableAccessExpressionNode concreteTypeNode -> visitVariableAccessExpressionNode(concreteTypeNode);
+      case ProcedureCallStatementNode concreteTypeNode -> visitProcedureCallStatementNode(concreteTypeNode);
+      case FunctionCallExpressionNode concreteTypeNode -> visitFunctionCallStatementNode(concreteTypeNode);
+      default -> throw new RuntimeException("Unsupported primitive type");
     }
   }
 
   private void executeBuiltInProcedureOrFunction(String identifier, PrimitiveTypeEnum argType) {
     switch (identifier.toLowerCase()) {
-    case "write" -> IO.print(stringLiteralsMemory.getEntry(dataStack.popInteger()));
-    case "writeln" -> IO.println(stringLiteralsMemory.getEntry(dataStack.popInteger()));
-    case "itos" -> dataStack.pushInteger(stringLiteralsMemory.addEntry(String.valueOf(dataStack.popInteger())));
-    case "rtos" -> dataStack.pushInteger(stringLiteralsMemory.addEntry(String.valueOf(dataStack.popFloat())));
-    case "btos" -> dataStack.pushInteger(stringLiteralsMemory.addEntry(String.valueOf(dataStack.popInteger() == 1 ? true : false)));
-
-    case "abs" -> {
-      if (argType == PrimitiveTypeEnum.REAL) {
-        dataStack.pushFloat(Math.abs(dataStack.popFloat()));
+      case "write" -> IO.print(stringLiteralsMemory.getEntry(dataStack.popInteger()));
+      case "writeln" -> IO.println(stringLiteralsMemory.getEntry(dataStack.popInteger()));
+      case "itos" -> dataStack.pushInteger(stringLiteralsMemory.addEntry(String.valueOf(dataStack.popInteger())));
+      case "rtos" -> dataStack.pushInteger(stringLiteralsMemory.addEntry(String.valueOf(dataStack.popFloat())));
+      case "btos" -> dataStack.pushInteger(stringLiteralsMemory.addEntry(String.valueOf(dataStack.popInteger() == 1 ? true : false)));
+      case "abs" -> {
+        if (argType == PrimitiveTypeEnum.REAL) {
+          dataStack.pushFloat(Math.abs(dataStack.popFloat()));
+        }
+        else {
+          dataStack.pushInteger(Math.abs(dataStack.popInteger()));
+        }
       }
-      else {
-        dataStack.pushInteger(Math.abs(dataStack.popInteger()));
+      case "sqr" -> {
+        if (argType == PrimitiveTypeEnum.REAL) {
+          float value = dataStack.popFloat();
+          dataStack.pushFloat(value * value);
+        }
+        else {
+          int value = dataStack.popInteger();
+          dataStack.pushInteger(value * value);
+        }
       }
-    }
-
-    case "sqr" -> {
-      if (argType == PrimitiveTypeEnum.REAL) {
-        float value = dataStack.popFloat();
-        dataStack.pushFloat(value * value);
-      }
-      else {
-        int value = dataStack.popInteger();
-        dataStack.pushInteger(value * value);
-      }
-    }
-
-    case "sqrt" -> dataStack.pushFloat((float) Math.sqrt(dataStack.popFloat()));
-    case "trunc" -> dataStack.pushInteger((int) dataStack.popFloat());
-    case "round" -> dataStack.pushInteger(Math.round(dataStack.popFloat()));
-    case "ord", "chr" -> dataStack.pushInteger(dataStack.popInteger());
-    case "succ" -> dataStack.pushInteger(dataStack.popInteger() + 1);
-    case "pred" -> dataStack.pushInteger(dataStack.popInteger() - 1);
-    case "length" -> dataStack.pushInteger(stringLiteralsMemory.getEntry(dataStack.popInteger()).length());
-    case "upcase" -> dataStack.pushInteger(Character.toUpperCase(dataStack.popInteger()));
-    default -> throw new RuntimeException("Unsupported built-in procedure or function");
+      case "sqrt" -> dataStack.pushFloat((float) Math.sqrt(dataStack.popFloat()));
+      case "trunc" -> dataStack.pushInteger((int) dataStack.popFloat());
+      case "round" -> dataStack.pushInteger(Math.round(dataStack.popFloat()));
+      case "ord", "chr" -> dataStack.pushInteger(dataStack.popInteger());
+      case "succ" -> dataStack.pushInteger(dataStack.popInteger() + 1);
+      case "pred" -> dataStack.pushInteger(dataStack.popInteger() - 1);
+      case "length" -> dataStack.pushInteger(stringLiteralsMemory.getEntry(dataStack.popInteger()).length());
+      case "upcase" -> dataStack.pushInteger(Character.toUpperCase(dataStack.popInteger()));
+      default -> throw new RuntimeException("Unsupported built-in procedure or function");
     }
   }
 }

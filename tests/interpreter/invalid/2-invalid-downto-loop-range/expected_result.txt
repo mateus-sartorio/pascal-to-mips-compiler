@@ -1,0 +1,2 @@
+RUNTIME ERROR: incompatible begin and end values: 1 downto 10.
+make[1]: *** [Makefile:84: run-interpreter] Error 1

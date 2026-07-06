@@ -1,0 +1,2 @@
+SEMANTIC ERROR (2): End index (1) must be bigger than start index (10) in declaration of array variables.
+make[1]: *** [Makefile:75: run-semantic] Error 1

@@ -11,6 +11,8 @@ import types.PrimitiveVariableType;
 import types.ProcedureOrFunctionEnum;
 
 public class MemoryStack {
+  private final int MAX_SIZE = 100;
+
   private final ProceduresAndFunctionsTable proceduresAndFunctionsTable;
   private final Stack<Memory> stack;
   private final Stack<VariablesTable> currentTable;
@@ -36,6 +38,15 @@ public class MemoryStack {
   }
 
   public void pushFrame(String identifier) {
+    if(stack.size() == MAX_SIZE) {
+      System.out.printf(
+        "RUNTIME ERROR: stack overflow - max stack (%d) size exceeded!\n",
+        MAX_SIZE
+      );
+      
+      System.exit(1);
+    }
+
     var entry = proceduresAndFunctionsTable.get(identifier);
     
     var l1 = entry.parameters.toList();

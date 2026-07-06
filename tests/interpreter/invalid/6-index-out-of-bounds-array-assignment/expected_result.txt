@@ -1,0 +1,2 @@
+RUNTIME ERROR: index [11] is out of bounds for array 'arr' of type 'array[1..10] of integer'!
+make[1]: *** [Makefile:84: run-interpreter] Error 1
