@@ -1,10 +1,12 @@
 package interpreter;
 
+import java.util.List;
 import java.util.Scanner;
 
 import ast.types.AstNode;
 import ast.types.ProgramNode;
 import ast.types.declarations.contracts.ProcedureOrFunctionDeclarationNode;
+import ast.types.declarations.implementations.VariableDeclarationNode;
 import ast.types.expressions.contracts.ExpressionNode;
 import ast.types.expressions.implementations.ArithmeticOperatorExpressionNode;
 import ast.types.expressions.implementations.CharToStringExpressionNode;
@@ -16,8 +18,10 @@ import ast.types.expressions.implementations.LogicOperatorExpressionNode;
 import ast.types.expressions.implementations.NotOperatorExpressionNode;
 import ast.types.expressions.implementations.PrimitiveTypeExpressionNode;
 import ast.types.expressions.implementations.VariableAccessExpressionNode;
+import ast.types.statements.contract.StatementNode;
 import ast.types.statements.implementations.AssignmentStatementNode;
 import ast.types.statements.implementations.CompoundStatementNode;
+import ast.types.statements.implementations.ExitStatementNode;
 import ast.types.statements.implementations.ForStatementNode;
 import ast.types.statements.implementations.IfStatementNode;
 import ast.types.statements.implementations.ProcedureCallStatementNode;
@@ -39,8 +43,9 @@ public class Interpreter {
   private final Memory globalVariablesMemory;
   private final MemoryStack memoryStack;
   private final ProgramNode programNode;
+  private final Scanner scanner;
 
-  Scanner scanner = new Scanner(System.in);
+  private boolean shouldExitCurrentExecutionContext;
 
   public Interpreter(VariablesTable globalVariablesTable, StringLiteralsTable stringLiteralsTable, BuiltInProceduresAndFunctionsTable builtInProceduresAndFunctionsTable, ProceduresAndFunctionsTable proceduresAndFunctionsTable, ProgramNode programNode) {
     this.globalVariablesTable = globalVariablesTable;
@@ -50,6 +55,8 @@ public class Interpreter {
     this.globalVariablesMemory = new Memory(globalVariablesTable);
     this.memoryStack = new MemoryStack(proceduresAndFunctionsTable);
     this.programNode = programNode;
+    this.scanner = new Scanner(System.in);
+    this.shouldExitCurrentExecutionContext = false;
   }
 
   public void execute() {
@@ -61,7 +68,7 @@ public class Interpreter {
   }
 
   private void visitCompoundStatementNode(CompoundStatementNode node) {
-    for (var statement : node.statements) {
+    for (StatementNode statement : node.statements) {
       visit(statement);
     }
   }
@@ -178,18 +185,18 @@ public class Interpreter {
     if (node.variableAccessExpressionNode instanceof IndexedVariableAccessExpressionNode) {
       int size = correctMemory.entryOf(variableIdentifier).size();
 
-      if (node.variableAccessExpressionNode instanceof IndexedVariableAccessExpressionNode iven) {
-        visit(iven.indexExpressionNode);
+      if (node.variableAccessExpressionNode instanceof IndexedVariableAccessExpressionNode indexedVariableAccessExpressionNode) {
+        visit(indexedVariableAccessExpressionNode.indexExpressionNode);
         int index = dataStack.popInteger();
 
-        var variableValue = correctTable.get(variableIdentifier);
-        var arrayVariableType = (ArrayVariableType) variableValue.type;
+        VariableTableEntry variableValue = correctTable.get(variableIdentifier);
+        ArrayVariableType arrayVariableType = (ArrayVariableType) variableValue.type;
         
         if((index < arrayVariableType.startIndex) || (index > arrayVariableType.endIndex)) {
           System.out.printf(
             "RUNTIME ERROR: index [%d] is out of bounds for array '%s' of type '%s'!\n",
             index,
-            iven.identifier,
+            indexedVariableAccessExpressionNode.identifier,
             arrayVariableType.toString()
           );
           
@@ -235,7 +242,7 @@ public class Interpreter {
       case Integer value -> dataStack.pushInteger(value);
       case Double value -> dataStack.pushFloat((float) (double) value);
       case String value -> {
-        var stringLiteralIndex = stringLiteralsMemory.indexOf(value);
+        int stringLiteralIndex = stringLiteralsMemory.indexOf(value);
         dataStack.pushInteger(stringLiteralIndex);
       }
       case Boolean value -> dataStack.pushInteger(value ? 1 : 0);
@@ -256,7 +263,7 @@ public class Interpreter {
         dataStack.pushFloat(dataStack.popInteger() + dataStack.popFloat());
       }
     }
-    else
+    else {
       if (node.left.type.basePrimitiveType == PrimitiveTypeEnum.REAL) {
         if (node.right.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
           dataStack.pushFloat(dataStack.popFloat() + dataStack.popInteger());
@@ -265,35 +272,35 @@ public class Interpreter {
           dataStack.pushFloat(dataStack.popFloat() + dataStack.popFloat());
         }
       }
-      else
+      else {
         if (node.left.type.basePrimitiveType == PrimitiveTypeEnum.CHAR) {
           if (node.right.type.basePrimitiveType == PrimitiveTypeEnum.CHAR) {
             dataStack.pushInteger(stringLiteralsMemory.addEntry(String.valueOf((char) dataStack.popInteger()) + String.valueOf((char) dataStack.popInteger())));
           }
           else {
-            var left = dataStack.popInteger();
+            int left = dataStack.popInteger();
             String leftCharToString = String.valueOf((char) left);
-            var right = dataStack.popInteger();
+            int right = dataStack.popInteger();
             String stringLiteralEntry = stringLiteralsMemory.getEntry(right);
             String finalString = leftCharToString + stringLiteralEntry;
 
             dataStack.pushInteger(stringLiteralsMemory.addEntry(finalString));
           }
         }
-        else
+        else {
           if (node.left.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
             if (node.right.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
-              var rightIndex = dataStack.popInteger();
-              var leftIndex = dataStack.popInteger();
+              int rightIndex = dataStack.popInteger();
+              int leftIndex = dataStack.popInteger();
               String rightString = stringLiteralsMemory.getEntry(rightIndex);
               String leftString = stringLiteralsMemory.getEntry(leftIndex);
-              var resultIndex = stringLiteralsMemory.addEntry(rightString + leftString);
+              int resultIndex = stringLiteralsMemory.addEntry(rightString + leftString);
               dataStack.pushInteger(resultIndex);
             }
             else {
-              var left = dataStack.popInteger();
+              int left = dataStack.popInteger();
               String str1 = stringLiteralsMemory.getEntry(left);
-              var right = dataStack.popInteger();
+              int right = dataStack.popInteger();
               String str2 = String.valueOf((char) right);
               String finalString = str1 + str2;
 
@@ -303,6 +310,9 @@ public class Interpreter {
           else {
             throw new RuntimeException("Unsupported primitive type");
           }
+        }      
+      }
+    }
   }
 
   private void handleMinus(ArithmeticOperatorExpressionNode node) {
@@ -648,12 +658,12 @@ public class Interpreter {
     ProcedureOrFunctionDeclarationNode procedureDeclaration = programNode.getDeclaration(node.procedureIdentifier);
 
     if (procedureDeclaration.parameters.isPresent()) {
-      var parameters = procedureDeclaration.parameters.get().variables;
+      List<VariableDeclarationNode> parameters = procedureDeclaration.parameters.get().variables;
       for (int i = parameters.size() - 1; i >= 0; i--) {
-        var parameter = parameters.get(i);
+        VariableDeclarationNode parameter = parameters.get(i);
 
         if (parameter.type instanceof ArrayVariableType ap) {
-          var size = ap.endIndex - ap.startIndex + 1;
+          int size = ap.endIndex - ap.startIndex + 1;
 
           switch (ap.basePrimitiveType) {
             case PrimitiveTypeEnum.REAL -> currentMemory.storeFloatArray(parameter.identifier, dataStack.popFloatArray(size));
@@ -680,6 +690,7 @@ public class Interpreter {
     visit(procedureDeclaration.compoundStatement);
 
     memoryStack.popFrame();
+    shouldExitCurrentExecutionContext = false;
   }
 
   private void visitFunctionCallStatementNode(FunctionCallExpressionNode node) {
@@ -705,9 +716,9 @@ public class Interpreter {
     ProcedureOrFunctionDeclarationNode declarationNode = programNode.getDeclaration(node.functionIdentifier);
 
     if (declarationNode.parameters.isPresent()) {
-      var parameters = declarationNode.parameters.get().variables;
+      List<VariableDeclarationNode> parameters = declarationNode.parameters.get().variables;
       for (int i = parameters.size() - 1; i >= 0; i--) {
-        var parameter = parameters.get(i);
+        VariableDeclarationNode parameter = parameters.get(i);
 
         if (parameter.type instanceof ArrayVariableType ap) {
           int size = ap.endIndex - ap.startIndex + 1;
@@ -746,27 +757,42 @@ public class Interpreter {
     }
 
     memoryStack.popFrame();
+    shouldExitCurrentExecutionContext = false;
+  }
+
+  private void visitExitStatementNode(ExitStatementNode node) {
+    shouldExitCurrentExecutionContext = true;
   }
 
   private void visit(AstNode node) {
     switch (node) {
+      case StatementNode statementNode -> {
+        if(shouldExitCurrentExecutionContext) {
+          return;
+        }
+
+        switch(statementNode) {
+          case CompoundStatementNode concreteTypeNode -> visitCompoundStatementNode(concreteTypeNode);
+          case IfStatementNode concreteTypeNode -> visitIfStatementNode(concreteTypeNode);
+          case ForStatementNode concreteTypeNode -> visitForStatementNode(concreteTypeNode);
+          case AssignmentStatementNode concreteTypeNode -> visitAssignmentStatementNode(concreteTypeNode);
+          case ProcedureCallStatementNode concreteTypeNode -> visitProcedureCallStatementNode(concreteTypeNode);
+          case ExitStatementNode concreteTypeNode -> visitExitStatementNode(concreteTypeNode);
+          default -> throw new RuntimeException("Unsupported statement node type");
+        }
+      }
       case ProgramNode concreteTypeNode -> visitProgramNode(concreteTypeNode);
-      case CompoundStatementNode concreteTypeNode -> visitCompoundStatementNode(concreteTypeNode);
-      case IfStatementNode concreteTypeNode -> visitIfStatementNode(concreteTypeNode);
-      case ForStatementNode concreteTypeNode -> visitForStatementNode(concreteTypeNode);
       case PrimitiveTypeExpressionNode<?> concreteTypeNode -> visitPrimitiveTypeExpressionNode(concreteTypeNode);
       case LogicOperatorExpressionNode concreteTypeNode -> visitLogicOperatorExpressionNode(concreteTypeNode);
       case NotOperatorExpressionNode concreteTypeNode -> visitNotOperatorExpressionNode(concreteTypeNode);
       case IntegerToRealExpressionNode concreteTypeNode -> visitIntegerToRealExpressionNode(concreteTypeNode);
       case CharToStringExpressionNode concreteTypeNode -> visitCharToStringExpressionNode(concreteTypeNode);
       case ComparisonOperatorExpressionNode concreteTypeNode -> visitComparisonOperatorExpressionNode(concreteTypeNode);
-      case AssignmentStatementNode concreteTypeNode -> visitAssignmentStatementNode(concreteTypeNode);
       case IndexedVariableAccessExpressionNode concreteTypeNode -> visitIndexedVariableAccessExpressionNode(concreteTypeNode);
       case ArithmeticOperatorExpressionNode concreteTypeNode -> visitArithmeticOperatorExpressionNode(concreteTypeNode);
       case VariableAccessExpressionNode concreteTypeNode -> visitVariableAccessExpressionNode(concreteTypeNode);
-      case ProcedureCallStatementNode concreteTypeNode -> visitProcedureCallStatementNode(concreteTypeNode);
       case FunctionCallExpressionNode concreteTypeNode -> visitFunctionCallStatementNode(concreteTypeNode);
-      default -> throw new RuntimeException("Unsupported primitive type");
+      default -> throw new RuntimeException("Unsupported node type");
     }
   }
 

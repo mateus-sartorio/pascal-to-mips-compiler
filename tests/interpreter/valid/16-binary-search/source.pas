@@ -9,17 +9,18 @@ var
   mid: integer;
 begin
   if low > high then
-    binarySearchArray := -1
-  else
   begin
-    mid := low + (high - low) div 2;
-    if arr[mid] = target then
-      binarySearchArray := mid
-    else if arr[mid] < target then
-      binarySearchArray := binarySearchArray(arr, mid + 1, high, target)
-    else
-      binarySearchArray := binarySearchArray(arr, low, mid - 1, target);
+    binarySearchArray := -1;
+    exit;
   end;
+
+  mid := low + (high - low) div 2;
+  if arr[mid] = target then
+    binarySearchArray := mid
+  else if arr[mid] < target then
+    binarySearchArray := binarySearchArray(arr, mid + 1, high, target)
+  else
+    binarySearchArray := binarySearchArray(arr, low, mid - 1, target);
 end;
 
 begin

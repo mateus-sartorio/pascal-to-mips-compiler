@@ -5,6 +5,7 @@ var x: integer;
 procedure inc2(var a: integer);
 begin
   a := a + 2;
+  exit;
 end;
 
 function inc3(var a: integer) : integer;

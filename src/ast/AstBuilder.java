@@ -29,6 +29,7 @@ import ast.types.expressions.implementations.FunctionReturnVariableAccessExpress
 import ast.types.statements.contract.StatementNode;
 import ast.types.statements.implementations.AssignmentStatementNode;
 import ast.types.statements.implementations.CompoundStatementNode;
+import ast.types.statements.implementations.ExitStatementNode;
 import ast.types.statements.implementations.ForStatementNode;
 import ast.types.statements.implementations.IfStatementNode;
 import ast.types.statements.implementations.ProcedureCallStatementNode;
@@ -45,6 +46,7 @@ import parser.PascalParser.BooleanConstantContext;
 import parser.PascalParser.Boolean_constantContext;
 import parser.PascalParser.Compound_statementContext;
 import parser.PascalParser.Empty_statementContext;
+import parser.PascalParser.Exit_statementContext;
 import parser.PascalParser.ExpressionContext;
 import parser.PascalParser.For_statementContext;
 import parser.PascalParser.FunctionCallContext;
@@ -522,6 +524,11 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
   @Override
   public StatementNode visitEmpty_statement(Empty_statementContext context) {
     return null;
+  }
+
+  @Override
+  public ExitStatementNode visitExit_statement(Exit_statementContext context) {
+    return new ExitStatementNode(currentId++);
   }
 
   @Override

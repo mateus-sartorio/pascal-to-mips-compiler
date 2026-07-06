@@ -54,6 +54,7 @@ TYPE: 'type' ;
 VAR: 'var' ;
 TRUE: 'true' ;
 FALSE: 'false' ;
+EXIT : 'exit' ;
 
 // 6.1.4. Directives Not needed
 

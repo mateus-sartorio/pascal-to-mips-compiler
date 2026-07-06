@@ -99,11 +99,11 @@ Local variables:
 1. identifier: 'textoLocalProcedure', line: 10, type: string
 2. identifier: 'newVariable', line: 10, type: string
 
-Function 'FormatarNome' - line 17, return type: string
+Function 'FormatarNome' - line 18, return type: string
 Parameters:
-0. identifier: 'id', line: 17, type: integer
-1. identifier: 'sufixo', line: 17, type: string
+0. identifier: 'id', line: 18, type: integer
+1. identifier: 'sufixo', line: 18, type: string
 Local variables:
-0. identifier: 'nomeFormatado', line: 19, type: string
+0. identifier: 'nomeFormatado', line: 20, type: string
 
 
