@@ -11,7 +11,7 @@ public class ArrayVariableType extends VariableType {
     int startIndex,
     int endIndex
   ) {
-    this.basePrimitiveType = basePrimitiveType;
+    super(basePrimitiveType, false);
     this.startIndex = startIndex;
     this.endIndex = endIndex;
   }

@@ -72,13 +72,20 @@ run-parser-gui:
 
 # Run the semantic checker
 run-semantic:
-	@$(JAVA) $(CLASS_PATH_OPTION) Main $(FILE_ABSOLUTE_PATH)
+	@$(JAVA) $(CLASS_PATH_OPTION) Main $(FILE_ABSOLUTE_PATH) -print-tables
 
 # Run the AST builder and save outputs as actual_result (.dot and .png) inside the test folder
 run-ast:
-	@$(JAVA) $(CLASS_PATH_OPTION) Main $(FILE_ABSOLUTE_PATH)
-	@mv test.dot $(dir $(FILE_ABSOLUTE_PATH))actual_result.dot
-	@dot -Tpng $(dir $(FILE_ABSOLUTE_PATH))actual_result.dot -o $(dir $(FILE_ABSOLUTE_PATH))actual_result.png
+	-@$(JAVA) $(CLASS_PATH_OPTION) Main $(FILE_ABSOLUTE_PATH) -print-ast 2>/dev/null || true
+	@dot -Tpng $(dir $(FILE_ABSOLUTE_PATH))actual_result.dot -o $(dir $(FILE_ABSOLUTE_PATH))actual_result.png 2>/dev/null || true
+
+# Run the interpreter
+run-interpreter:
+	@if [ -f "$(dir $(FILE_ABSOLUTE_PATH))input.txt" ]; then \
+		$(JAVA) $(CLASS_PATH_OPTION) Main $(FILE_ABSOLUTE_PATH) -interpret < "$(dir $(FILE_ABSOLUTE_PATH))input.txt"; \
+	else \
+		$(JAVA) $(CLASS_PATH_OPTION) Main $(FILE_ABSOLUTE_PATH) -interpret < /dev/null; \
+	fi
 
 # Run all automated tests
 test:

@@ -1,3 +1,7 @@
+STRING LITERALS TABLE:
+
+0. 'abc'
+
 
 BUILT-IN PROCEDURES AND FUNCTIONS TABLE:
 
@@ -60,6 +64,18 @@ Parameters:
 Built-in function 'upcase', return type: char
 Parameters:
 0. identifier: 'c', type: char
+
+Built-in function 'itos', return type: string
+Parameters:
+0. identifier: 'n', type: integer
+
+Built-in function 'rtos', return type: string
+Parameters:
+0. identifier: 'n', type: real
+
+Built-in function 'btos', return type: string
+Parameters:
+0. identifier: 'b', type: boolean
 
 
 

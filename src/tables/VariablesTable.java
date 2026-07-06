@@ -46,6 +46,10 @@ public final class VariablesTable {
     return table.isEmpty();
   }
 
+  public int size() {
+    return table.size();
+  }
+
   public boolean lookupVariable(String identifier) {
     return table.containsKey(identifier.toLowerCase());
   }
@@ -57,6 +61,10 @@ public final class VariablesTable {
 
   public VariableTableEntry get(String identifier) {
     return table.get(identifier.toLowerCase());
+  }
+
+  public int getIndex(String identifier) {
+    return new ArrayList<>(table.keySet()).indexOf(identifier.toLowerCase());
   }
 
   public List<VariableTableEntry> toList() {

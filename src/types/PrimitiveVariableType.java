@@ -2,7 +2,11 @@ package types;
 
 public class PrimitiveVariableType extends VariableType {
   public PrimitiveVariableType(PrimitiveTypeEnum basePrimitiveType) {
-    this.basePrimitiveType = basePrimitiveType;
+    super(basePrimitiveType, false);
+  }
+
+  public PrimitiveVariableType(PrimitiveTypeEnum basePrimitiveType, boolean isIndexed) {
+    super(basePrimitiveType, isIndexed);
   }
 
   @Override

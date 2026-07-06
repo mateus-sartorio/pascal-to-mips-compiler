@@ -1,0 +1,2 @@
+RUNTIME ERROR: stack overflow - max stack (100) size exceeded!
+make[1]: *** [Makefile:84: run-interpreter] Error 1

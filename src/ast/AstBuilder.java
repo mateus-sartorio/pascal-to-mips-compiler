@@ -25,10 +25,11 @@ import ast.types.expressions.implementations.LogicOperatorExpressionNode;
 import ast.types.expressions.implementations.NotOperatorExpressionNode;
 import ast.types.expressions.implementations.PrimitiveTypeExpressionNode;
 import ast.types.expressions.implementations.VariableAccessExpressionNode;
-import ast.types.expressions.implementations.FunctionReturnAssignmentExpressionNode;
+import ast.types.expressions.implementations.FunctionReturnVariableAccessExpressionNode;
 import ast.types.statements.contract.StatementNode;
 import ast.types.statements.implementations.AssignmentStatementNode;
 import ast.types.statements.implementations.CompoundStatementNode;
+import ast.types.statements.implementations.ExitStatementNode;
 import ast.types.statements.implementations.ForStatementNode;
 import ast.types.statements.implementations.IfStatementNode;
 import ast.types.statements.implementations.ProcedureCallStatementNode;
@@ -45,6 +46,7 @@ import parser.PascalParser.BooleanConstantContext;
 import parser.PascalParser.Boolean_constantContext;
 import parser.PascalParser.Compound_statementContext;
 import parser.PascalParser.Empty_statementContext;
+import parser.PascalParser.Exit_statementContext;
 import parser.PascalParser.ExpressionContext;
 import parser.PascalParser.For_statementContext;
 import parser.PascalParser.FunctionCallContext;
@@ -99,6 +101,10 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     this.globalVariablesTable = globalVariablesTable;
     this.builtInProceduresAndFunctionsTable = builtInProceduresAndFunctionsTable;
     this.proceduresAndFunctionsTable = proceduresAndFunctionsTable;
+  }
+
+  public ProgramNode getProgramNode() {
+    return programNode;
   }
 
 	// Imprime a árvore toda em stderr.
@@ -166,7 +172,7 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
   }
 
   @Override
-  public ExpressionNode visitVariable_access(Variable_accessContext context) {
+  public VariableAccessExpressionNode visitVariable_access(Variable_accessContext context) {
     String variableIdentifier;
     boolean isIndexedVariable = false;
     if(context.IDENTIFIER() == null) {
@@ -199,7 +205,7 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
 
     ProceduresAndFunctionsEntry functionEntry = proceduresAndFunctionsTable.get(variableIdentifier);
     if(functionEntry != null) {
-      return new FunctionReturnAssignmentExpressionNode(currentId++, functionEntry.identifier, new PrimitiveVariableType(functionEntry.returnType));
+      return new FunctionReturnVariableAccessExpressionNode(currentId++, functionEntry.identifier, new PrimitiveVariableType(functionEntry.returnType));
     }
 
     throw new RuntimeException("Variable " + variableIdentifier + " not found in symbol tables");
@@ -387,6 +393,9 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
       else if(operator.DIVISION() != null) {
         returnExpression = new ArithmeticOperatorExpressionNode(currentId++, leftExpression, rightExpression, "/");
       }
+      else if(operator.DIV() != null) {
+        returnExpression = new ArithmeticOperatorExpressionNode(currentId++, leftExpression, rightExpression, "div");
+      }
       else {
         returnExpression = new LogicOperatorExpressionNode(currentId++, leftExpression, rightExpression, "and");
       }
@@ -518,10 +527,15 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
   }
 
   @Override
-  public StatementNode visitAssignment_statement(Assignment_statementContext context) {
+  public ExitStatementNode visitExit_statement(Exit_statementContext context) {
+    return new ExitStatementNode(currentId++);
+  }
+
+  @Override
+  public AssignmentStatementNode visitAssignment_statement(Assignment_statementContext context) {
     Variable_accessContext variableAccessContext = context.variable_access();
 
-    ExpressionNode variableAccessExpressionNode = (ExpressionNode) visit(variableAccessContext);
+    VariableAccessExpressionNode variableAccessExpressionNode = (VariableAccessExpressionNode) visit(variableAccessContext);
     ExpressionNode expressionNode = (ExpressionNode) visit(context.expression());
 
     ExpressionNode finalExpressionNode = expressionNode;
@@ -533,8 +547,8 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
       finalExpressionNode = new CharToStringExpressionNode(currentId++, expressionNode);
     }
     
-    if(variableAccessExpressionNode instanceof FunctionReturnAssignmentExpressionNode) {
-      return new ReturnStatementNode(currentId++, finalExpressionNode);
+    if(variableAccessExpressionNode instanceof FunctionReturnVariableAccessExpressionNode) {
+      return new ReturnStatementNode(currentId++, variableAccessExpressionNode, finalExpressionNode);
     }
 
     return new AssignmentStatementNode(currentId++, variableAccessExpressionNode, finalExpressionNode);

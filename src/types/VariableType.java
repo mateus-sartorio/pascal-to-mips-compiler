@@ -1,7 +1,13 @@
 package types;
 
 public abstract class VariableType {
-  public PrimitiveTypeEnum basePrimitiveType;
+  public final PrimitiveTypeEnum basePrimitiveType;
+  public final boolean isIndexed;
+
+  public VariableType(PrimitiveTypeEnum basePrimitiveType, boolean isIndexed) {
+    this.basePrimitiveType = basePrimitiveType;
+    this.isIndexed = isIndexed;
+  }
 
   public abstract boolean isEquivalent(VariableType other);
 

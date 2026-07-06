@@ -1,5 +1,7 @@
 program p1;
-var n: integer;
+  var
+    n: integer;
+    r: real;
 begin
   n := 7;
   
@@ -17,6 +19,7 @@ begin
   then
   begin
     n := n * 2;
-    n := n / 2;
+    n := n div 2;
+    r := n div 2;
   end;
 end.

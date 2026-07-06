@@ -1,7 +1,9 @@
 package tables;
 
+import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 public final class StringLiteralsTable {
@@ -9,6 +11,14 @@ public final class StringLiteralsTable {
 
   public boolean isEmpty() {
     return table.isEmpty();
+  }
+
+  public int size() {
+    return table.size();
+  }
+
+  public List<String> toList() {
+    return new ArrayList<>(table);
   }
 
   public void addStringLiteral(String literal) {

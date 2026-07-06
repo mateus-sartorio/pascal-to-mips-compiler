@@ -93,7 +93,7 @@ boolean_constant: TRUE | FALSE ;
 
 // 6.7.2.1 General
 
-multiplying_operator: MULTIPLICATION | DIVISION | AND ;
+multiplying_operator: MULTIPLICATION | DIVISION | DIV | AND ;
 adding_operator: PLUS | MINUS | OR ;
 relational_operator:
 	EQUAL_TO
@@ -124,9 +124,12 @@ simple_statement:
 	empty_statement
 	| assignment_statement
 	| procedure_statement
+  | exit_statement
   ;
 
 empty_statement: /* empty */;
+
+exit_statement : EXIT ;
 
 // 6.8.2.2 Assignment-statements
 assignment_statement: variable_access ASSIGNMENT expression ;

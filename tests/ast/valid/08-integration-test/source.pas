@@ -24,12 +24,12 @@ begin
 
   { --- Bloco 4: Controle de Fluxo - Laço FOR (downto) com Comando Simples --- }
   for i := 10 downto 1 do
-    writeln(i);
+    writeln(itos(i));
 
   { --- Bloco 5: Controle de Fluxo - Laço FOR (to) com Bloco Composto --- }
   for i := 1 to 10 do
   begin
     auxiliar := i;
-    writeln(auxiliar);
+    writeln(itos(auxiliar));
   end;
 end.

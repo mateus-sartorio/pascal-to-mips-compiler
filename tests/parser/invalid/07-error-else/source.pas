@@ -1,7 +1,7 @@
-program ErrorElse;
+program p7;
 begin
-    if (10 > 5) then
-        writeln('Maior'); { Erro: este ponto e vírgula mata o else abaixo }
-    else
-        writeln('Menor');
+  if (10 > 5) then
+    writeln('Maior'); { Erro: este ponto e vírgula mata o else abaixo }
+  else
+    writeln('Menor');
 end.

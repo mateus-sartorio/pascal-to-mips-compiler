@@ -1,4 +1,4 @@
-program p29;
+program p28;
 
 var
   c : char;

@@ -1,0 +1,2 @@
+SEMANTIC ERROR (7): incompatible types for operator 'div', LHS is 'real' and RHS is 'integer'.
+make[1]: *** [Makefile:75: run-semantic] Error 1

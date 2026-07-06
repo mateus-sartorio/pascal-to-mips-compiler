@@ -2,6 +2,7 @@ package ast.types;
 
 import java.util.Optional;
 
+import ast.types.declarations.contracts.ProcedureOrFunctionDeclarationNode;
 import ast.types.declarations.implementations.ProcedureAndFunctionDeclarationPartNode;
 import ast.types.declarations.implementations.VariableDeclarationPartNode;
 import ast.types.statements.implementations.CompoundStatementNode;
@@ -51,5 +52,15 @@ public class ProgramNode extends AstNode {
     sb.append("%s -> %s [label=\"main body\"];\n".formatted(getDotNotationIdentifier(), compoundStatement.getDotNotationIdentifier()));
 
     return sb.toString();
+  }
+
+  public ProcedureOrFunctionDeclarationNode getDeclaration(String identifier) {
+    for(var p : proceduresAndFunctions.get().procedureOrFunctionDeclarations) {
+      if(p.identifier.equals(identifier)) {
+        return p;
+      }
+    }
+
+    return null;
   }
 }

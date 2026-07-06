@@ -1,0 +1,2 @@
+SEMANTIC ERROR (8): string cannot be indexed in lhs expression!
+make[1]: *** [Makefile:75: run-semantic] Error 1

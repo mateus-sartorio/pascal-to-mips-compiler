@@ -1,14 +1,11 @@
 package ast.types.statements.implementations;
 
 import ast.types.expressions.contracts.ExpressionNode;
-import ast.types.statements.contract.StatementNode;
+import ast.types.expressions.implementations.VariableAccessExpressionNode;
 
-public class ReturnStatementNode extends StatementNode {
-  public final ExpressionNode expression;
-
-  public ReturnStatementNode(int id, ExpressionNode expression) {
-    super(id);
-    this.expression = expression;
+public class ReturnStatementNode extends AssignmentStatementNode {
+  public ReturnStatementNode(int id, VariableAccessExpressionNode variableAccessExpressionNode, ExpressionNode expression) {
+    super(id, variableAccessExpressionNode, expression);
   }
 
   @Override
