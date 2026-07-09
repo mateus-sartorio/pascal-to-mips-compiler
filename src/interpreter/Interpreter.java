@@ -47,7 +47,13 @@ public class Interpreter {
 
   private boolean shouldExitCurrentExecutionContext;
 
-  public Interpreter(VariablesTable globalVariablesTable, StringLiteralsTable stringLiteralsTable, BuiltInProceduresAndFunctionsTable builtInProceduresAndFunctionsTable, ProceduresAndFunctionsTable proceduresAndFunctionsTable, ProgramNode programNode) {
+  public Interpreter(
+    VariablesTable globalVariablesTable,
+    StringLiteralsTable stringLiteralsTable,
+    BuiltInProceduresAndFunctionsTable builtInProceduresAndFunctionsTable,
+    ProceduresAndFunctionsTable proceduresAndFunctionsTable,
+    ProgramNode programNode
+  ) {
     this.globalVariablesTable = globalVariablesTable;
     this.builtInProceduresAndFunctionsTable = builtInProceduresAndFunctionsTable;
     this.stringLiteralsMemory = new StringLiteralsMemory(stringLiteralsTable);
@@ -246,7 +252,7 @@ public class Interpreter {
         dataStack.pushInteger(stringLiteralIndex);
       }
       case Boolean value -> dataStack.pushInteger(value ? 1 : 0);
-      case Character value -> dataStack.pushInteger((int) (char) value);
+      case Character value -> dataStack.pushInteger(value);
       default -> throw new RuntimeException("Unsupported primitive type");
     }
   }

@@ -87,6 +87,13 @@ run-interpreter:
 		$(JAVA) $(CLASS_PATH_OPTION) Main $(FILE_ABSOLUTE_PATH) -interpret < /dev/null; \
 	fi
 
+run-compiler:
+	@if [ -f "$(dir $(FILE_ABSOLUTE_PATH))input.txt" ]; then \
+		$(JAVA) $(CLASS_PATH_OPTION) Main $(FILE_ABSOLUTE_PATH) -compiler < "$(dir $(FILE_ABSOLUTE_PATH))input.txt"; \
+	else \
+		$(JAVA) $(CLASS_PATH_OPTION) Main $(FILE_ABSOLUTE_PATH) -compiler < /dev/null; \
+	fi
+
 # Run all automated tests
 test:
 	@chmod +x test.sh
