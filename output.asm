@@ -1,5 +1,6 @@
 .data
 string0: .asciiz "test"
+
 __bool_true: .asciiz "true"
 __bool_false: .asciiz "false"
 c: .word 0
@@ -7,19 +8,20 @@ c: .word 0
 .text
 .globl p1
 p1:
-la $t0, c
-subu $sp, $sp, 4
-sw $t0, 0($sp)
-lw $a0, 0($sp)
-addu $sp, $sp, 4
-li $v0, 4
-syscall
-li $a0, 10
-li $v0, 11
-syscall
-li $v0, 10
-syscall
-__itoa:                       # $a0 = integer
+	la $t0, c
+	subu $sp, $sp, 4
+	sw $t0, 0($sp)
+	lw $a0, 0($sp)
+	addu $sp, $sp, 4
+	li $v0, 4
+	syscall
+	li $a0, 10
+	li $v0, 11
+	syscall
+	li $v0, 10
+	syscall
+	
+	__itoa:                       # $a0 = integer
     move $t0, $a0             # $t0 = n  (save it; syscall 9 needs $a0)
     li $v0, 9                 # allocate a fixed 12-byte buffer
     li $a0, 12                #   max is "-2147483648\0" = 12 bytes exactly
@@ -60,7 +62,8 @@ __itoa_sign:
 __itoa_done:
     addiu $v0, $t2, 1         # $t2 sits one before the leftmost char; +1 = start
     jr $ra
-__rtoa:                       # $a0 = real (float bits)
+
+	__rtoa:                       # $a0 = real (float bits)
     addiu $sp, $sp, -20       # frame: save $ra + $s0-$s3
     sw $ra, 0($sp)
     sw $s0, 4($sp)
@@ -151,7 +154,8 @@ __rtoa_done:
     lw $s3, 16($sp)
     addiu $sp, $sp, 20
     jr $ra
-__btoa:                       # $a0 = boolean (0 or 1)
+
+	__btoa:                       # $a0 = boolean (0 or 1)
     beqz $a0, __btoa_false
     la $v0, __bool_true
     jr $ra
@@ -159,3 +163,4 @@ __btoa:                       # $a0 = boolean (0 or 1)
 __btoa_false:
     la $v0, __bool_false
     jr $ra
+

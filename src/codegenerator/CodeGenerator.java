@@ -37,6 +37,7 @@ public class CodeGenerator {
   private final BuiltInProceduresAndFunctionsTable builtInProceduresAndFunctionsTable;
 
   private int labelCounter;
+  private int indentLevel;
 
   public CodeGenerator(
     ProgramNode programNode,
@@ -52,12 +53,14 @@ public class CodeGenerator {
     this.builtInProceduresAndFunctionsTable = builtInProceduresAndFunctionsTable;
 
     this.labelCounter = 0;
+    this.indentLevel = 0;
   }
 
   public String generate() {
     emitHeader(); 
     visit(this.programNode);
     emitFooter();
+    emit("");
     emitIntegerToStringConversionFunction();
     emitRealToStringConversionFunction();
     emitBooleanToStringConversionFunction();
@@ -65,30 +68,35 @@ public class CodeGenerator {
     return mipsTargetCode.toString();
   }
 
+  private void emit(String line) {
+    mipsTargetCode.append("\t".repeat(indentLevel)).append(line).append("\n");
+  }
+
   private void emitHeader() {
-    mipsTargetCode.append(".data\n");
+    emit(".data");
 
     for(Integer key : stringLiteralsTable.keySet()) {
-      mipsTargetCode.append("string%d: .asciiz \"%s\"\n".formatted(key, stringLiteralsTable.get(key)));
+      emit("string%d: .asciiz \"%s\"\n".formatted(key, stringLiteralsTable.get(key)));
     }
 
-    mipsTargetCode.append("__bool_true: .asciiz \"true\"\n");
-    mipsTargetCode.append("__bool_false: .asciiz \"false\"\n");
+    emit("__bool_true: .asciiz \"true\"");
+    emit("__bool_false: .asciiz \"false\"");
 
     for(VariableTableEntry variable : globalVariablesTable.toList()) {
-      mipsTargetCode.append(variable.identifier.toLowerCase() + ": .word 0\n");
+      emit(variable.identifier.toLowerCase() + ": .word 0");
     }
 
-    mipsTargetCode.append("\n.text\n.globl %s\n%s:\n".formatted(programNode.programIdentifier, programNode.programIdentifier));
+    emit("\n.text\n.globl %s\n%s:".formatted(programNode.programIdentifier, programNode.programIdentifier));
+    indentLevel++;
   }
 
   private void emitFooter() {
-    mipsTargetCode.append("li $v0, 10\n");
-    mipsTargetCode.append("syscall\n");
+    emit("li $v0, 10");
+    emit("syscall");
   }
 
   private void emitIntegerToStringConversionFunction() {
-    mipsTargetCode.append("""
+    emit("""
 __itoa:                       # $a0 = integer
     move $t0, $a0             # $t0 = n  (save it; syscall 9 needs $a0)
     li $v0, 9                 # allocate a fixed 12-byte buffer
@@ -134,7 +142,7 @@ __itoa_done:
   }
 
   private void emitRealToStringConversionFunction() {
-    mipsTargetCode.append("""
+    emit("""
 __rtoa:                       # $a0 = real (float bits)
     addiu $sp, $sp, -20       # frame: save $ra + $s0-$s3
     sw $ra, 0($sp)
@@ -230,7 +238,7 @@ __rtoa_done:
   }
 
   private void emitBooleanToStringConversionFunction() {
-    mipsTargetCode.append("""
+    emit("""
 __btoa:                       # $a0 = boolean (0 or 1)
     beqz $a0, __btoa_false
     la $v0, __bool_true
@@ -243,13 +251,13 @@ __btoa_false:
   }
 
   private void emitPushTemp(String reg) {
-    mipsTargetCode.append("subu $sp, $sp, 4\n");
-    mipsTargetCode.append("sw " + reg + ", 0($sp)\n");
+    emit("subu $sp, $sp, 4");
+    emit("sw " + reg + ", 0($sp)");
   }
 
   private void emitPopTemp(String reg) {
-    mipsTargetCode.append("lw " + reg + ", 0($sp)\n");
-    mipsTargetCode.append("addu $sp, $sp, 4\n");
+    emit("lw " + reg + ", 0($sp)");
+    emit("addu $sp, $sp, 4");
   }
 
   private void visitProgramNode(ProgramNode node) {
@@ -272,21 +280,21 @@ __btoa_false:
 
     // Se aqui for o else, então pula para o elseLabel se a condição for falsa
     if (node.elseStatement.isPresent()) {
-      mipsTargetCode.append("beq $t0, $zero, " + elseLabel + "\n");
+      emit("beq $t0, $zero, " + elseLabel);
     } else {
-      mipsTargetCode.append("beq $t0, $zero, " + endIfLabel + "\n");
+      emit("beq $t0, $zero, " + endIfLabel);
     }
 
     // Then statement
     visit(node.thenStatement);
 
     if (node.elseStatement.isPresent()) {
-      mipsTargetCode.append("j " + endIfLabel + "\n");
-      mipsTargetCode.append(elseLabel + ":\n");
+      emit("j " + endIfLabel);
+      emit(elseLabel + ":");
       visit(node.elseStatement.get());
     }
 
-    mipsTargetCode.append(endIfLabel + ":\n\n");
+    emit(endIfLabel + ":\n");
 
   }
 
@@ -301,33 +309,33 @@ __btoa_false:
     emitPopTemp("$t0"); //t0 = initial value
     emitPopTemp("$t1"); //t1 = final value
 
-    mipsTargetCode.append("sw $t0, " + node.controlVariable.identifier + "\n");
+    emit("sw $t0, " + node.controlVariable.identifier);
     emitPushTemp("$t1");
-    mipsTargetCode.append(loopStartLabel + ":\n");
+    emit(loopStartLabel + ":");
 
-    mipsTargetCode.append("lw $t0, " + node.controlVariable.identifier + "\n");
+    emit("lw $t0, " + node.controlVariable.identifier);
     emitPopTemp("$t1"); //t1 = final value
 
     if(node.isDownto) {
-      mipsTargetCode.append("blt $t0, $t1, " + loopEndLabel + "\n");
+      emit("blt $t0, $t1, " + loopEndLabel);
     } else {
-      mipsTargetCode.append("bgt $t0, $t1, " + loopEndLabel + "\n");
+      emit("bgt $t0, $t1, " + loopEndLabel);
     }
 
     visit(node.body);
 
-    mipsTargetCode.append("lw $t0, " + node.controlVariable.identifier + "\n");
+    emit("lw $t0, " + node.controlVariable.identifier);
 
     if(node.isDownto) {
-      mipsTargetCode.append("subi $t0, $t0, 1\n");
+      emit("subi $t0, $t0, 1");
     } else {
-      mipsTargetCode.append("addi $t0, $t0, 1\n");
+      emit("addi $t0, $t0, 1");
     }
 
-    mipsTargetCode.append("sw $t0, " + node.controlVariable.identifier + "\n");
+    emit("sw $t0, " + node.controlVariable.identifier);
 
-    mipsTargetCode.append("j " + loopStartLabel + "\n");
-    mipsTargetCode.append(loopEndLabel + ":\n");
+    emit("j " + loopStartLabel);
+    emit(loopEndLabel + ":");
     emitPopTemp("$t1"); 
     
   }
@@ -339,22 +347,22 @@ __btoa_false:
   private void visitPrimitiveTypeExpressionNode(PrimitiveTypeExpressionNode<?> node) {
     switch (node.value) {
       case Integer value -> {
-        mipsTargetCode.append("li $t0, " + value + "\n");
+        emit("li $t0, " + value);
         emitPushTemp("$t0");
       }
       case Double value -> {
-        mipsTargetCode.append("li $t0, " + value + "\n");
+        emit("li $t0, " + value);
         emitPushTemp("$t0");
       }
       case String value -> {
         // TODO
       }
       case Boolean value -> {
-        mipsTargetCode.append("li $t0, " + (value ? 1 : 0) + "\n");
+        emit("li $t0, " + (value ? 1 : 0));
         emitPushTemp("$t0");
       }
       case Character value -> {
-        mipsTargetCode.append("li $t0, " + value + "\n");
+        emit("li $t0, " + value);
         emitPushTemp("$t0");
       }
       default -> throw new RuntimeException("Unsupported primitive type");
@@ -370,41 +378,41 @@ __btoa_false:
 
     if (node.left.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
       if (node.right.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
-        mipsTargetCode.append("add $t0, $t0, $t1\n");
+        emit("add $t0, $t0, $t1");
         emitPushTemp("$t0");
       }
       else {
-        mipsTargetCode.append("mtc1 $t0, $f0\n");
+        emit("mtc1 $t0, $f0");
         
-        mipsTargetCode.append("mtc1 $t1, $f2\n");
-        mipsTargetCode.append("cvt.s.w $f2, $f2\n");
+        emit("mtc1 $t1, $f2");
+        emit("cvt.s.w $f2, $f2");
 
-        mipsTargetCode.append("add.s $f0, $f0, $f2\n");
-        mipsTargetCode.append("mfc1 $t0, $f0\n");
+        emit("add.s $f0, $f0, $f2");
+        emit("mfc1 $t0, $f0");
         emitPushTemp("$t0");
       }
     }
     else {
       if (node.left.type.basePrimitiveType == PrimitiveTypeEnum.REAL) {
         if (node.right.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
-          mipsTargetCode.append("mtc1 $t0, $f0\n");
-          mipsTargetCode.append("cvt.s.w $f0, $f0\n");
+          emit("mtc1 $t0, $f0");
+          emit("cvt.s.w $f0, $f0");
           
-          mipsTargetCode.append("mtc1 $t1, $f2\n");
+          emit("mtc1 $t1, $f2");
           
-          mipsTargetCode.append("add.s $f0, $f0, $f2\n");
-          mipsTargetCode.append("mfc1 $t0, $f0\n");
+          emit("add.s $f0, $f0, $f2");
+          emit("mfc1 $t0, $f0");
           emitPushTemp("$t0");
         }
         else {
-          mipsTargetCode.append("mtc1 $t0, $f0\n");
-          mipsTargetCode.append("cvt.s.w $f0, $f0\n");
+          emit("mtc1 $t0, $f0");
+          emit("cvt.s.w $f0, $f0");
           
-          mipsTargetCode.append("mtc1 $t1, $f2\n");
-          mipsTargetCode.append("cvt.s.w $f2, $f2\n");
+          emit("mtc1 $t1, $f2");
+          emit("cvt.s.w $f2, $f2");
           
-          mipsTargetCode.append("add.s $f0, $f0, $f2\n");
-          mipsTargetCode.append("mfc1 $t0, $f0\n");
+          emit("add.s $f0, $f0, $f2");
+          emit("mfc1 $t0, $f0");
           emitPushTemp("$t0");
         }
       }
@@ -444,18 +452,18 @@ __btoa_false:
     // no esq = int / no dir = int
     if(node.left.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
       if(node.right.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
-        mipsTargetCode.append("sub $t0, $t0, $t1\n");
+        emit("sub $t0, $t0, $t1");
         emitPushTemp("$t0");
       }
       // no esq = int / no dir = real
       else {
-        mipsTargetCode.append("mtc1 $t0, $f0\n");
-        mipsTargetCode.append("cvt.s.w $f0, $f0\n");
+        emit("mtc1 $t0, $f0");
+        emit("cvt.s.w $f0, $f0");
         
-        mipsTargetCode.append("mtc1 $t1, $f2\n");
+        emit("mtc1 $t1, $f2");
         
-        mipsTargetCode.append("sub.s $f0, $f0, $f2\n");
-        mipsTargetCode.append("mfc1 $t0, $f0\n");
+        emit("sub.s $f0, $f0, $f2");
+        emit("mfc1 $t0, $f0");
         emitPushTemp("$t0");
       }
     }
@@ -463,25 +471,25 @@ __btoa_false:
       // no esq = real / no dir = int
       if(node.left.type.basePrimitiveType == PrimitiveTypeEnum.REAL) {
         if(node.right.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
-          mipsTargetCode.append("mtc1 $t0, $f0\n");
-          mipsTargetCode.append("cvt.s.w $f0, $f0\n");
+          emit("mtc1 $t0, $f0");
+          emit("cvt.s.w $f0, $f0");
           
-          mipsTargetCode.append("mtc1 $t1, $f2\n");
+          emit("mtc1 $t1, $f2");
           
-          mipsTargetCode.append("sub.s $f0, $f0, $f2\n");
-          mipsTargetCode.append("mfc1 $t0, $f0\n");
+          emit("sub.s $f0, $f0, $f2");
+          emit("mfc1 $t0, $f0");
           emitPushTemp("$t0");
         }
         // no esq = real / no dir = real
         else {
-          mipsTargetCode.append("mtc1 $t0, $f0\n");
-          mipsTargetCode.append("cvt.s.w $f0, $f0\n");
+          emit("mtc1 $t0, $f0");
+          emit("cvt.s.w $f0, $f0");
           
-          mipsTargetCode.append("mtc1 $t1, $f2\n");
-          mipsTargetCode.append("cvt.s.w $f2, $f2\n");
+          emit("mtc1 $t1, $f2");
+          emit("cvt.s.w $f2, $f2");
           
-          mipsTargetCode.append("sub.s $f0, $f0, $f2\n");
-          mipsTargetCode.append("mfc1 $t0, $f0\n");
+          emit("sub.s $f0, $f0, $f2");
+          emit("mfc1 $t0, $f0");
           emitPushTemp("$t0");
         }
       }
@@ -502,18 +510,18 @@ __btoa_false:
     // no esq = int / no dir = int
     if (node.left.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
       if (node.right.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
-        mipsTargetCode.append("mul $t0, $t0, $t1\n");
+        emit("mul $t0, $t0, $t1");
         emitPushTemp("$t0");
       }
       // no esq = int / no dir = real
       else {
-        mipsTargetCode.append("mtc1 $t0, $f0\n");
-        mipsTargetCode.append("cvt.s.w $f0, $f0\n");
+        emit("mtc1 $t0, $f0");
+        emit("cvt.s.w $f0, $f0");
         
-        mipsTargetCode.append("mtc1 $t1, $f2\n");
+        emit("mtc1 $t1, $f2");
         
-        mipsTargetCode.append("mul.s $f0, $f0, $f2\n");
-        mipsTargetCode.append("mfc1 $t0, $f0\n");
+        emit("mul.s $f0, $f0, $f2");
+        emit("mfc1 $t0, $f0");
         emitPushTemp("$t0");
       }
     }
@@ -521,25 +529,25 @@ __btoa_false:
       // no esq = real / no dir = int
       if (node.left.type.basePrimitiveType == PrimitiveTypeEnum.REAL) {
         if (node.right.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
-          mipsTargetCode.append("mtc1 $t0, $f0\n");
+          emit("mtc1 $t0, $f0");
           
-          mipsTargetCode.append("mtc1 $t1, $f2\n");
-          mipsTargetCode.append("cvt.s.w $f2, $f2\n");
+          emit("mtc1 $t1, $f2");
+          emit("cvt.s.w $f2, $f2");
           
-          mipsTargetCode.append("mul.s $f0, $f0, $f2\n");
-          mipsTargetCode.append("mfc1 $t0, $f0\n");
+          emit("mul.s $f0, $f0, $f2");
+          emit("mfc1 $t0, $f0");
           emitPushTemp("$t0");
         }
         // no esq = real / no dir = real
         else {
-          mipsTargetCode.append("mtc1 $t0, $f0\n");
-          mipsTargetCode.append("cvt.s.w $f0, $f0\n");
+          emit("mtc1 $t0, $f0");
+          emit("cvt.s.w $f0, $f0");
           
-          mipsTargetCode.append("mtc1 $t1, $f2\n");
-          mipsTargetCode.append("cvt.s.w $f2, $f2\n");
+          emit("mtc1 $t1, $f2");
+          emit("cvt.s.w $f2, $f2");
           
-          mipsTargetCode.append("mul.s $f0, $f0, $f2\n");
-          mipsTargetCode.append("mfc1 $t0, $f0\n");
+          emit("mul.s $f0, $f0, $f2");
+          emit("mfc1 $t0, $f0");
           emitPushTemp("$t0");
         }
       }
@@ -556,16 +564,16 @@ __btoa_false:
     emitPopTemp("$t1");
     emitPopTemp("$t0");
     
-    mipsTargetCode.append("mtc1 $t0, $f0\n");
-    mipsTargetCode.append("cvt.s.w $f0, $f0\n");
+    emit("mtc1 $t0, $f0");
+    emit("cvt.s.w $f0, $f0");
     
-    mipsTargetCode.append("mtc1 $t1, $f2\n");
-    mipsTargetCode.append("cvt.s.w $f2, $f2\n");
+    emit("mtc1 $t1, $f2");
+    emit("cvt.s.w $f2, $f2");
 
     // TODO : check if divisor is 0
 
-    mipsTargetCode.append("div.s $f0, $f2, $f0\n");
-    mipsTargetCode.append("mfc1 $t0, $f0\n");
+    emit("div.s $f0, $f2, $f0");
+    emit("mfc1 $t0, $f0");
     emitPushTemp("$t0");
   }
 
@@ -578,8 +586,8 @@ __btoa_false:
 
     // TODO : check if divisor is 0
 
-    mipsTargetCode.append("div $t1, $t0\n");
-    mipsTargetCode.append("mflo $t0\n");
+    emit("div $t1, $t0");
+    emit("mflo $t0");
     emitPushTemp("$t0");
   }
 
@@ -603,9 +611,9 @@ __btoa_false:
     emitPopTemp("$t1");
 
     if (node.type instanceof PrimitiveVariableType && node.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
-      mipsTargetCode.append("la $t0, " + node.identifier.toLowerCase() + "\n");
-      mipsTargetCode.append("add $t0, $t0, $t1\n");
-      mipsTargetCode.append("lbu $t0, 0($t0)\n");
+      emit("la $t0, " + node.identifier.toLowerCase());
+      emit("add $t0, $t0, $t1");
+      emit("lbu $t0, 0($t0)");
       emitPushTemp("$t0");
 
       return;
@@ -617,11 +625,11 @@ __btoa_false:
       case PrimitiveVariableType _ -> {
         switch (node.type.basePrimitiveType) {
           case PrimitiveTypeEnum.INTEGER, PrimitiveTypeEnum.REAL, PrimitiveTypeEnum.CHAR, PrimitiveTypeEnum.BOOLEAN -> {
-            mipsTargetCode.append("lw $t0, " + node.identifier.toLowerCase() + "\n");
+            emit("lw $t0, " + node.identifier.toLowerCase());
             emitPushTemp("$t0");
           }
           case PrimitiveTypeEnum.STRING -> {
-            mipsTargetCode.append("la $t0, " + node.identifier.toLowerCase() + "\n");
+            emit("la $t0, " + node.identifier.toLowerCase());
             emitPushTemp("$t0");
           }
           default -> throw new RuntimeException("Unsupported primitive type");
@@ -645,8 +653,8 @@ __btoa_false:
     emitPopTemp("$t0");
 
     switch (node.operator) {
-      case "and" -> mipsTargetCode.append("and $t0, $t0, $t1\n");
-      case "or" -> mipsTargetCode.append("or $t0, $t0, $t1\n");
+      case "and" -> emit("and $t0, $t0, $t1");
+      case "or" -> emit("or $t0, $t0, $t1");
       default -> throw new RuntimeException("Unsupported logic operator");
     }
     emitPushTemp("$t0");
@@ -655,7 +663,7 @@ __btoa_false:
   private void visitNotOperatorExpressionNode(NotOperatorExpressionNode node) {
     visit(node.expression);
     emitPopTemp("$t0");
-    mipsTargetCode.append("xori $t0, $t0, 1\n");
+    emit("xori $t0, $t0, 1");
     emitPushTemp("$t0");
   }
 
@@ -663,9 +671,9 @@ __btoa_false:
     visit(node.expression);
     emitPopTemp("$t0");
     
-    mipsTargetCode.append("mtc1 $t0, $f0\n");
-    mipsTargetCode.append("cvt.s.w $f0, $f0\n");
-    mipsTargetCode.append("mfc1 $t0, $f0\n");
+    emit("mtc1 $t0, $f0");
+    emit("cvt.s.w $f0, $f0");
+    emit("mfc1 $t0, $f0");
     emitPushTemp("$t0");
   }
 
@@ -673,14 +681,14 @@ __btoa_false:
     visit(node.expression);
     emitPopTemp("$t0");
     
-    mipsTargetCode.append("li $v0, 9\n");
-    mipsTargetCode.append("li $a0, 4\n");
-    mipsTargetCode.append("syscall\n");
+    emit("li $v0, 9");
+    emit("li $a0, 4");
+    emit("syscall");
 
-    mipsTargetCode.append("sb $t0, 0($v0)\n");
-    mipsTargetCode.append("sb $zero, 1($v0)\n");
+    emit("sb $t0, 0($v0)");
+    emit("sb $zero, 1($v0)");
 
-    mipsTargetCode.append("move $t0, $v0\n");
+    emit("move $t0, $v0");
     emitPushTemp("$t0");
   }
 
@@ -696,26 +704,26 @@ __btoa_false:
     // TODO: handle string comparisons
     switch (operator) {
       case "=" -> {
-        mipsTargetCode.append("subu $t0, $t0, $t1\n");
-        mipsTargetCode.append("sltiu $t0, $t0, 1\n");
+        emit("subu $t0, $t0, $t1");
+        emit("sltiu $t0, $t0, 1");
       }
       case "<>" -> {
-        mipsTargetCode.append("subu $t0, $t0, $t1\n");
-        mipsTargetCode.append("sltu $t0, $zero, $t0\n");
+        emit("subu $t0, $t0, $t1");
+        emit("sltu $t0, $zero, $t0");
       }
       case "<" -> {
-        mipsTargetCode.append("slt $t0, $t0, $t1\n");
+        emit("slt $t0, $t0, $t1");
       }
       case ">" -> {
-        mipsTargetCode.append("slt $t0, $t1, $t0\n");
+        emit("slt $t0, $t1, $t0");
       }
       case "<=" -> {
-        mipsTargetCode.append("slt $t0, $t1, $t0\n");
-        mipsTargetCode.append("xori $t0, $t0, 1\n");
+        emit("slt $t0, $t1, $t0");
+        emit("xori $t0, $t0, 1");
       }
       case ">=" -> {
-        mipsTargetCode.append("slt $t0, $t0, $t1\n");
-        mipsTargetCode.append("xori $t0, $t0, 1\n");
+        emit("slt $t0, $t0, $t1");
+        emit("xori $t0, $t0, 1");
       }
       default -> throw new RuntimeException("Unsupported operation");
     }
@@ -757,34 +765,34 @@ __btoa_false:
     switch (identifier.toLowerCase()) {
       case "write" -> {
         emitPopTemp("$a0");
-        mipsTargetCode.append("li $v0, 4\n");
-        mipsTargetCode.append("syscall\n");
+        emit("li $v0, 4");
+        emit("syscall");
       }
       case "writeln" -> {
         emitPopTemp("$a0");
-        mipsTargetCode.append("li $v0, 4\n");
-        mipsTargetCode.append("syscall\n");
+        emit("li $v0, 4");
+        emit("syscall");
 
-        mipsTargetCode.append("li $a0, 10\n");
-        mipsTargetCode.append("li $v0, 11\n");
-        mipsTargetCode.append("syscall\n");
+        emit("li $a0, 10");
+        emit("li $v0, 11");
+        emit("syscall");
       }
       case "itos" -> {
         emitPopTemp("$a0");
-        mipsTargetCode.append("jal __itoa\n");
-        mipsTargetCode.append("move $t0, $v0\n");
+        emit("jal __itoa");
+        emit("move $t0, $v0");
         emitPushTemp("$t0");
       }
       case "rtos" -> {
         emitPopTemp("$a0");
-        mipsTargetCode.append("jal __rtoa\n");
-        mipsTargetCode.append("move $t0, $v0\n");
+        emit("jal __rtoa");
+        emit("move $t0, $v0");
         emitPushTemp("$t0");
       }
       case "btos" -> {
         emitPopTemp("$a0");
-        mipsTargetCode.append("jal __btoa\n");
-        mipsTargetCode.append("move $t0, $v0\n");
+        emit("jal __btoa");
+        emit("move $t0, $v0");
         emitPushTemp("$t0");
       }
       case "abs" -> IO.print("");
