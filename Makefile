@@ -9,7 +9,7 @@ ANTLR_PATH := $(abspath libs/antlr-4.13.2-complete.jar)
 
 # CLASSPATH configuration option for Java environment
 CLASS_PATH_OPTION=-cp "$(JAVA_BIN_DIR):$(ANTLR_PATH)"
-JAVA_BIN_DIR = java_bin
+JAVA_BIN_DIR = java-bin
 
 # ANTLR compilation command configuration
 ANTLR4=$(JAVA) -jar $(ANTLR_PATH)

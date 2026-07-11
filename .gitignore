@@ -1,5 +1,6 @@
 # ANTLR generated code 
 src/.antlr
+java-bin/**/*
 java_bin/**/*
 src/parser/**/*
 

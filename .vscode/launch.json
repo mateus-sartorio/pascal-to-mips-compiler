@@ -6,7 +6,7 @@
       "name": "Main",
       "request": "launch",
       "mainClass": "Main",
-      "args": ["${workspaceFolder}/tests/interpreter/invalid/6-index-out-of-bounds-array-assignment/source.pas", "-interpret"]
+      "args": ["${workspaceFolder}/tests/compiler/valid/01-assignment-node/source.pas", "-compiler"]
     }
   ]
 }

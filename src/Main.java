@@ -102,8 +102,17 @@ public class Main {
 
     if (args.length > 1 && args[1].equals("-compiler")) {
       ProgramNode programNode = astBuilder.getProgramNode();
-      CodeGenerator codeGenerator = new CodeGenerator(programNode, globalVariablesTable, stringLiteralsTable);
-      IO.println(codeGenerator.generate());
+
+      CodeGenerator codeGenerator = new CodeGenerator(
+        programNode,
+        globalVariablesTable,
+        stringLiteralsTable,
+        builtInProceduresAndFunctionsTable
+      );
+
+      String mipsTargetCode = codeGenerator.generate();
+      Path outputPath = Path.of("output.asm").toAbsolutePath();
+      Files.writeString(outputPath, mipsTargetCode, StandardCharsets.UTF_8);
     }
   }
 }

@@ -588,6 +588,7 @@ public class Interpreter {
     int rightValue = dataStack.popInteger();
     int leftValue = dataStack.popInteger();
 
+    // TODO: handle string comparisons
     switch (operator) {
       case "=" -> dataStack.pushInteger(leftValue == rightValue ? 1 : 0);
       case "<>" -> dataStack.pushInteger(leftValue != rightValue ? 1 : 0);
@@ -772,6 +773,7 @@ public class Interpreter {
 
   private void visit(AstNode node) {
     switch (node) {
+      case ProgramNode concreteTypeNode -> visitProgramNode(concreteTypeNode);
       case StatementNode statementNode -> {
         if(shouldExitCurrentExecutionContext) {
           return;
@@ -787,17 +789,21 @@ public class Interpreter {
           default -> throw new RuntimeException("Unsupported statement node type");
         }
       }
-      case ProgramNode concreteTypeNode -> visitProgramNode(concreteTypeNode);
-      case PrimitiveTypeExpressionNode<?> concreteTypeNode -> visitPrimitiveTypeExpressionNode(concreteTypeNode);
-      case LogicOperatorExpressionNode concreteTypeNode -> visitLogicOperatorExpressionNode(concreteTypeNode);
-      case NotOperatorExpressionNode concreteTypeNode -> visitNotOperatorExpressionNode(concreteTypeNode);
-      case IntegerToRealExpressionNode concreteTypeNode -> visitIntegerToRealExpressionNode(concreteTypeNode);
-      case CharToStringExpressionNode concreteTypeNode -> visitCharToStringExpressionNode(concreteTypeNode);
-      case ComparisonOperatorExpressionNode concreteTypeNode -> visitComparisonOperatorExpressionNode(concreteTypeNode);
-      case IndexedVariableAccessExpressionNode concreteTypeNode -> visitIndexedVariableAccessExpressionNode(concreteTypeNode);
-      case ArithmeticOperatorExpressionNode concreteTypeNode -> visitArithmeticOperatorExpressionNode(concreteTypeNode);
-      case VariableAccessExpressionNode concreteTypeNode -> visitVariableAccessExpressionNode(concreteTypeNode);
-      case FunctionCallExpressionNode concreteTypeNode -> visitFunctionCallStatementNode(concreteTypeNode);
+      case ExpressionNode expressionNode -> {
+        switch(expressionNode) {
+          case PrimitiveTypeExpressionNode<?> concreteTypeNode -> visitPrimitiveTypeExpressionNode(concreteTypeNode);
+          case LogicOperatorExpressionNode concreteTypeNode -> visitLogicOperatorExpressionNode(concreteTypeNode);
+          case NotOperatorExpressionNode concreteTypeNode -> visitNotOperatorExpressionNode(concreteTypeNode);
+          case IntegerToRealExpressionNode concreteTypeNode -> visitIntegerToRealExpressionNode(concreteTypeNode);
+          case CharToStringExpressionNode concreteTypeNode -> visitCharToStringExpressionNode(concreteTypeNode);
+          case ComparisonOperatorExpressionNode concreteTypeNode -> visitComparisonOperatorExpressionNode(concreteTypeNode);
+          case IndexedVariableAccessExpressionNode concreteTypeNode -> visitIndexedVariableAccessExpressionNode(concreteTypeNode);
+          case ArithmeticOperatorExpressionNode concreteTypeNode -> visitArithmeticOperatorExpressionNode(concreteTypeNode);
+          case VariableAccessExpressionNode concreteTypeNode -> visitVariableAccessExpressionNode(concreteTypeNode);
+          case FunctionCallExpressionNode concreteTypeNode -> visitFunctionCallStatementNode(concreteTypeNode);
+          default -> throw new RuntimeException("Unsupported expression node type");
+        }
+      }
       default -> throw new RuntimeException("Unsupported node type");
     }
   }
