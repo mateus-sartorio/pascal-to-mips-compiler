@@ -76,16 +76,22 @@ public class CodeGenerator {
   private void emitHeader() {
     emit(".data");
 
-    for(Integer key : stringLiteralsTable.keySet()) {
-      emit("string%d: .asciiz \"%s\"\n".formatted(key, stringLiteralsTable.get(key)));
-    }
+    indentLevel++;
 
     emit("__bool_true: .asciiz \"true\"");
     emit("__bool_false: .asciiz \"false\"");
+    emit("");
+
+    for(Integer key : stringLiteralsTable.keySet()) {
+      emit("string%d: .asciiz \"%s\"".formatted(key, stringLiteralsTable.get(key)));
+    }
+    emit("");
 
     for(VariableTableEntry variable : globalVariablesTable.toList()) {
       emit(variable.identifier.toLowerCase() + ": .word 0");
     }
+
+    indentLevel--;
 
     emit("\n.text\n.globl %s\n%s:".formatted(programNode.programIdentifier, programNode.programIdentifier));
     indentLevel++;
