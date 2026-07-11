@@ -8,6 +8,7 @@ import java.util.Map;
 
 public final class StringLiteralsTable {
   private Map<Integer, String> map = new HashMap<>();
+  private Map<String, Integer> inverseMap = new HashMap<>();
 
   public boolean isEmpty() {
     return map.isEmpty();
@@ -32,11 +33,13 @@ public final class StringLiteralsTable {
   }
 
   public Integer indexOf(String value) {
-    return toList().indexOf(value);
+    return inverseMap.get(value);
   }
 
   public void addStringLiteral(String literal) {
-    map.put(map.size(), literal);
+    int size = map.size();
+    map.put(size, literal);
+    inverseMap.put(literal, size);
   }
 
   public String toString() {

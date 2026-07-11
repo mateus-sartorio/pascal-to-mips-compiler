@@ -61,10 +61,10 @@ public class CodeGenerator {
     visit(this.programNode);
     emitFooter();
 
-    // emit("");
-    // emitIntegerToStringConversionFunction();
-    // emitRealToStringConversionFunction();
-    // emitBooleanToStringConversionFunction();
+    emit("");
+    emitIntegerToStringConversionFunction();
+    emitRealToStringConversionFunction();
+    emitBooleanToStringConversionFunction();
 
     return mipsTargetCode.toString();
   }
@@ -98,6 +98,10 @@ public class CodeGenerator {
   }
 
   private void emitFooter() {
+    emit("");
+    indentLevel--;
+    emit("exit_program:");
+    indentLevel++;
     emit("li $v0, 10");
     emit("syscall");
   }
@@ -258,13 +262,25 @@ __btoa_false:
   }
 
   private void emitPushTemp(String reg) {
+    emit("");
+    emit("# push stack");
+
     emit("subu $sp, $sp, 4");
     emit("sw " + reg + ", 0($sp)");
+    
+    emit("# ----------------");
+    emit("");
   }
 
   private void emitPopTemp(String reg) {
+    emit("");
+    emit("# pop stack");
+
     emit("lw " + reg + ", 0($sp)");
     emit("addu $sp, $sp, 4");
+
+    emit("# ----------------");
+    emit("");
   }
 
   private void visitProgramNode(ProgramNode node) {
@@ -347,8 +363,18 @@ __btoa_false:
     
   }
 
+  // TODO: consider local variables
+  // TODO: consider indexed variables
   private void visitAssignmentStatementNode(AssignmentStatementNode node) {
-    // TODO
+    visit(node.expression);
+    emitPopTemp("$t0");
+
+    switch (node.variableAccessExpressionNode.type.basePrimitiveType) {
+      case PrimitiveTypeEnum.INTEGER, PrimitiveTypeEnum.REAL, PrimitiveTypeEnum.BOOLEAN, PrimitiveTypeEnum.CHAR, PrimitiveTypeEnum.STRING -> {
+        emit("sw $t0, %s".formatted(node.variableAccessExpressionNode.identifier.toLowerCase()));
+      }
+      default -> throw new RuntimeException("Unsupported primitive type");
+    }
   }
 
   private void visitPrimitiveTypeExpressionNode(PrimitiveTypeExpressionNode<?> node) {
@@ -362,7 +388,9 @@ __btoa_false:
         emitPushTemp("$t0");
       }
       case String value -> {
-        // TODO
+        int index = stringLiteralsTable.indexOf(value);
+        emit("la $t0, string%d".formatted(index));
+        emitPushTemp("$t0");
       }
       case Boolean value -> {
         emit("li $t0, " + (value ? 1 : 0));
@@ -631,12 +659,8 @@ __btoa_false:
     switch (node.type) {
       case PrimitiveVariableType _ -> {
         switch (node.type.basePrimitiveType) {
-          case PrimitiveTypeEnum.INTEGER, PrimitiveTypeEnum.REAL, PrimitiveTypeEnum.CHAR, PrimitiveTypeEnum.BOOLEAN -> {
+          case PrimitiveTypeEnum.INTEGER, PrimitiveTypeEnum.REAL, PrimitiveTypeEnum.CHAR, PrimitiveTypeEnum.BOOLEAN, PrimitiveTypeEnum.STRING -> {
             emit("lw $t0, " + node.identifier.toLowerCase());
-            emitPushTemp("$t0");
-          }
-          case PrimitiveTypeEnum.STRING -> {
-            emit("la $t0, " + node.identifier.toLowerCase());
             emitPushTemp("$t0");
           }
           default -> throw new RuntimeException("Unsupported primitive type");
