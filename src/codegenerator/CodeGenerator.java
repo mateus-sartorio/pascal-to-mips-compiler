@@ -405,8 +405,8 @@ __btoa_false:
   }
 
   private void handlePlus(ArithmeticOperatorExpressionNode node) {
-    visit(node.right);
     visit(node.left);
+    visit(node.right);
 
     emitPopTemp("$t1");
     emitPopTemp("$t0");
@@ -478,8 +478,8 @@ __btoa_false:
   }
 
   private void handleMinus(ArithmeticOperatorExpressionNode node) {
-    visit(node.right);
     visit(node.left);
+    visit(node.right);
 
     emitPopTemp("$t1");
     emitPopTemp("$t0");
@@ -536,8 +536,8 @@ __btoa_false:
   }
 
   private void handleMultiplication(ArithmeticOperatorExpressionNode node) {
-    visit(node.right);
     visit(node.left);
+    visit(node.right);
 
     emitPopTemp("$t1");
     emitPopTemp("$t0");
@@ -593,8 +593,8 @@ __btoa_false:
   }
 
   private void handleRealDivision(ArithmeticOperatorExpressionNode node) {
-    visit(node.right);
     visit(node.left);
+    visit(node.right);
 
     emitPopTemp("$t1");
     emitPopTemp("$t0");
@@ -613,8 +613,8 @@ __btoa_false:
   }
 
   private void handleIntegerDivision(ArithmeticOperatorExpressionNode node) {
-    visit(node.right);
     visit(node.left);
+    visit(node.right);
 
     emitPopTemp("$t1");
     emitPopTemp("$t0");
@@ -677,8 +677,8 @@ __btoa_false:
   }
 
   private void visitLogicOperatorExpressionNode(LogicOperatorExpressionNode node) {
-    visit(node.right);
     visit(node.left);
+    visit(node.right);
 
     emitPopTemp("$t1");
     emitPopTemp("$t0");

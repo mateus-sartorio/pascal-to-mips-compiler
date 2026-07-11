@@ -111,7 +111,7 @@ public class Main {
       );
 
       String mipsTargetCode = codeGenerator.generate();
-      Path outputPath = Path.of("output.asm").toAbsolutePath();
+      Path outputPath = Path.of(args[0]).toAbsolutePath().getParent().resolve("actual_code_result.asm");
       Files.writeString(outputPath, mipsTargetCode, StandardCharsets.UTF_8);
     }
   }
