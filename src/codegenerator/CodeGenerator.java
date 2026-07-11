@@ -60,10 +60,11 @@ public class CodeGenerator {
     emitHeader(); 
     visit(this.programNode);
     emitFooter();
-    emit("");
-    emitIntegerToStringConversionFunction();
-    emitRealToStringConversionFunction();
-    emitBooleanToStringConversionFunction();
+
+    // emit("");
+    // emitIntegerToStringConversionFunction();
+    // emitRealToStringConversionFunction();
+    // emitBooleanToStringConversionFunction();
 
     return mipsTargetCode.toString();
   }
