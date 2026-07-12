@@ -38,8 +38,11 @@ public final class StringLiteralsTable {
 
   public void addStringLiteral(String literal) {
     int size = map.size();
-    map.put(size, literal);
-    inverseMap.put(literal, size);
+
+    if(!inverseMap.containsKey(literal)) {
+      map.put(size, literal);
+      inverseMap.put(literal, size);
+    }
   }
 
   public String toString() {

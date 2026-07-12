@@ -1,0 +1,2 @@
+SEMANTIC ERROR (4): Array types are not compatible with comparison operations.
+make[1]: *** [Makefile:75: run-semantic] Error 1

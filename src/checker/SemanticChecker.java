@@ -60,6 +60,8 @@ import types.TypeRules;
 import types.VariableType;
 
 public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
+  private static final int MAXIMUM_PROCEDURE_OR_FUNCTION_PARAMETERS = 4;
+
   // Program identifier
   String programIdentifier;
 
@@ -326,7 +328,12 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
     }
   }
 
-  private void registerProcedureOrFunctionParameters(Identifier_listContext context, String procedureOrFunctionIdentifier, VariableType variableType) {
+  private void registerProcedureOrFunctionParameters(
+    Identifier_listContext context,
+    String procedureOrFunctionIdentifier,
+    VariableType variableType,
+    ProcedureOrFunctionEnum procedureOrFunctionType
+  ) {
     for (TerminalNode identifierNode : context.IDENTIFIER()) {
       Token token = identifierNode.getSymbol();
 
@@ -335,6 +342,21 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
       String variableIdentifier = token.getText();
       int variableLine = token.getLine();
+
+      ProceduresAndFunctionsEntry entry = proceduresAndFunctionsTable.get(procedureOrFunctionIdentifier);
+
+      int parametersCount = entry.parameters.toList().size();
+
+      if(parametersCount >= MAXIMUM_PROCEDURE_OR_FUNCTION_PARAMETERS) {
+        System.out.printf(
+          "SEMANTIC ERROR (%d): %s cannot have more than %d parameters.\n",
+          context.start.getLine(),
+          procedureOrFunctionType.toString(),
+          MAXIMUM_PROCEDURE_OR_FUNCTION_PARAMETERS
+        );
+
+        System.exit(1);
+      }
 
       proceduresAndFunctionsTable.addProcedlureOrFunctionParameter(procedureOrFunctionIdentifier, variableIdentifier, variableLine, variableType);
     }
@@ -459,19 +481,30 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
     RuleContext declaration = context.parent.parent;
 
-    if (declaration instanceof Function_headingContext) {
-      Function_headingContext functionHeadingContext = (Function_headingContext) declaration;
+    if (declaration instanceof Function_headingContext functionHeadingContext) {
       String identifier = functionHeadingContext.IDENTIFIER().getText();
       assert proceduresAndFunctionsTable.lookProcedureOrFunction(identifier);
-      registerProcedureOrFunctionParameters(context.identifier_list(), identifier, type);
+      
+      registerProcedureOrFunctionParameters(
+        context.identifier_list(),
+        identifier,
+        type,
+        ProcedureOrFunctionEnum.FUNCTION
+      );
     }
-    else
-      if (declaration instanceof Procedure_headingContext) {
-        Procedure_headingContext procedureHeadingContext = (Procedure_headingContext) declaration;
+    else {
+      if (declaration instanceof Procedure_headingContext procedureHeadingContext) {
         String identifier = procedureHeadingContext.IDENTIFIER().getText();
         assert proceduresAndFunctionsTable.lookProcedureOrFunction(identifier);
-        registerProcedureOrFunctionParameters(context.identifier_list(), identifier, type);
+
+        registerProcedureOrFunctionParameters(
+          context.identifier_list(),
+          identifier,
+          type,
+          ProcedureOrFunctionEnum.PROCEDURE
+        );
       }
+    }
 
     return new PrimitiveVariableType(PrimitiveTypeEnum.NO_TYPE);
   }
@@ -1036,7 +1069,19 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
     VariableType rightType = visit(context.simple_expression(1));
 
-    if(leftType.basePrimitiveType == PrimitiveTypeEnum.NO_TYPE || rightType.basePrimitiveType == PrimitiveTypeEnum.NO_TYPE) {
+    if(leftType instanceof ArrayVariableType || rightType instanceof ArrayVariableType) {
+      System.out.printf(
+        "SEMANTIC ERROR (%d): Array types are not compatible with comparison operations.\n",
+        context.relational_operator().start.getLine()
+      );
+      
+      System.exit(1);
+    }
+
+    if(
+      leftType.basePrimitiveType == PrimitiveTypeEnum.NO_TYPE ||
+      rightType.basePrimitiveType == PrimitiveTypeEnum.NO_TYPE
+    ) {
       return new PrimitiveVariableType(PrimitiveTypeEnum.NO_TYPE);
     }
 

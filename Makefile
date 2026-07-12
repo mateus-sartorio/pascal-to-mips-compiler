@@ -87,6 +87,7 @@ run-interpreter:
 		$(JAVA) $(CLASS_PATH_OPTION) Main $(FILE_ABSOLUTE_PATH) -interpret < /dev/null; \
 	fi
 
+# Run the compiler
 run-compiler:
 	@if [ -f "$(dir $(FILE_ABSOLUTE_PATH))input.txt" ]; then \
 		$(JAVA) $(CLASS_PATH_OPTION) Main $(FILE_ABSOLUTE_PATH) -compiler < "$(dir $(FILE_ABSOLUTE_PATH))input.txt"; \

@@ -66,6 +66,9 @@ case "$1" in
     "--interpreter")
         run_module "interpreter"
         ;;
+    "--compiler")
+        run_module "compiler"
+        ;;
     "--clean")
         find tests -name "actual_result.txt" -delete
         find tests -name "actual_result.dot" -delete
@@ -79,5 +82,6 @@ case "$1" in
         run_module "semantic"
         run_module "ast"
         run_module "interpreter"
+        run_module "compiler"
         ;;
 esac

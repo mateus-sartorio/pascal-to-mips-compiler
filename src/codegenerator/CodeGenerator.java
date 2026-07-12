@@ -61,10 +61,15 @@ public class CodeGenerator {
     visit(this.programNode);
     emitFooter();
 
+    // Auxiliary functions
     emit("");
     emitIntegerToStringConversionFunction();
     emitRealToStringConversionFunction();
     emitBooleanToStringConversionFunction();
+    emitStringComparisonFunction();
+    emitConcatStringWithString();
+    emitConcatCharWithString();
+    emitConcatStringWithChar();
 
     return mipsTargetCode.toString();
   }
@@ -82,18 +87,22 @@ public class CodeGenerator {
     emit("__bool_false: .asciiz \"false\"");
     emit("");
 
+    // Runtime error messages
+    emit("__div_zero_msg: .asciiz \"RUNTIME ERROR: division by zero!\"");
+    emit("");
+
     for(Integer key : stringLiteralsTable.keySet()) {
-      emit("string%d: .asciiz \"%s\"".formatted(key, stringLiteralsTable.get(key)));
+      emit("__string%d: .asciiz \"%s\"".formatted(key, stringLiteralsTable.get(key)));
     }
     emit("");
 
     for(VariableTableEntry variable : globalVariablesTable.toList()) {
-      emit(variable.identifier.toLowerCase() + ": .word 0");
+      emit("%s: .word 0".formatted(variable.identifier.toLowerCase()));
     }
 
     indentLevel--;
 
-    emit("\n.text\n.globl %s\n%s:".formatted(programNode.programIdentifier, programNode.programIdentifier));
+    emit("\n.text\n.globl %s\n\n%s:".formatted(programNode.programIdentifier, programNode.programIdentifier));
     indentLevel++;
   }
 
@@ -104,6 +113,169 @@ public class CodeGenerator {
     indentLevel++;
     emit("li $v0, 10");
     emit("syscall");
+  }
+
+  private void emitConcatStringWithString(){
+    emit("""
+  __concat_string_with_string: #a0 = address of first string, $a1 = address of second string
+    subu $sp, $sp, 16 
+    sw $ra, 12($sp)
+    sw $a0, 8($sp)
+    sw $a1, 4($sp)
+
+# Calculate the length of the first string
+    move $t0, $a0
+  __ssc_len1:
+    lb $t1, 0($t0)
+    beqz $t1, __ssc_len1_end
+    addi $t0, $t0, 1
+    j __ssc_len1
+  __ssc_len1_end:
+    sub $t2, $t0, $a0 # t2 = length of first string
+
+# Calculate the length of the second string
+    move $t0, $a1
+  __ssc_len2:
+    lb $t1, 0($t0)
+    beqz $t1, __ssc_len2_end
+    addi $t0, $t0, 1
+    j __ssc_len2
+  __ssc_len2_end:
+    sub $t3, $t0, $a1 # t3 = length of second string
+
+# Allocate memory for the concatenated string
+    add $a0, $t2, $t3
+    addi $a0, $a0, 1 # +1 for null terminator
+    li $v0, 9
+    syscall # $v0 = address of new string
+
+# Load the original string addresses from the stack
+    lw $a0, 8($sp) 
+    lw $a1, 4($sp)
+    move $t0, $v0 # t0 = address of new string
+
+# Copy the first string to the new string
+  __ssc_copy1:
+    lb $t1, 0($a0)
+    beqz $t1, __ssc_copy1_end
+    sb $t1, 0($t0)
+    addi $a0, $a0, 1
+    addi $t0, $t0, 1
+    j __ssc_copy1
+  __ssc_copy1_end:
+
+# Copy the second string to the new string
+  __ssc_copy2:
+    lb $t1, 0($a1)
+    beqz $t1, __ssc_copy2_end
+    sb $t1, 0($t0)
+    addi $a1, $a1, 1
+    addi $t0, $t0, 1
+    j __ssc_copy2
+  __ssc_copy2_end:
+
+    sb $zero, 0($t0) # Null terminator
+    lw $ra, 12($sp) # Restore return address
+    addi $sp, $sp, 16 # Restore stack pointer
+    jr $ra
+    """);
+  }
+
+  private void emitConcatCharWithString() {
+    emit("""
+  __concat_char_with_string: #a0 = char, $a1 = address of string
+    subu $sp, $sp, 16
+    sw $ra, 12($sp)
+    sw $a0, 8($sp)
+    sw $a1, 4($sp)
+
+  # Calculate the length of the string
+    move $t0, $a1
+
+  __ccs_len:
+    lb $t1, 0($t0)
+    beqz $t1, __ccs_len_end
+    addi $t0, $t0, 1
+    j __ccs_len
+  __ccs_len_end:
+    sub $t2, $t0, $a1 # t2 = length of string
+
+  # Allocate memory for the concatenated string
+    addi $a0, $t2, 2 # +1 for char, +1 for null terminator
+    li $v0, 9
+    syscall # $v0 = address of new string
+
+    lw $a0, 8($sp) # Load char
+    lw $a1, 4($sp) # Load original string address
+    move $t0, $v0 # t0 = address of new string
+
+  # Add the char to the new string
+
+    sb $a0, 0($t0)
+    addi $t0, $t0, 1
+    
+  # Copy the original string to the new string
+  __ccs_copy:
+    lb $t1, 0($a1)
+    beqz $t1, __ccs_copy_end
+    sb $t1, 0($t0)
+    addi $a1, $a1, 1
+    addi $t0, $t0, 1
+    j __ccs_copy
+  __ccs_copy_end:
+
+    sb $zero, 0($t0) # Null terminator
+    lw $ra, 12($sp) # Restore return address
+    addi $sp, $sp, 16 # Restore stack pointer
+    jr $ra
+    """);
+  }
+
+  private void emitConcatStringWithChar() {
+    emit("""
+  __concat_string_with_char: #a0 = address of string, $a1 = char
+    subu $sp, $sp, 16
+    sw $ra, 12($sp)
+    sw $a0, 8($sp)
+    sw $a1, 4($sp)
+    
+  # Calculate the length of the string
+    move $t0, $a0
+    
+__csc_len:
+    lb $t1, 0($t0)
+    beqz $t1, __csc_len_end
+    addi $t0, $t0, 1
+    j __csc_len
+__csc_len_end:
+    sub $t2, $t0, $a0 # t2 = length of string
+
+  # Allocate memory for the concatenated string
+    addi $a0, $t2, 2 # +1 for char, +1 for null terminator
+    li $v0, 9
+    syscall # $v0 = address of new string
+    
+    lw $a0, 8($sp) # Load original string address
+    lw $a1, 4($sp) # Load char
+    move $t0, $v0 # t0 = address of new string
+
+  # Copy the original string to the new string
+  __csc_copy:
+    lb $t1, 0($a0)
+    beqz $t1, __csc_copy_end
+    sb $t1, 0($t0)
+    addi $a0, $a0, 1
+    addi $t0, $t0, 1
+    j __csc_copy
+  __csc_copy_end:
+  
+    sb $a1, 0($t0) # Add the char
+    sb $zero, 1($t0) # Null terminator
+  
+    lw $ra, 12($sp) # Restore return address
+    addi $sp, $sp, 16 # Restore stack pointer
+    jr $ra
+    """);
   }
 
   private void emitIntegerToStringConversionFunction() {
@@ -261,26 +433,58 @@ __btoa_false:
 """);
   }
 
-  private void emitPushTemp(String reg) {
-    emit("");
-    emit("# push stack");
+  private void emitStringComparisonFunction() {
+    emit("""
+# ------------------------------------------------------------
+# __strcmp : lexical comparison of two null-terminated strings
+#   $a0 = address of left string
+#   $a1 = address of right string
+#   returns in $v0:  -1 if left < right
+#                     0 if left = right
+#                     1 if left > right
+# clobbers: $t0, $t1  (leaves $a0/$a1 advanced)
+# ------------------------------------------------------------
+__strcmp:
+__strcmp_loop:
+    lbu $t0, 0($a0)              # current byte of left  (unsigned!)
+    lbu $t1, 0($a1)              # current byte of right
+    bne $t0, $t1, __strcmp_diff  # bytes differ -> decide ordering
+    beq $t0, $zero, __strcmp_eq  # both zero -> reached end together, equal
+    addiu $a0, $a0, 1            # advance both pointers
+    addiu $a1, $a1, 1
+    j __strcmp_loop
 
-    emit("subu $sp, $sp, 4");
-    emit("sw " + reg + ", 0($sp)");
-    
-    emit("# ----------------");
-    emit("");
+__strcmp_diff:
+    bltu $t0, $t1, __strcmp_less # left byte < right byte -> left is smaller
+    li $v0, 1                    # otherwise left > right -> left is bigger
+    jr $ra
+
+__strcmp_less:
+    li $v0, -1
+    jr $ra
+
+__strcmp_eq:
+    li $v0, 0
+    jr $ra
+""");
   }
 
-  private void emitPopTemp(String reg) {
-    emit("");
-    emit("# pop stack");
+  private void emitPushTemp(String register) {
+    emit("# push temp from %s into the stack".formatted(register));
 
-    emit("lw " + reg + ", 0($sp)");
+    emit("subu $sp, $sp, 4");
+    emit("sw %s, 0($sp)".formatted(register));
+    
+    emit("# ----------------");
+  }
+
+  private void emitPopTemp(String register) {
+    emit("# pop stack temp into %s".formatted(register));
+
+    emit("lw %s, 0($sp)".formatted(register));
     emit("addu $sp, $sp, 4");
 
     emit("# ----------------");
-    emit("");
   }
 
   private void visitProgramNode(ProgramNode node) {
@@ -295,36 +499,37 @@ __btoa_false:
 
   private void visitIfStatementNode(IfStatementNode node) {
     int uniqueLabelId = labelCounter++;
-    String elseLabel = "else_label_" + uniqueLabelId;
-    String endIfLabel = "end_if_label_" + uniqueLabelId;
+    String elseLabel = "else_label_%d".formatted(uniqueLabelId);
+    String endIfLabel = "end_if_label_%d".formatted(uniqueLabelId);
 
     visit(node.condition);
     emitPopTemp("$t0");
 
     // Se aqui for o else, então pula para o elseLabel se a condição for falsa
     if (node.elseStatement.isPresent()) {
-      emit("beq $t0, $zero, " + elseLabel);
-    } else {
-      emit("beq $t0, $zero, " + endIfLabel);
+      emit("beq $t0, $zero, %s".formatted(elseLabel));
+    }
+    else {
+      emit("beq $t0, $zero, %s".formatted(endIfLabel));
     }
 
     // Then statement
     visit(node.thenStatement);
 
     if (node.elseStatement.isPresent()) {
-      emit("j " + endIfLabel);
-      emit(elseLabel + ":");
+      emit("j %s".formatted(endIfLabel));
+      emit("%s:".formatted(elseLabel));
       visit(node.elseStatement.get());
     }
 
-    emit(endIfLabel + ":\n");
-
+    emit("%s:".formatted(endIfLabel));
+    emit("");
   }
 
   private void visitForStatementNode(ForStatementNode node) {
     int uniqueLabelId = labelCounter++;
-    String loopStartLabel = "for_start_" + uniqueLabelId;
-    String loopEndLabel = "for_end_" + uniqueLabelId;
+    String loopStartLabel = "for_start_%s".formatted(uniqueLabelId);
+    String loopEndLabel = "for_end_%s".formatted(uniqueLabelId);
     
     visit(node.finalValue);
     visit(node.initialValue);
@@ -332,35 +537,36 @@ __btoa_false:
     emitPopTemp("$t0"); //t0 = initial value
     emitPopTemp("$t1"); //t1 = final value
 
-    emit("sw $t0, " + node.controlVariable.identifier);
+    emit("sw $t0, %s".formatted(node.controlVariable.identifier.toLowerCase()));
     emitPushTemp("$t1");
-    emit(loopStartLabel + ":");
+    emit("%s:".formatted(loopStartLabel));
 
-    emit("lw $t0, " + node.controlVariable.identifier);
+    emit("lw $t0, %s".formatted(node.controlVariable.identifier.toLowerCase()));
     emitPopTemp("$t1"); //t1 = final value
 
     if(node.isDownto) {
-      emit("blt $t0, $t1, " + loopEndLabel);
-    } else {
-      emit("bgt $t0, $t1, " + loopEndLabel);
+      emit("blt $t0, $t1, %s".formatted(loopEndLabel));
+    }
+    else {
+      emit("bgt $t0, $t1, %s".formatted(loopEndLabel));
     }
 
     visit(node.body);
 
-    emit("lw $t0, " + node.controlVariable.identifier);
+    emit("lw $t0, %s".formatted(node.controlVariable.identifier.toLowerCase()));
 
     if(node.isDownto) {
       emit("subi $t0, $t0, 1");
-    } else {
+    }
+    else {
       emit("addi $t0, $t0, 1");
     }
 
-    emit("sw $t0, " + node.controlVariable.identifier);
+    emit("sw $t0, %s".formatted(node.controlVariable.identifier.toLowerCase()));
 
-    emit("j " + loopStartLabel);
-    emit(loopEndLabel + ":");
-    emitPopTemp("$t1"); 
-    
+    emit("j %s".formatted(loopStartLabel));
+    emit("%s:".formatted(loopEndLabel));
+    emitPopTemp("$t1");
   }
 
   // TODO: consider local variables
@@ -368,36 +574,30 @@ __btoa_false:
   private void visitAssignmentStatementNode(AssignmentStatementNode node) {
     visit(node.expression);
     emitPopTemp("$t0");
-
-    switch (node.variableAccessExpressionNode.type.basePrimitiveType) {
-      case PrimitiveTypeEnum.INTEGER, PrimitiveTypeEnum.REAL, PrimitiveTypeEnum.BOOLEAN, PrimitiveTypeEnum.CHAR, PrimitiveTypeEnum.STRING -> {
-        emit("sw $t0, %s".formatted(node.variableAccessExpressionNode.identifier.toLowerCase()));
-      }
-      default -> throw new RuntimeException("Unsupported primitive type");
-    }
+    emit("sw $t0, %s".formatted(node.variableAccessExpressionNode.identifier.toLowerCase()));
   }
 
   private void visitPrimitiveTypeExpressionNode(PrimitiveTypeExpressionNode<?> node) {
     switch (node.value) {
       case Integer value -> {
-        emit("li $t0, " + value);
+        emit("li $t0, %d".formatted(value));
         emitPushTemp("$t0");
       }
       case Double value -> {
-        emit("li $t0, " + value);
+        emit("li $t0, %f".formatted(value));
         emitPushTemp("$t0");
       }
       case String value -> {
         int index = stringLiteralsTable.indexOf(value);
-        emit("la $t0, string%d".formatted(index));
+        emit("la $t0, __string%d".formatted(index));
         emitPushTemp("$t0");
       }
       case Boolean value -> {
-        emit("li $t0, " + (value ? 1 : 0));
+        emit("li $t0, %d".formatted(value ? 1 : 0));
         emitPushTemp("$t0");
       }
       case Character value -> {
-        emit("li $t0, " + value);
+        emit("li $t0, %d".formatted((int) value));
         emitPushTemp("$t0");
       }
       default -> throw new RuntimeException("Unsupported primitive type");
@@ -454,19 +654,47 @@ __btoa_false:
       else {
         if (node.left.type.basePrimitiveType == PrimitiveTypeEnum.CHAR) {
           if (node.right.type.basePrimitiveType == PrimitiveTypeEnum.CHAR) {
-            // TODO
+            // Aloca espaço para a string resultante
+            emit("li $a0, 3");
+            emit("li $v0, 9");
+            emit("syscall"); // o endereço da string alocada estará em $v0
+
+            // Concatena os caracteres
+            emit("sb $t0, 0($v0)"); // primeiro caractere no primeiro byte
+            emit("sb $t1, 1($v0)"); // segundo caractere no segundo byte
+            emit("sb $zero, 2($v0)"); // terminador nulo
+
+            emitPushTemp("$v0"); // empurra o endereço da string resultante para a pilha
+          }
+          else if
+          (node.right.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
+            emit("move $a0, $t0"); // caractere da esquerda
+            emit("move $a1, $t1"); // endereço da string da direita
+            emit("jal __concat_char_with_string");
+            emitPushTemp("$v0"); // empurra o endereço da string resultante para a pilha
           }
           else {
-            // TODO
+            throw new RuntimeException("Unsupported primitive type");
           }
         }
         else {
           if (node.left.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
             if (node.right.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
-              // TODO
+              emit("move $a0, $t0"); // endereço da primeira string da esquerda
+              emit("move $a1, $t1"); // endereço da segunda string da direita
+              emit("jal __concat_string_with_string");
+              emitPushTemp("$v0"); // empurra o endereço da string resultante para a pilha
             }
             else {
-              // TODO
+              if (node.right.type.basePrimitiveType == PrimitiveTypeEnum.CHAR) {
+                emit("move $a0, $t0"); // endereço da string da esquerda
+                emit("move $a1, $t1"); // caractere da direita
+                emit("jal __concat_string_with_char");
+                emitPushTemp("$v0"); // empurra o endereço da string resultante para a pilha
+              }
+              else {
+                throw new RuntimeException("Unsupported primitive type");
+              }
             }
           }
           else {
@@ -532,7 +760,6 @@ __btoa_false:
         throw new RuntimeException("Unsupported primitive type");
       }
     }
-    
   }
 
   private void handleMultiplication(ArithmeticOperatorExpressionNode node) {
@@ -598,14 +825,37 @@ __btoa_false:
 
     emitPopTemp("$t1");
     emitPopTemp("$t0");
-    
-    emit("mtc1 $t0, $f0");
-    emit("cvt.s.w $f0, $f0");
-    
-    emit("mtc1 $t1, $f2");
-    emit("cvt.s.w $f2, $f2");
 
-    // TODO : check if divisor is 0
+    // --- Check if divisor is not equal to zero
+
+    int id = labelCounter++;
+    String okLabel = "real_division_ok_%d".formatted(id);
+    
+    emit("bnez $t1, %s".formatted(okLabel));
+    
+    // Print error message
+    emit("la $a0, __div_zero_msg");
+    emit("li $v0, 4");
+    emit("syscall");
+    
+    // Exit program
+    emit("li $v0, 10");
+    emit("syscall");
+
+    // Safe to continue
+    emit("%s:".formatted(okLabel));
+
+    // ------------------------------------------
+
+    emit("mtc1 $t0, $f0");
+    if(node.left.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
+      emit("cvt.s.w $f0, $f0");
+    }
+
+    emit("mtc1 $t1, $f2");
+    if(node.right.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
+      emit("cvt.s.w $f2, $f2");
+    }
 
     emit("div.s $f0, $f0, $f2");
     emit("mfc1 $t0, $f0");
@@ -619,7 +869,26 @@ __btoa_false:
     emitPopTemp("$t1");
     emitPopTemp("$t0");
 
-    // TODO : check if divisor is 0
+    // --- Check if divisor is not equal to zero
+
+    int id = labelCounter++;
+    String okLabel = "integer_division_ok_%d".formatted(id);
+    
+    emit("bnez $t1, %s".formatted(okLabel));
+    
+    // Print error message
+    emit("la $a0, __div_zero_msg");
+    emit("li $v0, 4");
+    emit("syscall");
+    
+    // Exit program
+    emit("li $v0, 10");
+    emit("syscall");
+
+    // Safe to continue
+    emit("%s:".formatted(okLabel));
+
+    // ------------------------------------------
 
     emit("div $t0, $t1");
     emit("mflo $t0");
@@ -646,11 +915,10 @@ __btoa_false:
     emitPopTemp("$t1");
 
     if (node.type instanceof PrimitiveVariableType && node.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
-      emit("la $t0, " + node.identifier.toLowerCase());
+      emit("lw $t0, %s".formatted(node.identifier.toLowerCase()));
       emit("add $t0, $t0, $t1");
       emit("lbu $t0, 0($t0)");
       emitPushTemp("$t0");
-
       return;
     }
   }
@@ -658,13 +926,8 @@ __btoa_false:
   private void visitVariableAccessExpressionNode(VariableAccessExpressionNode node) {
     switch (node.type) {
       case PrimitiveVariableType _ -> {
-        switch (node.type.basePrimitiveType) {
-          case PrimitiveTypeEnum.INTEGER, PrimitiveTypeEnum.REAL, PrimitiveTypeEnum.CHAR, PrimitiveTypeEnum.BOOLEAN, PrimitiveTypeEnum.STRING -> {
-            emit("lw $t0, " + node.identifier.toLowerCase());
-            emitPushTemp("$t0");
-          }
-          default -> throw new RuntimeException("Unsupported primitive type");
-        }
+        emit("lw $t0, %s".formatted(node.identifier.toLowerCase()));
+        emitPushTemp("$t0");
       }
       case ArrayVariableType _ -> {
         switch (node.type.basePrimitiveType) {
@@ -688,6 +951,7 @@ __btoa_false:
       case "or" -> emit("or $t0, $t0, $t1");
       default -> throw new RuntimeException("Unsupported logic operator");
     }
+
     emitPushTemp("$t0");
   }
 
@@ -728,11 +992,37 @@ __btoa_false:
 
     visit(node.left);
     visit(node.right);
+    
+    
+    if(node.left.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
+      emitPopTemp("$a1");
+      emitPopTemp("$a0");      
+
+      emit("jal __strcmp");
+
+      switch (operator) {
+        case "=" -> emit("sltiu $t0, $v0, 1");
+        case "<>" -> emit("sltu $t0, $zero, $v0");
+        case "<" -> emit("slt $t0, $v0, $zero");
+        case ">" -> emit("slt $t0, $zero, $v0");
+        case "<=" -> {
+          emit("slt $t0, $zero, $v0");
+          emit("xori $t0, $t0, 1");
+        }
+        case ">=" -> {
+          emit("slt $t0, $v0, $zero");
+          emit("xori $t0, $t0, 1");
+        }
+        default -> throw new RuntimeException("Unsupported operation");
+      }
+
+      emitPushTemp("$t0");
+      return;
+    }
 
     emitPopTemp("$t1");
     emitPopTemp("$t0");
 
-    // TODO: handle string comparisons
     switch (operator) {
       case "=" -> {
         emit("subu $t0, $t0, $t1");
@@ -762,28 +1052,30 @@ __btoa_false:
     emitPushTemp("$t0");
   }
 
+  // TODO: handle non built-in procedures
   private void visitProcedureCallStatementNode(ProcedureCallStatementNode node) {
     if (builtInProceduresAndFunctionsTable.lookProcedureOrFunction(node.procedureIdentifier)) {
       for (ExpressionNode argument : node.arguments) {
         visit(argument);
       }
 
-      PrimitiveTypeEnum firstArgType = node.arguments.isEmpty() ? null : node.arguments.get(0).type.basePrimitiveType;
+      PrimitiveTypeEnum firstArgumentType = node.arguments.isEmpty() ? null : node.arguments.get(0).type.basePrimitiveType;
 
-      executeBuiltInProcedureOrFunction(node.procedureIdentifier, firstArgType);
+      executeBuiltInProcedureOrFunction(node.procedureIdentifier.toLowerCase(), firstArgumentType);
       return;
     }
   }
 
+  // TODO: handle non built-in functions
   private void visitFunctionCallStatementNode(FunctionCallExpressionNode node) {
     if (builtInProceduresAndFunctionsTable.lookProcedureOrFunction(node.functionIdentifier)) {
       for (ExpressionNode argument : node.arguments) {
         visit(argument);
       }
 
-      PrimitiveTypeEnum firstArgType = node.arguments.isEmpty() ? null : node.arguments.get(0).type.basePrimitiveType;
+      PrimitiveTypeEnum firstArgumentType = node.arguments.isEmpty() ? null : node.arguments.get(0).type.basePrimitiveType;
 
-      executeBuiltInProcedureOrFunction(node.functionIdentifier, firstArgType);
+      executeBuiltInProcedureOrFunction(node.functionIdentifier.toLowerCase(), firstArgumentType);
       return;
     }
   }

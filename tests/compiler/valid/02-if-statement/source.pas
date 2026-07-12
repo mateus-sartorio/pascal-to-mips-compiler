@@ -16,5 +16,4 @@ begin
       a := a - 1;
       writeln(itos(a));
     end
-
 end.
