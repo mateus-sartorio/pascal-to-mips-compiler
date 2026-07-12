@@ -607,7 +607,7 @@ __btoa_false:
 
     // TODO : check if divisor is 0
 
-    emit("div.s $f0, $f2, $f0");
+    emit("div.s $f0, $f0, $f2");
     emit("mfc1 $t0, $f0");
     emitPushTemp("$t0");
   }
@@ -621,7 +621,7 @@ __btoa_false:
 
     // TODO : check if divisor is 0
 
-    emit("div $t1, $t0");
+    emit("div $t0, $t1");
     emit("mflo $t0");
     emitPushTemp("$t0");
   }
