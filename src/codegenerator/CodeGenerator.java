@@ -2,6 +2,8 @@ package codegenerator;
 
 import ast.types.AstNode;
 import ast.types.ProgramNode;
+import ast.types.declarations.contracts.ProcedureOrFunctionDeclarationNode;
+import ast.types.declarations.implementations.ProcedureAndFunctionDeclarationPartNode;
 import ast.types.expressions.contracts.ExpressionNode;
 import ast.types.expressions.implementations.ArithmeticOperatorExpressionNode;
 import ast.types.expressions.implementations.CharToStringExpressionNode;
@@ -20,6 +22,7 @@ import ast.types.statements.implementations.ExitStatementNode;
 import ast.types.statements.implementations.ForStatementNode;
 import ast.types.statements.implementations.IfStatementNode;
 import ast.types.statements.implementations.ProcedureCallStatementNode;
+import ast.types.statements.implementations.ReturnStatementNode;
 import tables.BuiltInProceduresAndFunctionsTable;
 import tables.StringLiteralsTable;
 import tables.VariablesTable;
@@ -59,11 +62,13 @@ public class CodeGenerator {
   }
 
   public String generate() {
-    emitHeader(); 
+    emitHeader();
+
+    indentLevel = 1;
     visit(this.programNode);
-    emitFooter();
 
     // Auxiliary functions
+    indentLevel = 0;
     emit("");
     emitIntegerToStringConversionFunction();
     emitRealToStringConversionFunction();
@@ -110,334 +115,340 @@ public class CodeGenerator {
 
     indentLevel--;
 
-    emit("\n.text\n.globl %s\n\n%s:".formatted(programNode.programIdentifier, programNode.programIdentifier));
-    indentLevel++;
+    emit("");
+    emit(".text");
+    emit(".globl %s".formatted(programNode.programIdentifier.toLowerCase()));
+    emit("");
+    emit("%s:".formatted(programNode.programIdentifier.toLowerCase()));
   }
 
   private void emitFooter() {
+    indentLevel = 0;
+    
     emit("");
-    indentLevel--;
-    emit("exit_program:");
-    indentLevel++;
+    emit("__exit_program:");
+    
+    indentLevel = 1;
+    
     emit("li $v0, 10");
     emit("syscall");
   }
 
   private void emitConcatStringWithString(){
     emit("""
-  __concat_string_with_string: #a0 = address of first string, $a1 = address of second string
-    subu $sp, $sp, 16 
-    sw $ra, 12($sp)
-    sw $a0, 8($sp)
-    sw $a1, 4($sp)
+__concat_string_with_string: #a0 = address of first string, $a1 = address of second string
+  subu $sp, $sp, 16 
+  sw $ra, 12($sp)
+  sw $a0, 8($sp)
+  sw $a1, 4($sp)
 
 # Calculate the length of the first string
-    move $t0, $a0
-  __ssc_len1:
-    lb $t1, 0($t0)
-    beqz $t1, __ssc_len1_end
-    addi $t0, $t0, 1
-    j __ssc_len1
-  __ssc_len1_end:
-    sub $t2, $t0, $a0 # t2 = length of first string
+  move $t0, $a0
+__ssc_len1:
+  lb $t1, 0($t0)
+  beqz $t1, __ssc_len1_end
+  addi $t0, $t0, 1
+  j __ssc_len1
+__ssc_len1_end:
+  sub $t2, $t0, $a0 # t2 = length of first string
 
 # Calculate the length of the second string
-    move $t0, $a1
-  __ssc_len2:
-    lb $t1, 0($t0)
-    beqz $t1, __ssc_len2_end
-    addi $t0, $t0, 1
-    j __ssc_len2
-  __ssc_len2_end:
-    sub $t3, $t0, $a1 # t3 = length of second string
+  move $t0, $a1
+__ssc_len2:
+  lb $t1, 0($t0)
+  beqz $t1, __ssc_len2_end
+  addi $t0, $t0, 1
+  j __ssc_len2
+__ssc_len2_end:
+  sub $t3, $t0, $a1 # t3 = length of second string
 
 # Allocate memory for the concatenated string
-    add $a0, $t2, $t3
-    addi $a0, $a0, 1 # +1 for null terminator
-    li $v0, 9
-    syscall # $v0 = address of new string
+  add $a0, $t2, $t3
+  addi $a0, $a0, 1 # +1 for null terminator
+  li $v0, 9
+  syscall # $v0 = address of new string
 
 # Load the original string addresses from the stack
-    lw $a0, 8($sp) 
-    lw $a1, 4($sp)
-    move $t0, $v0 # t0 = address of new string
+  lw $a0, 8($sp) 
+  lw $a1, 4($sp)
+  move $t0, $v0 # t0 = address of new string
 
 # Copy the first string to the new string
-  __ssc_copy1:
-    lb $t1, 0($a0)
-    beqz $t1, __ssc_copy1_end
-    sb $t1, 0($t0)
-    addi $a0, $a0, 1
-    addi $t0, $t0, 1
-    j __ssc_copy1
-  __ssc_copy1_end:
+__ssc_copy1:
+  lb $t1, 0($a0)
+  beqz $t1, __ssc_copy1_end
+  sb $t1, 0($t0)
+  addi $a0, $a0, 1
+  addi $t0, $t0, 1
+  j __ssc_copy1
+__ssc_copy1_end:
 
 # Copy the second string to the new string
-  __ssc_copy2:
-    lb $t1, 0($a1)
-    beqz $t1, __ssc_copy2_end
-    sb $t1, 0($t0)
-    addi $a1, $a1, 1
-    addi $t0, $t0, 1
-    j __ssc_copy2
-  __ssc_copy2_end:
+__ssc_copy2:
+  lb $t1, 0($a1)
+  beqz $t1, __ssc_copy2_end
+  sb $t1, 0($t0)
+  addi $a1, $a1, 1
+  addi $t0, $t0, 1
+  j __ssc_copy2
+__ssc_copy2_end:
 
-    sb $zero, 0($t0) # Null terminator
-    lw $ra, 12($sp) # Restore return address
-    addi $sp, $sp, 16 # Restore stack pointer
-    jr $ra
+  sb $zero, 0($t0) # Null terminator
+  lw $ra, 12($sp) # Restore return address
+  addi $sp, $sp, 16 # Restore stack pointer
+  jr $ra
     """);
   }
 
   private void emitConcatCharWithString() {
     emit("""
-  __concat_char_with_string: #a0 = char, $a1 = address of string
-    subu $sp, $sp, 16
-    sw $ra, 12($sp)
-    sw $a0, 8($sp)
-    sw $a1, 4($sp)
+__concat_char_with_string: #a0 = char, $a1 = address of string
+  subu $sp, $sp, 16
+  sw $ra, 12($sp)
+  sw $a0, 8($sp)
+  sw $a1, 4($sp)
 
-  # Calculate the length of the string
-    move $t0, $a1
+# Calculate the length of the string
+  move $t0, $a1
 
-  __ccs_len:
-    lb $t1, 0($t0)
-    beqz $t1, __ccs_len_end
-    addi $t0, $t0, 1
-    j __ccs_len
-  __ccs_len_end:
-    sub $t2, $t0, $a1 # t2 = length of string
+__ccs_len:
+  lb $t1, 0($t0)
+  beqz $t1, __ccs_len_end
+  addi $t0, $t0, 1
+  j __ccs_len
+__ccs_len_end:
+  sub $t2, $t0, $a1 # t2 = length of string
 
-  # Allocate memory for the concatenated string
-    addi $a0, $t2, 2 # +1 for char, +1 for null terminator
-    li $v0, 9
-    syscall # $v0 = address of new string
+# Allocate memory for the concatenated string
+  addi $a0, $t2, 2 # +1 for char, +1 for null terminator
+  li $v0, 9
+  syscall # $v0 = address of new string
 
-    lw $a0, 8($sp) # Load char
-    lw $a1, 4($sp) # Load original string address
-    move $t0, $v0 # t0 = address of new string
+  lw $a0, 8($sp) # Load char
+  lw $a1, 4($sp) # Load original string address
+  move $t0, $v0 # t0 = address of new string
 
-  # Add the char to the new string
+# Add the char to the new string
 
-    sb $a0, 0($t0)
-    addi $t0, $t0, 1
-    
-  # Copy the original string to the new string
-  __ccs_copy:
-    lb $t1, 0($a1)
-    beqz $t1, __ccs_copy_end
-    sb $t1, 0($t0)
-    addi $a1, $a1, 1
-    addi $t0, $t0, 1
-    j __ccs_copy
-  __ccs_copy_end:
+  sb $a0, 0($t0)
+  addi $t0, $t0, 1
+  
+# Copy the original string to the new string
+__ccs_copy:
+  lb $t1, 0($a1)
+  beqz $t1, __ccs_copy_end
+  sb $t1, 0($t0)
+  addi $a1, $a1, 1
+  addi $t0, $t0, 1
+  j __ccs_copy
+__ccs_copy_end:
 
-    sb $zero, 0($t0) # Null terminator
-    lw $ra, 12($sp) # Restore return address
-    addi $sp, $sp, 16 # Restore stack pointer
-    jr $ra
+  sb $zero, 0($t0) # Null terminator
+  lw $ra, 12($sp) # Restore return address
+  addi $sp, $sp, 16 # Restore stack pointer
+  jr $ra
     """);
   }
 
   private void emitConcatStringWithChar() {
     emit("""
-  __concat_string_with_char: #a0 = address of string, $a1 = char
-    subu $sp, $sp, 16
-    sw $ra, 12($sp)
-    sw $a0, 8($sp)
-    sw $a1, 4($sp)
-    
-  # Calculate the length of the string
-    move $t0, $a0
-    
+__concat_string_with_char: #a0 = address of string, $a1 = char
+  subu $sp, $sp, 16
+  sw $ra, 12($sp)
+  sw $a0, 8($sp)
+  sw $a1, 4($sp)
+  
+# Calculate the length of the string
+  move $t0, $a0
+  
 __csc_len:
-    lb $t1, 0($t0)
-    beqz $t1, __csc_len_end
-    addi $t0, $t0, 1
-    j __csc_len
+  lb $t1, 0($t0)
+  beqz $t1, __csc_len_end
+  addi $t0, $t0, 1
+  j __csc_len
 __csc_len_end:
-    sub $t2, $t0, $a0 # t2 = length of string
+  sub $t2, $t0, $a0 # t2 = length of string
 
-  # Allocate memory for the concatenated string
-    addi $a0, $t2, 2 # +1 for char, +1 for null terminator
-    li $v0, 9
-    syscall # $v0 = address of new string
-    
-    lw $a0, 8($sp) # Load original string address
-    lw $a1, 4($sp) # Load char
-    move $t0, $v0 # t0 = address of new string
+# Allocate memory for the concatenated string
+  addi $a0, $t2, 2 # +1 for char, +1 for null terminator
+  li $v0, 9
+  syscall # $v0 = address of new string
+  
+  lw $a0, 8($sp) # Load original string address
+  lw $a1, 4($sp) # Load char
+  move $t0, $v0 # t0 = address of new string
 
-  # Copy the original string to the new string
-  __csc_copy:
-    lb $t1, 0($a0)
-    beqz $t1, __csc_copy_end
-    sb $t1, 0($t0)
-    addi $a0, $a0, 1
-    addi $t0, $t0, 1
-    j __csc_copy
-  __csc_copy_end:
-  
-    sb $a1, 0($t0) # Add the char
-    sb $zero, 1($t0) # Null terminator
-  
-    lw $ra, 12($sp) # Restore return address
-    addi $sp, $sp, 16 # Restore stack pointer
-    jr $ra
+# Copy the original string to the new string
+__csc_copy:
+  lb $t1, 0($a0)
+  beqz $t1, __csc_copy_end
+  sb $t1, 0($t0)
+  addi $a0, $a0, 1
+  addi $t0, $t0, 1
+  j __csc_copy
+__csc_copy_end:
+
+  sb $a1, 0($t0) # Add the char
+  sb $zero, 1($t0) # Null terminator
+
+  lw $ra, 12($sp) # Restore return address
+  addi $sp, $sp, 16 # Restore stack pointer
+  jr $ra
     """);
   }
 
   private void emitIntegerToStringConversionFunction() {
     emit("""
 __itoa:                       # $a0 = integer
-    move $t0, $a0             # $t0 = n  (save it; syscall 9 needs $a0)
-    li $v0, 9                 # allocate a fixed 12-byte buffer
-    li $a0, 12                #   max is "-2147483648\\0" = 12 bytes exactly
-    syscall                   # $v0 = buffer base
-    addiu $t2, $v0, 11        # $t2 -> last byte
-    sb $zero, 0($t2)          # null terminator at the end
-    addiu $t2, $t2, -1        # $t2 -> first digit slot (offset 10)
+  move $t0, $a0             # $t0 = n  (save it; syscall 9 needs $a0)
+  li $v0, 9                 # allocate a fixed 12-byte buffer
+  li $a0, 12                #   max is "-2147483648\\0" = 12 bytes exactly
+  syscall                   # $v0 = buffer base
+  addiu $t2, $v0, 11        # $t2 -> last byte
+  sb $zero, 0($t2)          # null terminator at the end
+  addiu $t2, $t2, -1        # $t2 -> first digit slot (offset 10)
 
-    li $t5, 0                 # negative flag
-    bgez $t0, __itoa_zero
-    li $t5, 1
-    subu $t0, $zero, $t0      # n = -n, work with positive
+  li $t5, 0                 # negative flag
+  bgez $t0, __itoa_zero
+  li $t5, 1
+  subu $t0, $zero, $t0      # n = -n, work with positive
 
 __itoa_zero:
-    bnez $t0, __itoa_loop     # special-case n == 0 (loop would emit nothing)
-    li $t6, 48                # '0'
-    sb $t6, 0($t2)
-    move $v0, $t2
-    jr $ra
+  bnez $t0, __itoa_loop     # special-case n == 0 (loop would emit nothing)
+  li $t6, 48                # '0'
+  sb $t6, 0($t2)
+  move $v0, $t2
+  jr $ra
 
 __itoa_loop:
-    beqz $t0, __itoa_sign
-    li $t3, 10
-    divu $t0, $t3             # LO = n/10, HI = n%10
-    mfhi $t6                  # remainder = this digit (0..9)
-    mflo $t0                  # n = n/10  for next iteration
-    addiu $t6, $t6, 48        # digit -> ASCII ('0' = 48)
-    sb $t6, 0($t2)            # write it
-    addiu $t2, $t2, -1        # step left
-    j __itoa_loop
+  beqz $t0, __itoa_sign
+  li $t3, 10
+  divu $t0, $t3             # LO = n/10, HI = n%10
+  mfhi $t6                  # remainder = this digit (0..9)
+  mflo $t0                  # n = n/10  for next iteration
+  addiu $t6, $t6, 48        # digit -> ASCII ('0' = 48)
+  sb $t6, 0($t2)            # write it
+  addiu $t2, $t2, -1        # step left
+  j __itoa_loop
 
 __itoa_sign:
-    beqz $t5, __itoa_done
-    li $t6, 45                # '-'
-    sb $t6, 0($t2)
-    addiu $t2, $t2, -1
+  beqz $t5, __itoa_done
+  li $t6, 45                # '-'
+  sb $t6, 0($t2)
+  addiu $t2, $t2, -1
 
 __itoa_done:
-    addiu $v0, $t2, 1         # $t2 sits one before the leftmost char; +1 = start
-    jr $ra
+  addiu $v0, $t2, 1         # $t2 sits one before the leftmost char; +1 = start
+  jr $ra
 """);
   }
 
   private void emitRealToStringConversionFunction() {
     emit("""
 __rtoa:                       # $a0 = real (float bits)
-    addiu $sp, $sp, -20       # frame: save $ra + $s0-$s3
-    sw $ra, 0($sp)
-    sw $s0, 4($sp)
-    sw $s1, 8($sp)
-    sw $s2, 12($sp)
-    sw $s3, 16($sp)
+  addiu $sp, $sp, -20       # frame: save $ra + $s0-$s3
+  sw $ra, 0($sp)
+  sw $s0, 4($sp)
+  sw $s1, 8($sp)
+  sw $s2, 12($sp)
+  sw $s3, 16($sp)
 
-    mtc1 $a0, $f20            # $f20 = x  (survives syscall 9 below)
+  mtc1 $a0, $f20            # $f20 = x  (survives syscall 9 below)
 
-    li $v0, 9                 # allocate a fixed 32-byte buffer
-    li $a0, 32
-    syscall                   # $v0 = buffer base
-    move $s0, $v0             # $s0 = write pointer
-    move $s1, $v0             # $s1 = buffer base (return value)
+  li $v0, 9                 # allocate a fixed 32-byte buffer
+  li $a0, 32
+  syscall                   # $v0 = buffer base
+  move $s0, $v0             # $s0 = write pointer
+  move $s1, $v0             # $s1 = buffer base (return value)
 
-    mtc1 $zero, $f22          # $f22 = 0.0
-    c.lt.s $f20, $f22         # cc = (x < 0.0)
-    bc1f __rtoa_int           # if x >= 0, skip the sign
-    li $t0, 45                # '-'
-    sb $t0, 0($s0)
-    addiu $s0, $s0, 1
-    neg.s $f20, $f20          # x = -x, work with positive
+  mtc1 $zero, $f22          # $f22 = 0.0
+  c.lt.s $f20, $f22         # cc = (x < 0.0)
+  bc1f __rtoa_int           # if x >= 0, skip the sign
+  li $t0, 45                # '-'
+  sb $t0, 0($s0)
+  addiu $s0, $s0, 1
+  neg.s $f20, $f20          # x = -x, work with positive
 
 __rtoa_int:
-    trunc.w.s $f22, $f20      # truncate toward zero
-    mfc1 $s2, $f22            # $s2 = integer part
-    cvt.s.w $f24, $f22        # $f24 = (float) integer part
-    sub.s $f26, $f20, $f24    # $f26 = fractional part (0 <= frac < 1)
+  trunc.w.s $f22, $f20      # truncate toward zero
+  mfc1 $s2, $f22            # $s2 = integer part
+  cvt.s.w $f24, $f22        # $f24 = (float) integer part
+  sub.s $f26, $f20, $f24    # $f26 = fractional part (0 <= frac < 1)
 
-    li $t0, 1000000           # scale the fraction to 6 decimals
-    mtc1 $t0, $f28
-    cvt.s.w $f28, $f28        # $f28 = 1000000.0
-    mul.s $f26, $f26, $f28    # frac *= 1e6
-    li $t0, 0x3F000000        # 0.5 in IEEE-754 single
-    mtc1 $t0, $f28
-    add.s $f26, $f26, $f28    # round to nearest
-    trunc.w.s $f26, $f26
-    mfc1 $s3, $f26            # $s3 = fractional integer (0..1000000)
+  li $t0, 1000000           # scale the fraction to 6 decimals
+  mtc1 $t0, $f28
+  cvt.s.w $f28, $f28        # $f28 = 1000000.0
+  mul.s $f26, $f26, $f28    # frac *= 1e6
+  li $t0, 0x3F000000        # 0.5 in IEEE-754 single
+  mtc1 $t0, $f28
+  add.s $f26, $f26, $f28    # round to nearest
+  trunc.w.s $f26, $f26
+  mfc1 $s3, $f26            # $s3 = fractional integer (0..1000000)
 
-    li $t0, 1000000           # if the fraction rounded up to 1.0, carry it
-    blt $s3, $t0, __rtoa_emit_int
-    subu $s3, $s3, $t0        # frac = 0
-    addiu $s2, $s2, 1         # carry into the integer part
+  li $t0, 1000000           # if the fraction rounded up to 1.0, carry it
+  blt $s3, $t0, __rtoa_emit_int
+  subu $s3, $s3, $t0        # frac = 0
+  addiu $s2, $s2, 1         # carry into the integer part
 
 __rtoa_emit_int:
-    move $a0, $s2             # convert the integer part via __itoa
-    jal __itoa
-    move $t0, $v0             # $t0 = source pointer (itoa result)
+  move $a0, $s2             # convert the integer part via __itoa
+  jal __itoa
+  move $t0, $v0             # $t0 = source pointer (itoa result)
 
 __rtoa_copy_int:
-    lb $t1, 0($t0)            # copy the integer digits into our buffer
-    beqz $t1, __rtoa_dot
-    sb $t1, 0($s0)
-    addiu $s0, $s0, 1
-    addiu $t0, $t0, 1
-    j __rtoa_copy_int
+  lb $t1, 0($t0)            # copy the integer digits into our buffer
+  beqz $t1, __rtoa_dot
+  sb $t1, 0($s0)
+  addiu $s0, $s0, 1
+  addiu $t0, $t0, 1
+  j __rtoa_copy_int
 
 __rtoa_dot:
-    li $t1, 46                # '.'
-    sb $t1, 0($s0)
-    addiu $s0, $s0, 1
+  li $t1, 46                # '.'
+  sb $t1, 0($s0)
+  addiu $s0, $s0, 1
 
-    li $t2, 100000            # divisor for the most significant fractional digit
-    li $t3, 6                 # emit exactly 6 fractional digits (with leading zeros)
+  li $t2, 100000            # divisor for the most significant fractional digit
+  li $t3, 6                 # emit exactly 6 fractional digits (with leading zeros)
 
 __rtoa_frac_loop:
-    beqz $t3, __rtoa_done
-    divu $s3, $t2             # LO = frac/divisor, HI = frac%divisor
-    mflo $t1                  # this digit
-    mfhi $s3                  # remainder for the next iteration
-    addiu $t1, $t1, 48        # digit -> ASCII
-    sb $t1, 0($s0)
-    addiu $s0, $s0, 1
-    li $t4, 10
-    divu $t2, $t4             # divisor /= 10
-    mflo $t2
-    addiu $t3, $t3, -1
-    j __rtoa_frac_loop
+  beqz $t3, __rtoa_done
+  divu $s3, $t2             # LO = frac/divisor, HI = frac%divisor
+  mflo $t1                  # this digit
+  mfhi $s3                  # remainder for the next iteration
+  addiu $t1, $t1, 48        # digit -> ASCII
+  sb $t1, 0($s0)
+  addiu $s0, $s0, 1
+  li $t4, 10
+  divu $t2, $t4             # divisor /= 10
+  mflo $t2
+  addiu $t3, $t3, -1
+  j __rtoa_frac_loop
 
 __rtoa_done:
-    sb $zero, 0($s0)          # null terminator
-    move $v0, $s1             # return the buffer base
+  sb $zero, 0($s0)          # null terminator
+  move $v0, $s1             # return the buffer base
 
-    lw $ra, 0($sp)
-    lw $s0, 4($sp)
-    lw $s1, 8($sp)
-    lw $s2, 12($sp)
-    lw $s3, 16($sp)
-    addiu $sp, $sp, 20
-    jr $ra
+  lw $ra, 0($sp)
+  lw $s0, 4($sp)
+  lw $s1, 8($sp)
+  lw $s2, 12($sp)
+  lw $s3, 16($sp)
+  addiu $sp, $sp, 20
+  jr $ra
 """);
   }
 
   private void emitBooleanToStringConversionFunction() {
     emit("""
 __btoa:                       # $a0 = boolean (0 or 1)
-    beqz $a0, __btoa_false
-    la $v0, __bool_true
-    jr $ra
+  beqz $a0, __btoa_false
+  la $v0, __bool_true
+  jr $ra
 
 __btoa_false:
-    la $v0, __bool_false
-    jr $ra
+  la $v0, __bool_false
+  jr $ra
 """);
   }
 
@@ -454,26 +465,26 @@ __btoa_false:
 # ------------------------------------------------------------
 __strcmp:
 __strcmp_loop:
-    lbu $t0, 0($a0)              # current byte of left  (unsigned!)
-    lbu $t1, 0($a1)              # current byte of right
-    bne $t0, $t1, __strcmp_diff  # bytes differ -> decide ordering
-    beq $t0, $zero, __strcmp_eq  # both zero -> reached end together, equal
-    addiu $a0, $a0, 1            # advance both pointers
-    addiu $a1, $a1, 1
-    j __strcmp_loop
+  lbu $t0, 0($a0)              # current byte of left  (unsigned!)
+  lbu $t1, 0($a1)              # current byte of right
+  bne $t0, $t1, __strcmp_diff  # bytes differ -> decide ordering
+  beq $t0, $zero, __strcmp_eq  # both zero -> reached end together, equal
+  addiu $a0, $a0, 1            # advance both pointers
+  addiu $a1, $a1, 1
+  j __strcmp_loop
 
 __strcmp_diff:
-    bltu $t0, $t1, __strcmp_less # left byte < right byte -> left is smaller
-    li $v0, 1                    # otherwise left > right -> left is bigger
-    jr $ra
+  bltu $t0, $t1, __strcmp_less # left byte < right byte -> left is smaller
+  li $v0, 1                    # otherwise left > right -> left is bigger
+  jr $ra
 
 __strcmp_less:
-    li $v0, -1
-    jr $ra
+  li $v0, -1
+  jr $ra
 
 __strcmp_eq:
-    li $v0, 0
-    jr $ra
+  li $v0, 0
+  jr $ra
 """);
   }
 
@@ -497,6 +508,23 @@ __strcmp_eq:
 
   private void visitProgramNode(ProgramNode node) {
     visit(node.compoundStatement);
+    emitFooter();
+
+    node.proceduresAndFunctions.ifPresent(proceduresAndFunctions -> visit(proceduresAndFunctions));
+  }
+
+  private void visitProcedureAndFunctionDeclarationPartNode(ProcedureAndFunctionDeclarationPartNode node) {
+    for(ProcedureOrFunctionDeclarationNode procedureOrFunction : node.procedureOrFunctionDeclarations) {
+      indentLevel = 0;
+      emit("");
+      emit("%s:".formatted(procedureOrFunction.identifier.toLowerCase()));
+      
+      indentLevel = 1;
+      emitPushTemp("$ra");
+      visit(procedureOrFunction.compoundStatement);
+      emitPopTemp("$ra");
+      emit("jr $ra");
+    }
   }
 
   private void visitCompoundStatementNode(CompoundStatementNode node) {
@@ -586,6 +614,11 @@ __strcmp_eq:
     visit(node.expression);
 
     String variableIdentifier = node.variableAccessExpressionNode.identifier;
+
+    if(node instanceof ReturnStatementNode returnStatementNode) {
+      emitPopTemp("$v0");
+      return;
+    }
 
     if (node.variableAccessExpressionNode instanceof IndexedVariableAccessExpressionNode indexedVariableAccessExpressionNode) {
       // TODO: handle index out of bounds exceptions
@@ -864,7 +897,7 @@ __strcmp_eq:
     // --- Check if divisor is not equal to zero
 
     int id = labelCounter++;
-    String okLabel = "real_division_ok_%d".formatted(id);
+    String okLabel = "__real_division_ok_%d".formatted(id);
     
     emit("bnez $t1, %s".formatted(okLabel));
     
@@ -874,8 +907,7 @@ __strcmp_eq:
     emit("syscall");
     
     // Exit program
-    emit("li $v0, 10");
-    emit("syscall");
+    emit("j __exit_program");
 
     // Safe to continue
     emit("%s:".formatted(okLabel));
@@ -907,7 +939,7 @@ __strcmp_eq:
     // --- Check if divisor is not equal to zero
 
     int id = labelCounter++;
-    String okLabel = "integer_division_ok_%d".formatted(id);
+    String okLabel = "__integer_division_ok_%d".formatted(id);
     
     emit("bnez $t1, %s".formatted(okLabel));
     
@@ -917,8 +949,7 @@ __strcmp_eq:
     emit("syscall");
     
     // Exit program
-    emit("li $v0, 10");
-    emit("syscall");
+    emit("j __exit_program");
 
     // Safe to continue
     emit("%s:".formatted(okLabel));
@@ -1108,6 +1139,8 @@ __strcmp_eq:
       executeBuiltInProcedureOrFunction(node.procedureIdentifier.toLowerCase(), firstArgumentType);
       return;
     }
+
+    emit("jal %s".formatted(node.procedureIdentifier.toLowerCase()));
   }
 
   // TODO: handle non built-in functions
@@ -1122,6 +1155,9 @@ __strcmp_eq:
       executeBuiltInProcedureOrFunction(node.functionIdentifier.toLowerCase(), firstArgumentType);
       return;
     }
+
+    emit("jal %s".formatted(node.functionIdentifier.toLowerCase()));
+    emitPushTemp("$v0");
   }
 
   private void visitExitStatementNode(ExitStatementNode node) {
@@ -1179,6 +1215,7 @@ __strcmp_eq:
   private void visit(AstNode node) {
     switch (node) {
       case ProgramNode concreteTypeNode -> visitProgramNode(concreteTypeNode);
+      case ProcedureAndFunctionDeclarationPartNode concreteTypeNode -> visitProcedureAndFunctionDeclarationPartNode(concreteTypeNode);
       case StatementNode statementNode -> {
         switch(statementNode) {
           case CompoundStatementNode concreteTypeNode -> visitCompoundStatementNode(concreteTypeNode);
