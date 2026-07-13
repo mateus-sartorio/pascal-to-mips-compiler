@@ -6,7 +6,7 @@
       "name": "Main",
       "request": "launch",
       "mainClass": "Main",
-      "args": ["${workspaceFolder}/tests/semantic/invalid/35-maximum-procedure-parameter-count/source.pas", "-compiler"]
+      "args": ["${workspaceFolder}/tests/compiler/valid/09-array-indexation/source.pas", "-compiler"]
     }
   ]
 }

@@ -3,17 +3,21 @@ package types;
 import java.util.Formatter;
 
 public class ArrayVariableType extends VariableType {
-  public final int startIndex;
-  public final int endIndex;
+  public final int lowerBound;
+  public final int upperBound;
 
   public ArrayVariableType(
     PrimitiveTypeEnum basePrimitiveType,
-    int startIndex,
-    int endIndex
+    int lowerBound,
+    int upperBound
   ) {
     super(basePrimitiveType, false);
-    this.startIndex = startIndex;
-    this.endIndex = endIndex;
+    this.lowerBound = lowerBound;
+    this.upperBound = upperBound;
+  }
+
+  public int size() {
+    return upperBound - lowerBound + 1;
   }
 
   @Override
@@ -26,8 +30,8 @@ public class ArrayVariableType extends VariableType {
     
     return (
       this.basePrimitiveType == other.basePrimitiveType &&
-      this.startIndex == otherCorrectType.startIndex &&
-      this.endIndex == otherCorrectType.endIndex
+      this.lowerBound == otherCorrectType.lowerBound &&
+      this.upperBound == otherCorrectType.upperBound
     );
   }
 
@@ -35,7 +39,7 @@ public class ArrayVariableType extends VariableType {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     Formatter f = new Formatter(sb);
-    f.format("array[%d..%d] of %s", startIndex, endIndex, basePrimitiveType.toString());
+    f.format("array[%d..%d] of %s", lowerBound, upperBound, basePrimitiveType.toString());
     f.close();
 
     return sb.toString();

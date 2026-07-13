@@ -29,6 +29,8 @@ import types.PrimitiveTypeEnum;
 import types.PrimitiveVariableType;
 
 public class CodeGenerator {
+  private static final int WORD_SIZE = 4;
+
   private final StringBuilder mipsTargetCode ;
   private final ProgramNode programNode;
 
@@ -97,6 +99,12 @@ public class CodeGenerator {
     emit("");
 
     for(VariableTableEntry variable : globalVariablesTable.toList()) {
+      if(variable.type instanceof ArrayVariableType arrayVariableType) {
+        emit(".align 2");
+        emit("%s: .space %d".formatted(variable.identifier.toLowerCase(), WORD_SIZE * arrayVariableType.size()));
+        continue;
+      }
+      
       emit("%s: .word 0".formatted(variable.identifier.toLowerCase()));
     }
 
@@ -499,8 +507,8 @@ __strcmp_eq:
 
   private void visitIfStatementNode(IfStatementNode node) {
     int uniqueLabelId = labelCounter++;
-    String elseLabel = "else_label_%d".formatted(uniqueLabelId);
-    String endIfLabel = "end_if_label_%d".formatted(uniqueLabelId);
+    String elseLabel = "__else_label_%d".formatted(uniqueLabelId);
+    String endIfLabel = "__end_if_label_%d".formatted(uniqueLabelId);
 
     visit(node.condition);
     emitPopTemp("$t0");
@@ -528,8 +536,8 @@ __strcmp_eq:
 
   private void visitForStatementNode(ForStatementNode node) {
     int uniqueLabelId = labelCounter++;
-    String loopStartLabel = "for_start_%s".formatted(uniqueLabelId);
-    String loopEndLabel = "for_end_%s".formatted(uniqueLabelId);
+    String loopStartLabel = "__for_start_%s".formatted(uniqueLabelId);
+    String loopEndLabel = "__for_end_%s".formatted(uniqueLabelId);
     
     visit(node.finalValue);
     visit(node.initialValue);
@@ -538,11 +546,15 @@ __strcmp_eq:
     emitPopTemp("$t1"); //t1 = final value
 
     emit("sw $t0, %s".formatted(node.controlVariable.identifier.toLowerCase()));
+    
+    // TODO
     emitPushTemp("$t1");
+    
     emit("%s:".formatted(loopStartLabel));
 
     emit("lw $t0, %s".formatted(node.controlVariable.identifier.toLowerCase()));
-    emitPopTemp("$t1"); //t1 = final value
+    
+    emit("lw $t1, 0($sp)"); //t1 = final value
 
     if(node.isDownto) {
       emit("blt $t0, $t1, %s".formatted(loopEndLabel));
@@ -556,7 +568,7 @@ __strcmp_eq:
     emit("lw $t0, %s".formatted(node.controlVariable.identifier.toLowerCase()));
 
     if(node.isDownto) {
-      emit("subi $t0, $t0, 1");
+      emit("addi $t0, $t0, -1");
     }
     else {
       emit("addi $t0, $t0, 1");
@@ -570,11 +582,33 @@ __strcmp_eq:
   }
 
   // TODO: consider local variables
-  // TODO: consider indexed variables
   private void visitAssignmentStatementNode(AssignmentStatementNode node) {
     visit(node.expression);
-    emitPopTemp("$t0");
-    emit("sw $t0, %s".formatted(node.variableAccessExpressionNode.identifier.toLowerCase()));
+
+    String variableIdentifier = node.variableAccessExpressionNode.identifier;
+
+    if (node.variableAccessExpressionNode instanceof IndexedVariableAccessExpressionNode indexedVariableAccessExpressionNode) {
+      // TODO: handle index out of bounds exceptions
+
+      visit(indexedVariableAccessExpressionNode.indexExpressionNode);
+      emitPopTemp("$t1");
+      emitPopTemp("$t2");
+
+      VariableTableEntry variableValue = globalVariablesTable.get(variableIdentifier);
+      ArrayVariableType arrayVariableType = (ArrayVariableType) variableValue.type;
+      
+      emit("addi $t1, $t1, -%d".formatted(arrayVariableType.lowerBound));
+      emit("sll $t1, $t1, 2");
+
+      emit("la $t0, %s".formatted(indexedVariableAccessExpressionNode.identifier.toLowerCase()));
+      emit("add $t0, $t0, $t1");
+
+      emit("sw $t2, 0($t0)");
+    }
+    else {
+      emitPopTemp("$t0");
+      emit("sw $t0, %s".formatted(node.variableAccessExpressionNode.identifier.toLowerCase()));
+    }
   }
 
   private void visitPrimitiveTypeExpressionNode(PrimitiveTypeExpressionNode<?> node) {
@@ -584,7 +618,8 @@ __strcmp_eq:
         emitPushTemp("$t0");
       }
       case Double value -> {
-        emit("li $t0, %f".formatted(value));
+        int bits = Float.floatToIntBits(value.floatValue());
+        emit("li $t0, %d".formatted(bits));
         emitPushTemp("$t0");
       }
       case String value -> {
@@ -908,19 +943,31 @@ __strcmp_eq:
     }
   }
 
+  // TODO: handle local variables of functions
   private void visitIndexedVariableAccessExpressionNode(IndexedVariableAccessExpressionNode node) {
-    // TODO
-
     visit(node.indexExpressionNode);
     emitPopTemp("$t1");
-
+    
     if (node.type instanceof PrimitiveVariableType && node.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
+      // TODO: handle string out of bounds exception
       emit("lw $t0, %s".formatted(node.identifier.toLowerCase()));
       emit("add $t0, $t0, $t1");
       emit("lbu $t0, 0($t0)");
       emitPushTemp("$t0");
       return;
     }
+
+    // TODO: handle array out of bounds exception
+    
+    VariableTableEntry symbol = globalVariablesTable.get(node.identifier);
+    ArrayVariableType arrayType = (ArrayVariableType) symbol.type;
+    
+    emit("la $t0, %s".formatted(node.identifier.toLowerCase()));
+    emit("addi $t1, $t1, -%d".formatted(arrayType.lowerBound));
+    emit("sll $t1, $t1, 2");
+    emit("add $t0, $t0, $t1");
+    emit("lw $t0, 0($t0)");
+    emitPushTemp("$t0");
   }
 
   private void visitVariableAccessExpressionNode(VariableAccessExpressionNode node) {
@@ -930,10 +977,8 @@ __strcmp_eq:
         emitPushTemp("$t0");
       }
       case ArrayVariableType _ -> {
-        switch (node.type.basePrimitiveType) {
-          // TODO
-          default -> throw new RuntimeException("Unsupported primitive type of array type");
-        }
+        emit("la $t0, %s".formatted(node.identifier.toLowerCase()));
+        emitPushTemp("$t0");
       }
       default -> throw new RuntimeException("Unsupported type");
     }
@@ -992,7 +1037,6 @@ __strcmp_eq:
 
     visit(node.left);
     visit(node.right);
-    
     
     if(node.left.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
       emitPopTemp("$a1");

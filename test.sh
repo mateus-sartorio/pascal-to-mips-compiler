@@ -67,7 +67,7 @@ case "$1" in
         run_module "interpreter"
         ;;
     "--compiler")
-        run_module "compiler"
+        bash test_compiler.sh
         ;;
     "--clean")
         find tests -name "actual_result.txt" -delete
@@ -82,6 +82,6 @@ case "$1" in
         run_module "semantic"
         run_module "ast"
         run_module "interpreter"
-        run_module "compiler"
+        bash test_compiler.sh
         ;;
 esac

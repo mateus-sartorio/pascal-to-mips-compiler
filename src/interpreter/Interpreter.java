@@ -188,47 +188,35 @@ public class Interpreter {
       correctTable = memoryStack.peekTable();
     }
 
-    if (node.variableAccessExpressionNode instanceof IndexedVariableAccessExpressionNode) {
+    if (node.variableAccessExpressionNode instanceof IndexedVariableAccessExpressionNode indexedVariableAccessExpressionNode) {
       int size = correctMemory.entryOf(variableIdentifier).size();
+      
+      visit(indexedVariableAccessExpressionNode.indexExpressionNode);
+      int index = dataStack.popInteger();
 
-      if (node.variableAccessExpressionNode instanceof IndexedVariableAccessExpressionNode indexedVariableAccessExpressionNode) {
-        visit(indexedVariableAccessExpressionNode.indexExpressionNode);
-        int index = dataStack.popInteger();
-
-        VariableTableEntry variableValue = correctTable.get(variableIdentifier);
-        ArrayVariableType arrayVariableType = (ArrayVariableType) variableValue.type;
+      VariableTableEntry variableValue = correctTable.get(variableIdentifier);
+      ArrayVariableType arrayVariableType = (ArrayVariableType) variableValue.type;
+      
+      if((index < arrayVariableType.lowerBound) || (index > arrayVariableType.upperBound)) {
+        System.out.printf(
+          "RUNTIME ERROR: index [%d] is out of bounds for array '%s' of type '%s'!\n",
+          index,
+          indexedVariableAccessExpressionNode.identifier,
+          arrayVariableType.toString()
+        );
         
-        if((index < arrayVariableType.startIndex) || (index > arrayVariableType.endIndex)) {
-          System.out.printf(
-            "RUNTIME ERROR: index [%d] is out of bounds for array '%s' of type '%s'!\n",
-            index,
-            indexedVariableAccessExpressionNode.identifier,
-            arrayVariableType.toString()
-          );
-          
-          System.exit(1);
-        }
-
-        int offset = index - arrayVariableType.startIndex;
-
-        switch (node.variableAccessExpressionNode.type.basePrimitiveType) {
-          case PrimitiveTypeEnum.REAL -> correctMemory.storeFloatAt(variableIdentifier, dataStack.popFloat(), offset);
-          case PrimitiveTypeEnum.INTEGER -> correctMemory.storeIntegerAt(variableIdentifier, dataStack.popInteger(), offset);
-          case PrimitiveTypeEnum.BOOLEAN -> correctMemory.storeIntegerAt(variableIdentifier, dataStack.popInteger(), offset);
-          case PrimitiveTypeEnum.CHAR -> correctMemory.storeIntegerAt(variableIdentifier, dataStack.popInteger(), offset);
-          case PrimitiveTypeEnum.STRING -> correctMemory.storeIntegerAt(variableIdentifier, dataStack.popInteger(), offset);
-          default -> throw new RuntimeException("Unsupported primitive type");
-        }
+        System.exit(1);
       }
-      else {
-        switch (node.variableAccessExpressionNode.type.basePrimitiveType) {
-          case PrimitiveTypeEnum.REAL -> correctMemory.storeFloatArray(variableIdentifier, dataStack.popFloatArray(size));
-          case PrimitiveTypeEnum.INTEGER -> correctMemory.storeIntegerArray(variableIdentifier, dataStack.popIntegerArray(size));
-          case PrimitiveTypeEnum.BOOLEAN -> correctMemory.storeIntegerArray(variableIdentifier, dataStack.popIntegerArray(size));
-          case PrimitiveTypeEnum.CHAR -> correctMemory.storeIntegerArray(variableIdentifier, dataStack.popIntegerArray(size));
-          case PrimitiveTypeEnum.STRING -> correctMemory.storeIntegerArray(variableIdentifier, dataStack.popIntegerArray(size));
-          default -> throw new RuntimeException("Unsupported primitive type");
-        }
+
+      int offset = index - arrayVariableType.lowerBound;
+
+      switch (node.variableAccessExpressionNode.type.basePrimitiveType) {
+        case PrimitiveTypeEnum.REAL -> correctMemory.storeFloatAt(variableIdentifier, dataStack.popFloat(), offset);
+        case PrimitiveTypeEnum.INTEGER -> correctMemory.storeIntegerAt(variableIdentifier, dataStack.popInteger(), offset);
+        case PrimitiveTypeEnum.BOOLEAN -> correctMemory.storeIntegerAt(variableIdentifier, dataStack.popInteger(), offset);
+        case PrimitiveTypeEnum.CHAR -> correctMemory.storeIntegerAt(variableIdentifier, dataStack.popInteger(), offset);
+        case PrimitiveTypeEnum.STRING -> correctMemory.storeIntegerAt(variableIdentifier, dataStack.popInteger(), offset);
+        default -> throw new RuntimeException("Unsupported primitive type");
       }
     }
     else {
@@ -465,19 +453,19 @@ public class Interpreter {
 
     if (node.type instanceof PrimitiveVariableType && node.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
       int strIndex = correctMemory.loadInteger(node.identifier);
-      String str = stringLiteralsMemory.getEntry(strIndex);
+      String string = stringLiteralsMemory.getEntry(strIndex);
 
-      if(index < 0 || index > (str.length() - 1)) {
+      if(index < 0 || index > (string.length() - 1)) {
         System.out.printf(
           "RUNTIME ERROR: index [%d] is out of bounds for string '%s'!\n",
           index,
-          str
+          string
         );
 
         System.exit(1);
       }
 
-      char c = str.charAt(index);
+      char c = string.charAt(index);
       dataStack.pushInteger(c);
       
       return;
@@ -486,7 +474,7 @@ public class Interpreter {
     VariableTableEntry symbol = correctTable.get(node.identifier);
     ArrayVariableType arrayType = (ArrayVariableType) symbol.type;
     
-    if((index < arrayType.startIndex) || (index > arrayType.endIndex)) {
+    if((index < arrayType.lowerBound) || (index > arrayType.upperBound)) {
       System.out.printf(
         "RUNTIME ERROR: index [%d] is out of bounds for array '%s' of type '%s'!\n",
         index,
@@ -497,7 +485,7 @@ public class Interpreter {
       System.exit(1);
     }
     
-    int offset = index - arrayType.startIndex;
+    int offset = index - arrayType.lowerBound;
 
     switch (node.type.basePrimitiveType) {
       case PrimitiveTypeEnum.INTEGER -> dataStack.pushInteger(correctMemory.loadIntegerAt(node.identifier, offset));
@@ -588,7 +576,23 @@ public class Interpreter {
     int rightValue = dataStack.popInteger();
     int leftValue = dataStack.popInteger();
 
-    // TODO: handle string comparisons
+    if(node.left.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
+      String leftString = stringLiteralsMemory.getEntry(leftValue);
+      String righString = stringLiteralsMemory.getEntry(rightValue);
+
+      switch (operator) {
+        case "=" -> dataStack.pushInteger(leftString.equals(righString) ? 1 : 0);
+        case "<>" -> dataStack.pushInteger(leftString.equals(righString) ? 0 : 1);
+        case "<" -> dataStack.pushInteger((leftString.compareTo(righString) < 0) ? 1 : 0);
+        case ">" -> dataStack.pushInteger((leftString.compareTo(righString) > 0) ? 1 : 0);
+        case "<=" -> dataStack.pushInteger((leftString.compareTo(righString) <= 0) ? 1 : 0);
+        case ">=" -> dataStack.pushInteger((leftString.compareTo(righString) >= 0) ? 1 : 0);
+        default -> throw new RuntimeException("Unsupported operation");
+      }
+
+      return;
+    }
+
     switch (operator) {
       case "=" -> dataStack.pushInteger(leftValue == rightValue ? 1 : 0);
       case "<>" -> dataStack.pushInteger(leftValue != rightValue ? 1 : 0);
@@ -669,10 +673,10 @@ public class Interpreter {
       for (int i = parameters.size() - 1; i >= 0; i--) {
         VariableDeclarationNode parameter = parameters.get(i);
 
-        if (parameter.type instanceof ArrayVariableType ap) {
-          int size = ap.endIndex - ap.startIndex + 1;
+        if (parameter.type instanceof ArrayVariableType arrayVariableType) {
+          int size = arrayVariableType.size();
 
-          switch (ap.basePrimitiveType) {
+          switch (arrayVariableType.basePrimitiveType) {
             case PrimitiveTypeEnum.REAL -> currentMemory.storeFloatArray(parameter.identifier, dataStack.popFloatArray(size));
             case PrimitiveTypeEnum.INTEGER -> currentMemory.storeIntegerArray(parameter.identifier, dataStack.popIntegerArray(size));
             case PrimitiveTypeEnum.BOOLEAN -> currentMemory.storeIntegerArray(parameter.identifier, dataStack.popIntegerArray(size));
@@ -727,10 +731,10 @@ public class Interpreter {
       for (int i = parameters.size() - 1; i >= 0; i--) {
         VariableDeclarationNode parameter = parameters.get(i);
 
-        if (parameter.type instanceof ArrayVariableType ap) {
-          int size = ap.endIndex - ap.startIndex + 1;
+        if (parameter.type instanceof ArrayVariableType arrayVariableType) {
+          int size = arrayVariableType.size();
 
-          switch (ap.basePrimitiveType) {
+          switch (arrayVariableType.basePrimitiveType) {
             case PrimitiveTypeEnum.REAL -> currentMemory.storeFloatArray(parameter.identifier, dataStack.popFloatArray(size));
             case PrimitiveTypeEnum.INTEGER -> currentMemory.storeIntegerArray(parameter.identifier, dataStack.popIntegerArray(size));
             case PrimitiveTypeEnum.BOOLEAN -> currentMemory.storeIntegerArray(parameter.identifier, dataStack.popIntegerArray(size));

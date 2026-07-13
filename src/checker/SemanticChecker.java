@@ -373,21 +373,21 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
       Array_typeContext arrayType = context.array_type();
       PrimitiveTypeEnum primitiveType = PrimitiveTypeEnum.getType(arrayType.primitive_type().getText());
       Subrange_typeContext subrangeType = arrayType.subrange_type();
-      int startIndex = Integer.parseInt(subrangeType.UNSIGNED_INTEGER(0).getText());
-      int endIndex = Integer.parseInt(subrangeType.UNSIGNED_INTEGER(1).getText());
+      int lowerBound = Integer.parseInt(subrangeType.UNSIGNED_INTEGER(0).getText());
+      int upperBound = Integer.parseInt(subrangeType.UNSIGNED_INTEGER(1).getText());
 
-      if(endIndex <= startIndex) {
+      if(upperBound <= lowerBound) {
         System.out.printf(
           "SEMANTIC ERROR (%d): End index (%d) must be bigger than start index (%d) in declaration of array variables.\n",
           arrayType.ARRAY().getSymbol().getLine(),
-          endIndex,
-          startIndex
+          upperBound,
+          lowerBound
         );
 
         System.exit(1);
       }
 
-      type = new ArrayVariableType(primitiveType, startIndex, endIndex);
+      type = new ArrayVariableType(primitiveType, lowerBound, upperBound);
     }
 
     return type;

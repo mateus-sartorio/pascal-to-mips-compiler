@@ -28,9 +28,9 @@ public class Memory {
           i++;
         }
         case ArrayVariableType type -> {
-          this.identifierIndexMap.put(variable.identifier.toLowerCase(), new VariableEntry(i, type.endIndex - type.startIndex + 1));
+          this.identifierIndexMap.put(variable.identifier.toLowerCase(), new VariableEntry(i, type.upperBound - type.lowerBound + 1));
           
-          for(int j = type.startIndex; j <= type.endIndex; j++) {
+          for(int j = type.lowerBound; j <= type.upperBound; j++) {
             this.memory.add(Word.fromInt(0));
             i++;
           }

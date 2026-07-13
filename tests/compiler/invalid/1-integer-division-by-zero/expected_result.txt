@@ -1,2 +1,1 @@
 RUNTIME ERROR: division by zero!
-make[1]: *** [Makefile:84: run-interpreter] Error 1

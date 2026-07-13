@@ -100,6 +100,10 @@ test:
 	@chmod +x test.sh
 	@./test.sh $(ARGS)
 
+# Run only the MIPS/MARS compiler suite (generates ASM + runs MARS)
+test-compiler:
+	@bash test_compiler.sh
+
 # Clean automated tests results
 test-clean:
 	@./test.sh --clean
