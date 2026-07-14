@@ -11,12 +11,12 @@ import tables.VariablesTable.VariableTableEntry;
 import types.ArrayVariableType;
 import types.PrimitiveVariableType;
 
-public class CallFrame {
+public class CallFrameOffsetMap {
   public record LocalVariableEntry(int offset, int size) {}
 
   private final Map<String, LocalVariableEntry> map;
 
-  public CallFrame(ProceduresAndFunctionsTable proceduresAndFunctionsTable) {
+  public CallFrameOffsetMap(ProceduresAndFunctionsTable proceduresAndFunctionsTable) {
     this.map = new HashMap<>();
 
     for(ProceduresAndFunctionsEntry entry : proceduresAndFunctionsTable.getAll()) {

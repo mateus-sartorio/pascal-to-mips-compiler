@@ -1,4 +1,4 @@
-program p17;
+program p15;
 var
   ia, ib, ic : integer;
   ra, rb, rc : real;

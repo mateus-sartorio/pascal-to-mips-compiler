@@ -6,7 +6,7 @@
       "name": "Main",
       "request": "launch",
       "mainClass": "Main",
-      "args": ["${workspaceFolder}/tests/compiler/valid/13-fibonacci/source.pas", "-compiler"]
+      "args": ["${workspaceFolder}/tests/compiler/valid/23-string-parameter/source.pas", "-compiler"]
     }
   ]
 }

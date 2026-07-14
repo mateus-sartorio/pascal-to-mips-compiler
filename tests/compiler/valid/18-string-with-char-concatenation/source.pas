@@ -1,4 +1,4 @@
-program p5;
+program p18;
 
 var
   a, c: string;

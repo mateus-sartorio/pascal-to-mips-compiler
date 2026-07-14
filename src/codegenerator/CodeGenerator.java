@@ -41,7 +41,7 @@ public class CodeGenerator {
   private final BuiltInProceduresAndFunctionsTable builtInProceduresAndFunctionsTable;
   private final ProceduresAndFunctionsTable proceduresAndFunctionsTable;
 
-  private final CallFrame callFrame;
+  private final CallFrameOffsetMap callFrameOffsetMap;
 
   private int labelCounter;
   private int indentLevel;
@@ -55,7 +55,7 @@ public class CodeGenerator {
     this.builtInProceduresAndFunctionsTable = builtInProceduresAndFunctionsTable;
     this.proceduresAndFunctionsTable = proceduresAndFunctionsTable;
 
-    this.callFrame = new CallFrame(proceduresAndFunctionsTable);
+    this.callFrameOffsetMap = new CallFrameOffsetMap(proceduresAndFunctionsTable);
 
     this.labelCounter = 0;
     this.indentLevel = 0;
@@ -584,7 +584,8 @@ public class CodeGenerator {
 
     emit("sw $t0, %s".formatted(node.controlVariable.identifier.toLowerCase()));
 
-    // TODO
+    // TODO: boundaries check
+
     emitPushTemp("$t1");
 
     emit("%s:".formatted(loopStartLabel));
@@ -618,7 +619,6 @@ public class CodeGenerator {
     emitPopTemp("$t1");
   }
 
-  // TODO: consider local variables
   private void visitAssignmentStatementNode(AssignmentStatementNode node) {
     visit(node.expression);
 
@@ -649,8 +649,22 @@ public class CodeGenerator {
         emit("sw $t2, 0($t0)");
       }
       else {
-        emitPopTemp("$t0");
-        emit("sw $t0, %s".formatted(node.variableAccessExpressionNode.identifier.toLowerCase()));
+        switch (node.variableAccessExpressionNode.type) {
+          case PrimitiveVariableType _ -> {
+            emitPopTemp("$t0");
+            emit("sw $t0, %s".formatted(node.variableAccessExpressionNode.identifier.toLowerCase()));
+          }
+          case ArrayVariableType arrayType -> {
+            emit("la $t1, %s".formatted(node.variableAccessExpressionNode.identifier.toLowerCase()));
+            
+            int elementCount = arrayType.size();
+            for(int i = 0; i < elementCount; i++) {
+              emitPopTemp("$t0");
+              emit("sw $t0 %d($t1)".formatted(i * Constants.WORD_SIZE));
+            }
+          }
+          default -> throw new RuntimeException("Unsupported type");
+          }
       }
 
       return;
@@ -658,17 +672,20 @@ public class CodeGenerator {
 
     emitPopTemp("$t0");
 
-    var entry = callFrame.get(variableIdentifier);
+    var entry = callFrameOffsetMap.get(variableIdentifier);
     var offset = entry.offset() + 2 * Constants.WORD_SIZE;
 
     switch (node.variableAccessExpressionNode.type) {
     case PrimitiveVariableType _ -> {
       emit("sw $t0, %d($fp)".formatted(offset));
     }
-    case ArrayVariableType _ -> {
-      // TODO
-      // emit("la $t0, %s".formatted(node.identifier.toLowerCase()));
-      // emitPushTemp("$t0");
+    case ArrayVariableType arrayType -> {
+      emit("la $t1, %d($fp)".formatted(offset));
+      
+      int elementCount = arrayType.size();
+      for(int i = 0; i < elementCount; i++) {
+        emit("sw $t0 %d($t1)".formatted(i * Constants.WORD_SIZE));
+      }
     }
     default -> throw new RuntimeException("Unsupported type");
     }
@@ -750,8 +767,8 @@ public class CodeGenerator {
         }
       }
       else {
-        if (node.left.type.basePrimitiveType == PrimitiveTypeEnum.CHAR) {
-          if (node.right.type.basePrimitiveType == PrimitiveTypeEnum.CHAR) {
+        if (node.left.type.basePrimitiveType == PrimitiveTypeEnum.CHAR || (node.left.type.basePrimitiveType == PrimitiveTypeEnum.STRING && node.left instanceof IndexedVariableAccessExpressionNode)) {
+          if (node.right.type.basePrimitiveType == PrimitiveTypeEnum.CHAR || (node.left.type.basePrimitiveType == PrimitiveTypeEnum.STRING && node.left instanceof IndexedVariableAccessExpressionNode)) {
             // Aloca espaço para a string resultante
             emit("li $a0, 3");
             emit("li $v0, 9");
@@ -1009,21 +1026,47 @@ public class CodeGenerator {
     visit(node.indexExpressionNode);
     emitPopTemp("$t1");
 
+    if (globalVariablesTable.lookupVariable(node.identifier)) {
+      if (node.type instanceof PrimitiveVariableType && node.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
+        // TODO: handle string out of bounds exception
+        emit("lw $t0, %s".formatted(node.identifier.toLowerCase()));
+        emit("add $t0, $t0, $t1");
+        emit("lbu $t0, 0($t0)");
+        emitPushTemp("$t0");
+        return;
+      }
+  
+      // TODO: handle array out of bounds exception
+  
+      VariableTableEntry symbol = globalVariablesTable.get(node.identifier);
+      ArrayVariableType arrayType = (ArrayVariableType) symbol.type;
+  
+      emit("la $t0, %s".formatted(node.identifier.toLowerCase()));
+      emit("addi $t1, $t1, -%d".formatted(arrayType.lowerBound));
+      emit("sll $t1, $t1, 2");
+      emit("add $t0, $t0, $t1");
+      emit("lw $t0, 0($t0)");
+      emitPushTemp("$t0");
+      
+      return;
+    }
+
+    var entry = callFrameOffsetMap.get(node.identifier.toLowerCase());
+    var offset = entry.offset() + 2 * Constants.WORD_SIZE;
+
     if (node.type instanceof PrimitiveVariableType && node.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
       // TODO: handle string out of bounds exception
-      emit("lw $t0, %s".formatted(node.identifier.toLowerCase()));
+      emit("lw $t0, %d($fp)".formatted(offset));
       emit("add $t0, $t0, $t1");
       emit("lbu $t0, 0($t0)");
       emitPushTemp("$t0");
       return;
     }
 
-    // TODO: handle array out of bounds exception
-
-    VariableTableEntry symbol = globalVariablesTable.get(node.identifier);
+    VariableTableEntry symbol = proceduresAndFunctionsTable.getParameterOrLocalVariableFromAnyProcedureOrFunction(node.identifier);
     ArrayVariableType arrayType = (ArrayVariableType) symbol.type;
-
-    emit("la $t0, %s".formatted(node.identifier.toLowerCase()));
+  
+    emit("la $t0, %d($fp)".formatted(offset));
     emit("addi $t1, $t1, -%d".formatted(arrayType.lowerBound));
     emit("sll $t1, $t1, 2");
     emit("add $t0, $t0, $t1");
@@ -1038,9 +1081,14 @@ public class CodeGenerator {
         emit("lw $t0, %s".formatted(node.identifier.toLowerCase()));
         emitPushTemp("$t0");
       }
-      case ArrayVariableType _ -> {
-        emit("la $t0, %s".formatted(node.identifier.toLowerCase()));
-        emitPushTemp("$t0");
+      case ArrayVariableType arrayType -> {
+        emit("la $t1, %s".formatted(node.identifier.toLowerCase()));
+        
+        int elementCount = arrayType.size();
+        for(int i = elementCount - 1; i >=0 ; i--) {
+          emit("lw $t0 %d($t1)".formatted(i * Constants.WORD_SIZE));
+          emitPushTemp("$t0");
+        }
       }
       default -> throw new RuntimeException("Unsupported type");
       }
@@ -1048,7 +1096,7 @@ public class CodeGenerator {
       return;
     }
 
-    var entry = callFrame.get(node.identifier.toLowerCase());
+    var entry = callFrameOffsetMap.get(node.identifier.toLowerCase());
     var offset = entry.offset() + 2 * Constants.WORD_SIZE;
 
     switch (node.type) {
@@ -1056,10 +1104,14 @@ public class CodeGenerator {
       emit("lw $t0, %d($fp)".formatted(offset));
       emitPushTemp("$t0");
     }
-    case ArrayVariableType _ -> {
-      // TODO
-      // emit("la $t0, %s".formatted(node.identifier.toLowerCase()));
-      // emitPushTemp("$t0");
+    case ArrayVariableType arrayType -> {
+      emit("la $t1, %d($fp)".formatted(offset));
+      
+      int elementCount = arrayType.size();
+      for(int i = elementCount - 1; i >=0 ; i--) {
+        emit("lw $t0 %d($t1)".formatted(i * Constants.WORD_SIZE));
+        emitPushTemp("$t0");
+      }
     }
     default -> throw new RuntimeException("Unsupported type");
     }
@@ -1177,7 +1229,6 @@ public class CodeGenerator {
     emitPushTemp("$t0");
   }
 
-  // TODO: handle non built-in procedures
   private void visitProcedureCallStatementNode(ProcedureCallStatementNode node) {
     if (builtInProceduresAndFunctionsTable.lookProcedureOrFunction(node.procedureIdentifier)) {
       for (ExpressionNode argument : node.arguments) {
@@ -1197,9 +1248,13 @@ public class CodeGenerator {
     for (int i = localVariables.size() - 1; i >= 0; i--) {
       var localVariable = localVariables.get(i);
 
-      if (localVariable.type instanceof ArrayVariableType arrayVariableType) {
-        stackFrameSize += Constants.WORD_SIZE * arrayVariableType.size();
-        // TODO
+      if (localVariable.type instanceof ArrayVariableType arrayType) {
+        stackFrameSize += Constants.WORD_SIZE * arrayType.size();
+
+        int elementCount = arrayType.size();
+        for(int j = 0; j < elementCount; j++) {
+          emitPushTemp("$zero");
+        }
       }
       else {
         stackFrameSize += Constants.WORD_SIZE;
@@ -1225,7 +1280,6 @@ public class CodeGenerator {
     emit("addu $sp, $sp, %d".formatted(stackFrameSize));
   }
 
-  // TODO: handle non built-in functions
   private void visitFunctionCallStatementNode(FunctionCallExpressionNode node) {
     if (builtInProceduresAndFunctionsTable.lookProcedureOrFunction(node.functionIdentifier)) {
       for (ExpressionNode argument : node.arguments) {
@@ -1245,9 +1299,13 @@ public class CodeGenerator {
     for (int i = localVariables.size() - 1; i >= 0; i--) {
       var localVariable = localVariables.get(i);
 
-      if (localVariable.type instanceof ArrayVariableType arrayVariableType) {
-        stackFrameSize += Constants.WORD_SIZE * arrayVariableType.size();
-        // TODO
+      if (localVariable.type instanceof ArrayVariableType arrayType) {
+        stackFrameSize += Constants.WORD_SIZE * arrayType.size();
+
+        int elementCount = arrayType.size();
+        for(int j = 0; j < elementCount; j++) {
+          emitPushTemp("$zero");
+        }
       }
       else {
         stackFrameSize += Constants.WORD_SIZE;
@@ -1371,39 +1429,39 @@ public class CodeGenerator {
       emitPushTemp("$t0");
     }
     case "length" -> {
-    int uniqueId = labelCounter++;
-    String lenLoop = "__len_loop_%d".formatted(uniqueId);
-    String lenEnd = "__len_end_%d".formatted(uniqueId);
+      int uniqueId = labelCounter++;
+      String lenLoop = "__len_loop_%d".formatted(uniqueId);
+      String lenEnd = "__len_end_%d".formatted(uniqueId);
 
-    // Pega o endereço da string da pilha
-    emitPopTemp("$a0");
-    emit("move $t0, $a0");
-    
-    emit("%s:".formatted(lenLoop));
-    emit("lbu $t1, 0($t0)");
-    emit("beqz $t1, %s".formatted(lenEnd));
-    emit("addi $t0, $t0, 1");
-    emit("j %s".formatted(lenLoop));
-    
-    emit("%s:".formatted(lenEnd));
-    emit("sub $t0, $t0, $a0");
-    emitPushTemp("$t0");
+      // Pega o endereço da string da pilha
+      emitPopTemp("$a0");
+      emit("move $t0, $a0");
+
+      emit("%s:".formatted(lenLoop));
+      emit("lbu $t1, 0($t0)");
+      emit("beqz $t1, %s".formatted(lenEnd));
+      emit("addi $t0, $t0, 1");
+      emit("j %s".formatted(lenLoop));
+
+      emit("%s:".formatted(lenEnd));
+      emit("sub $t0, $t0, $a0");
+      emitPushTemp("$t0");
     }
     case "upcase" -> {
-    int uniqueId = labelCounter++;
-    String skipLabel = "__skip_upcase_%d".formatted(uniqueId);
+      int uniqueId = labelCounter++;
+      String skipLabel = "__skip_upcase_%d".formatted(uniqueId);
 
-    emitPopTemp("$t0");
-    emit("li $t1, 97"); 
-    emit("li $t2, 122");
-    
-    emit("blt $t0, $t1, %s".formatted(skipLabel));
-    emit("bgt $t0, $t2, %s".formatted(skipLabel));
-    
-    emit("addi $t0, $t0, -32");
-    
-    emit("%s:".formatted(skipLabel));
-    emitPushTemp("$t0");
+      emitPopTemp("$t0");
+      emit("li $t1, 97");
+      emit("li $t2, 122");
+
+      emit("blt $t0, $t1, %s".formatted(skipLabel));
+      emit("bgt $t0, $t2, %s".formatted(skipLabel));
+
+      emit("addi $t0, $t0, -32");
+
+      emit("%s:".formatted(skipLabel));
+      emitPushTemp("$t0");
     }
     default -> throw new RuntimeException("Unsupported built-in %s".formatted(identifier));
     }
