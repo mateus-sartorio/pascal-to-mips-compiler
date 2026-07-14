@@ -26,7 +26,7 @@ YELLOW='\033[0;33m'
 NC='\033[0m'
 
 TESTS_DIR="tests/compiler"
-MARS_TIMEOUT=30                                   # segundos por caso (guarda contra loop infinito)
+MARS_TIMEOUT=30
 MARS_ERROR_MARKER="Processing terminated due to errors."
 
 RECORDED=0
@@ -116,14 +116,9 @@ while IFS= read -r infile; do
     # Remove diffs antigos, sem sentido no modo de gravação
     rm -f "$case_dir/diff.diff" "$case_dir/diff_asm.diff" "$case_dir/diff_txt.diff"
 
-    echo -e "${GREEN}[ OK ] $case_name${NC}"
+    echo -e "${GREEN}[PASS] $case_name${NC}"
     RECORDED=$((RECORDED + 1))
 done < <(find "$TESTS_DIR" -name "source.pas" | sort)
-
-echo
-echo -e "${BLUE}=== RESUMO ===${NC}"
-echo -e "  ${GREEN}Gabaritos gerados: $RECORDED${NC}"
-echo -e "  ${RED}Casos pulados:     $SKIPPED${NC}"
 
 # Sai com código != 0 se algum caso não pôde ser gravado
 [ "$SKIPPED" -eq 0 ]
