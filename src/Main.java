@@ -107,7 +107,8 @@ public class Main {
         programNode,
         globalVariablesTable,
         stringLiteralsTable,
-        builtInProceduresAndFunctionsTable
+        builtInProceduresAndFunctionsTable,
+        proceduresAndFunctionsTable
       );
 
       String mipsTargetCode = codeGenerator.generate();

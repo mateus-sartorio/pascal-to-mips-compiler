@@ -1,7 +1,9 @@
 package tables;
 
+import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import tables.VariablesTable.VariableTableEntry;
@@ -40,6 +42,10 @@ public final class ProceduresAndFunctionsTable {
 
   public boolean isEmpty() {
     return table.isEmpty();
+  }
+
+  public List<ProceduresAndFunctionsEntry> getAll() {
+    return new ArrayList<>(table.values());
   }
 
   public boolean lookProcedureOrFunction(String identifier) {

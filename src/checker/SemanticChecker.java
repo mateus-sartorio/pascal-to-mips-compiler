@@ -60,8 +60,6 @@ import types.TypeRules;
 import types.VariableType;
 
 public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
-  private static final int MAXIMUM_PROCEDURE_OR_FUNCTION_PARAMETERS = 4;
-
   // Program identifier
   String programIdentifier;
 
@@ -344,19 +342,6 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
       int variableLine = token.getLine();
 
       ProceduresAndFunctionsEntry entry = proceduresAndFunctionsTable.get(procedureOrFunctionIdentifier);
-
-      int parametersCount = entry.parameters.toList().size();
-
-      if(parametersCount >= MAXIMUM_PROCEDURE_OR_FUNCTION_PARAMETERS) {
-        System.out.printf(
-          "SEMANTIC ERROR (%d): %s cannot have more than %d parameters.\n",
-          context.start.getLine(),
-          procedureOrFunctionType.toString(),
-          MAXIMUM_PROCEDURE_OR_FUNCTION_PARAMETERS
-        );
-
-        System.exit(1);
-      }
 
       proceduresAndFunctionsTable.addProcedlureOrFunctionParameter(procedureOrFunctionIdentifier, variableIdentifier, variableLine, variableType);
     }

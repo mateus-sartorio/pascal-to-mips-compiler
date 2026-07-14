@@ -605,7 +605,7 @@ public class Interpreter {
   }
 
   private void visitProcedureCallStatementNode(ProcedureCallStatementNode node) {
-    if (builtInProceduresAndFunctionsTable.lookProcedureOrFunction(node.procedureIdentifier)) {
+    if(builtInProceduresAndFunctionsTable.lookProcedureOrFunction(node.procedureIdentifier)) {
       String procName = node.procedureIdentifier.toLowerCase();
 
       if (procName.equals("read") || procName.equals("readln")) {
@@ -659,7 +659,7 @@ public class Interpreter {
       return;
     }
 
-    for (ExpressionNode argument : node.arguments) {
+    for(ExpressionNode argument : node.arguments) {
       visit(argument);
     }
 

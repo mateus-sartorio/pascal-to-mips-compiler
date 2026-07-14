@@ -24,6 +24,7 @@ import ast.types.statements.implementations.IfStatementNode;
 import ast.types.statements.implementations.ProcedureCallStatementNode;
 import ast.types.statements.implementations.ReturnStatementNode;
 import tables.BuiltInProceduresAndFunctionsTable;
+import tables.ProceduresAndFunctionsTable;
 import tables.StringLiteralsTable;
 import tables.VariablesTable;
 import tables.VariablesTable.VariableTableEntry;
@@ -32,14 +33,15 @@ import types.PrimitiveTypeEnum;
 import types.PrimitiveVariableType;
 
 public class CodeGenerator {
-  private static final int WORD_SIZE = 4;
-
   private final StringBuilder mipsTargetCode ;
   private final ProgramNode programNode;
 
   private final StringLiteralsTable stringLiteralsTable;
   private final VariablesTable globalVariablesTable;
   private final BuiltInProceduresAndFunctionsTable builtInProceduresAndFunctionsTable;
+  private final ProceduresAndFunctionsTable proceduresAndFunctionsTable;
+
+  private final CallFrame callFrame;
 
   private int labelCounter;
   private int indentLevel;
@@ -48,7 +50,8 @@ public class CodeGenerator {
     ProgramNode programNode,
     VariablesTable globalVariablesTable,
     StringLiteralsTable stringLiteralsTable,
-    BuiltInProceduresAndFunctionsTable builtInProceduresAndFunctionsTable
+    BuiltInProceduresAndFunctionsTable builtInProceduresAndFunctionsTable,
+    ProceduresAndFunctionsTable proceduresAndFunctionsTable
   ) {
     this.mipsTargetCode = new StringBuilder();
     this.programNode = programNode;
@@ -56,6 +59,9 @@ public class CodeGenerator {
     this.globalVariablesTable = globalVariablesTable;
     this.stringLiteralsTable = stringLiteralsTable;
     this.builtInProceduresAndFunctionsTable = builtInProceduresAndFunctionsTable;
+    this.proceduresAndFunctionsTable = proceduresAndFunctionsTable;
+
+    this.callFrame = new CallFrame(proceduresAndFunctionsTable);
 
     this.labelCounter = 0;
     this.indentLevel = 0;
@@ -106,7 +112,7 @@ public class CodeGenerator {
     for(VariableTableEntry variable : globalVariablesTable.toList()) {
       if(variable.type instanceof ArrayVariableType arrayVariableType) {
         emit(".align 2");
-        emit("%s: .space %d".formatted(variable.identifier.toLowerCase(), WORD_SIZE * arrayVariableType.size()));
+        emit("%s: .space %d".formatted(variable.identifier.toLowerCase(), Constants.WORD_SIZE * arrayVariableType.size()));
         continue;
       }
       
@@ -520,9 +526,18 @@ __strcmp_eq:
       emit("%s:".formatted(procedureOrFunction.identifier.toLowerCase()));
       
       indentLevel = 1;
-      emitPushTemp("$ra");
+
+      emit("subu $sp, $sp, 8");
+      emit("sw $ra, 4($sp)");
+      emit("sw $fp, 0($sp)");
+      emit("move $fp, $sp");
+
       visit(procedureOrFunction.compoundStatement);
-      emitPopTemp("$ra");
+
+      emit("move $sp, $fp");        // discard leftover temps
+      emit("lw $ra, 4($sp)");
+      emit("lw $fp, 0($sp)");
+      emit("addu $sp, $sp, 8");
       emit("jr $ra");
     }
   }
@@ -613,34 +628,55 @@ __strcmp_eq:
   private void visitAssignmentStatementNode(AssignmentStatementNode node) {
     visit(node.expression);
 
-    String variableIdentifier = node.variableAccessExpressionNode.identifier;
+    String variableIdentifier = node.variableAccessExpressionNode.identifier.toLowerCase();
 
     if(node instanceof ReturnStatementNode returnStatementNode) {
       emitPopTemp("$v0");
       return;
     }
 
-    if (node.variableAccessExpressionNode instanceof IndexedVariableAccessExpressionNode indexedVariableAccessExpressionNode) {
-      // TODO: handle index out of bounds exceptions
+    if (globalVariablesTable.lookupVariable(variableIdentifier)) {
+      if (node.variableAccessExpressionNode instanceof IndexedVariableAccessExpressionNode indexedVariableAccessExpressionNode) {
+        // TODO: handle index out of bounds exceptions
 
-      visit(indexedVariableAccessExpressionNode.indexExpressionNode);
-      emitPopTemp("$t1");
-      emitPopTemp("$t2");
+        visit(indexedVariableAccessExpressionNode.indexExpressionNode);
+        emitPopTemp("$t1");
+        emitPopTemp("$t2");
 
-      VariableTableEntry variableValue = globalVariablesTable.get(variableIdentifier);
-      ArrayVariableType arrayVariableType = (ArrayVariableType) variableValue.type;
-      
-      emit("addi $t1, $t1, -%d".formatted(arrayVariableType.lowerBound));
-      emit("sll $t1, $t1, 2");
+        VariableTableEntry variableValue = globalVariablesTable.get(variableIdentifier);
+        ArrayVariableType arrayVariableType = (ArrayVariableType) variableValue.type;
+        
+        emit("addi $t1, $t1, -%d".formatted(arrayVariableType.lowerBound));
+        emit("sll $t1, $t1, 2");
 
-      emit("la $t0, %s".formatted(indexedVariableAccessExpressionNode.identifier.toLowerCase()));
-      emit("add $t0, $t0, $t1");
+        emit("la $t0, %s".formatted(indexedVariableAccessExpressionNode.identifier.toLowerCase()));
+        emit("add $t0, $t0, $t1");
 
-      emit("sw $t2, 0($t0)");
+        emit("sw $t2, 0($t0)");
+      }
+      else {
+        emitPopTemp("$t0");
+        emit("sw $t0, %s".formatted(node.variableAccessExpressionNode.identifier.toLowerCase()));
+      }
+
+      return;
     }
-    else {
-      emitPopTemp("$t0");
-      emit("sw $t0, %s".formatted(node.variableAccessExpressionNode.identifier.toLowerCase()));
+    
+    emitPopTemp("$t0");
+
+    var entry = callFrame.get(variableIdentifier);
+    var offset = entry.offset() + 2 * Constants.WORD_SIZE;
+
+    switch (node.variableAccessExpressionNode.type) {
+      case PrimitiveVariableType _ -> {
+        emit("sw $t0, %d($fp)".formatted(offset));
+      }
+      case ArrayVariableType _ -> {
+        // TODO 
+        // emit("la $t0, %s".formatted(node.identifier.toLowerCase()));
+        // emitPushTemp("$t0");
+      }
+      default -> throw new RuntimeException("Unsupported type");
     }
   }
 
@@ -1002,14 +1038,34 @@ __strcmp_eq:
   }
 
   private void visitVariableAccessExpressionNode(VariableAccessExpressionNode node) {
+    if (globalVariablesTable.lookupVariable(node.identifier)) {
+      switch (node.type) {
+        case PrimitiveVariableType _ -> {
+          emit("lw $t0, %s".formatted(node.identifier.toLowerCase()));
+          emitPushTemp("$t0");
+        }
+        case ArrayVariableType _ -> {
+          emit("la $t0, %s".formatted(node.identifier.toLowerCase()));
+          emitPushTemp("$t0");
+        }
+        default -> throw new RuntimeException("Unsupported type");
+      }
+
+      return;
+    }
+
+    var entry = callFrame.get(node.identifier.toLowerCase());
+    var offset = entry.offset() + 2 * Constants.WORD_SIZE;
+
     switch (node.type) {
       case PrimitiveVariableType _ -> {
-        emit("lw $t0, %s".formatted(node.identifier.toLowerCase()));
+        emit("lw $t0, %d($fp)".formatted(offset));
         emitPushTemp("$t0");
       }
       case ArrayVariableType _ -> {
-        emit("la $t0, %s".formatted(node.identifier.toLowerCase()));
-        emitPushTemp("$t0");
+        // TODO 
+        // emit("la $t0, %s".formatted(node.identifier.toLowerCase()));
+        // emitPushTemp("$t0");
       }
       default -> throw new RuntimeException("Unsupported type");
     }
@@ -1129,7 +1185,7 @@ __strcmp_eq:
 
   // TODO: handle non built-in procedures
   private void visitProcedureCallStatementNode(ProcedureCallStatementNode node) {
-    if (builtInProceduresAndFunctionsTable.lookProcedureOrFunction(node.procedureIdentifier)) {
+    if(builtInProceduresAndFunctionsTable.lookProcedureOrFunction(node.procedureIdentifier)) {
       for (ExpressionNode argument : node.arguments) {
         visit(argument);
       }
@@ -1140,7 +1196,40 @@ __strcmp_eq:
       return;
     }
 
+    var entry = proceduresAndFunctionsTable.get(node.procedureIdentifier);
+    var localVariables = entry.localVariables.toList();
+
+    int stackFrameSize = 0;
+    for(int i = localVariables.size() - 1; i >= 0; i--) {
+      var localVariable = localVariables.get(i);
+
+      if(localVariable.type instanceof ArrayVariableType arrayVariableType) {
+        stackFrameSize += Constants.WORD_SIZE * arrayVariableType.size();
+        // TODO 
+      }
+      else {
+        stackFrameSize += Constants.WORD_SIZE;
+        emitPushTemp("$zero");
+      }
+    }
+
+    for(int i = node.arguments.size() - 1; i >= 0; i--) {
+      ExpressionNode argument = node.arguments.get(i);
+
+      if(argument.type instanceof ArrayVariableType arrayVariableType) {
+        stackFrameSize += Constants.WORD_SIZE * arrayVariableType.size();
+      }
+      else {
+        stackFrameSize += Constants.WORD_SIZE;
+      }
+
+      visit(argument);
+    }
+
+
     emit("jal %s".formatted(node.procedureIdentifier.toLowerCase()));
+    // Pop the arguments from the stack after the function call
+    emit("addu $sp, $sp, %d".formatted(stackFrameSize));
   }
 
   // TODO: handle non built-in functions
@@ -1156,7 +1245,40 @@ __strcmp_eq:
       return;
     }
 
+    var entry = proceduresAndFunctionsTable.get(node.functionIdentifier);
+    var localVariables = entry.localVariables.toList();
+
+    int stackFrameSize = 0;
+    for(int i = localVariables.size() - 1; i >= 0; i--) {
+      var localVariable = localVariables.get(i);
+
+      if(localVariable.type instanceof ArrayVariableType arrayVariableType) {
+        stackFrameSize += Constants.WORD_SIZE * arrayVariableType.size();
+        // TODO 
+      }
+      else {
+        stackFrameSize += Constants.WORD_SIZE;
+        emitPushTemp("$zero");
+      }
+    }
+
+    for(int i = node.arguments.size() - 1; i >= 0; i--) {
+      ExpressionNode argument = node.arguments.get(i);
+
+      if(argument.type instanceof ArrayVariableType arrayVariableType) {
+        stackFrameSize += Constants.WORD_SIZE * arrayVariableType.size();
+      }
+      else {
+        stackFrameSize += Constants.WORD_SIZE;
+      }
+
+      visit(argument);
+    }
+
+
     emit("jal %s".formatted(node.functionIdentifier.toLowerCase()));
+    // Pop the arguments from the stack after the function call
+    emit("addu $sp, $sp, %d".formatted(stackFrameSize));
     emitPushTemp("$v0");
   }
 
