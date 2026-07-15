@@ -8,7 +8,7 @@ procedure p(s: string);
 begin
   write('String: [');
   for i := 0 to 1 do
-    write(s[i] + ',');
+    write(s[i] + ', ');
   writeln(s[2] + ']');
 end;
 

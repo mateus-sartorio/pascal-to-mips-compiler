@@ -24,29 +24,16 @@ public class CallFrameOffsetMap {
       expandedList.addAll(entry.localVariables.toList());
       VariablesTable expandedVariablesTable = new VariablesTable(expandedList);
       
-      int i = 0;
+      int offset = 0;
       for(VariableTableEntry variable : expandedVariablesTable.toList()) {
-        switch(variable.type) {
-          case PrimitiveVariableType _ -> {
-            LocalVariableEntry localVariableEntry = new LocalVariableEntry(
-              i * Constants.WORD_SIZE,
-              Constants.WORD_SIZE
-            );
-
-            map.put(variable.identifier.toLowerCase(), localVariableEntry);
-          }
-          case ArrayVariableType type -> {
-            LocalVariableEntry localVariableEntry = new LocalVariableEntry(
-              i * Constants.WORD_SIZE * type.size(),
-              Constants.WORD_SIZE * type.size()
-            );
-            
-            map.put(variable.identifier.toLowerCase(), localVariableEntry);
-          }
+        int size = switch (variable.type) {
+          case PrimitiveVariableType _ -> Constants.WORD_SIZE;
+          case ArrayVariableType type   -> Constants.WORD_SIZE * type.size();
           default -> throw new RuntimeException("Unsupported variable type");
-        }
+        };
 
-        i++;
+        map.put(variable.identifier.toLowerCase(), new LocalVariableEntry(offset, size));
+        offset += size;
       }
     }
   }

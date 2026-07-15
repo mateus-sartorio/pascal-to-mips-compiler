@@ -45,6 +45,7 @@ public class CodeGenerator {
 
   private int labelCounter;
   private int indentLevel;
+  private String currentExitLabel;
 
   public CodeGenerator(ProgramNode programNode, VariablesTable globalVariablesTable, StringLiteralsTable stringLiteralsTable, BuiltInProceduresAndFunctionsTable builtInProceduresAndFunctionsTable, ProceduresAndFunctionsTable proceduresAndFunctionsTable) {
     this.mipsTargetCode = new StringBuilder();
@@ -507,14 +508,19 @@ public class CodeGenerator {
   }
 
   private void visitProgramNode(ProgramNode node) {
+    currentExitLabel = "__exit_program";
+    
     visit(node.compoundStatement);
     emitFooter();
 
-    node.proceduresAndFunctions.ifPresent(proceduresAndFunctions -> visit(proceduresAndFunctions));
+    node.proceduresAndFunctions.ifPresent(this::visit);
   }
 
   private void visitProcedureAndFunctionDeclarationPartNode(ProcedureAndFunctionDeclarationPartNode node) {
     for (ProcedureOrFunctionDeclarationNode procedureOrFunction : node.procedureOrFunctionDeclarations) {
+      int uniqueLabelId = labelCounter++;
+      currentExitLabel = "__epilogue_%d".formatted(uniqueLabelId);
+      
       indentLevel = 0;
       emit("");
       emit("%s:".formatted(procedureOrFunction.identifier.toLowerCase()));
@@ -528,7 +534,9 @@ public class CodeGenerator {
 
       visit(procedureOrFunction.compoundStatement);
 
-      emit("move $sp, $fp"); // discard leftover temps
+      // epilogue — labeled so exit can jump to it
+      emit("%s:".formatted(currentExitLabel));
+      emit("move $sp, $fp");
       emit("lw $ra, 4($sp)");
       emit("lw $fp, 0($sp)");
       emit("addu $sp, $sp, 8");
@@ -755,7 +763,7 @@ public class CodeGenerator {
       }
       else {
         if (node.left.type.basePrimitiveType == PrimitiveTypeEnum.CHAR || (node.left.type.basePrimitiveType == PrimitiveTypeEnum.STRING && node.left instanceof IndexedVariableAccessExpressionNode)) {
-          if (node.right.type.basePrimitiveType == PrimitiveTypeEnum.CHAR || (node.left.type.basePrimitiveType == PrimitiveTypeEnum.STRING && node.left instanceof IndexedVariableAccessExpressionNode)) {
+          if (node.right.type.basePrimitiveType == PrimitiveTypeEnum.CHAR || (node.right.type.basePrimitiveType == PrimitiveTypeEnum.STRING && node.right instanceof IndexedVariableAccessExpressionNode)) {
 
             emit("li $a0, 3");
             emit("li $v0, 9");
@@ -1280,7 +1288,7 @@ public class CodeGenerator {
   }
 
   private void visitExitStatementNode(ExitStatementNode node) {
-    // TODO
+    emit("j %s".formatted(currentExitLabel));
   }
 
   private void executeBuiltInProcedureOrFunction(String identifier, PrimitiveTypeEnum argType) {
