@@ -9,7 +9,7 @@ ANTLR_PATH := $(abspath libs/antlr-4.13.2-complete.jar)
 
 # CLASSPATH configuration option for Java environment
 CLASS_PATH_OPTION=-cp "$(JAVA_BIN_DIR):$(ANTLR_PATH)"
-JAVA_BIN_DIR = java_bin
+JAVA_BIN_DIR = java-bin
 
 # ANTLR compilation command configuration
 ANTLR4=$(JAVA) -jar $(ANTLR_PATH)
@@ -87,10 +87,22 @@ run-interpreter:
 		$(JAVA) $(CLASS_PATH_OPTION) Main $(FILE_ABSOLUTE_PATH) -interpret < /dev/null; \
 	fi
 
+# Run the compiler
+run-compiler:
+	@if [ -f "$(dir $(FILE_ABSOLUTE_PATH))input.txt" ]; then \
+		$(JAVA) $(CLASS_PATH_OPTION) Main $(FILE_ABSOLUTE_PATH) -compiler < "$(dir $(FILE_ABSOLUTE_PATH))input.txt"; \
+	else \
+		$(JAVA) $(CLASS_PATH_OPTION) Main $(FILE_ABSOLUTE_PATH) -compiler < /dev/null; \
+	fi
+
 # Run all automated tests
-test:
+test: all
 	@chmod +x test.sh
 	@./test.sh $(ARGS)
+
+# Run only the MIPS/MARS compiler suite (generates ASM + runs MARS)
+test-compiler:
+	@bash test_compiler.sh
 
 # Clean automated tests results
 test-clean:

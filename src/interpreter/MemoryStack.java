@@ -1,5 +1,6 @@
 package interpreter;
 
+import java.util.List;
 import java.util.Stack;
 
 import interpreter.Memory.VariableEntry;
@@ -47,19 +48,19 @@ public class MemoryStack {
       System.exit(1);
     }
 
-    var entry = proceduresAndFunctionsTable.get(identifier);
+    ProceduresAndFunctionsEntry entry = proceduresAndFunctionsTable.get(identifier);
     
-    var l1 = entry.parameters.toList();
-    l1.addAll(entry.localVariables.toList());
+    List<VariableTableEntry> expandedList = entry.parameters.toList();
+    expandedList.addAll(entry.localVariables.toList());
 
     if(entry.type == ProcedureOrFunctionEnum.FUNCTION) {
-      l1.add(new VariableTableEntry(identifier, new PrimitiveVariableType(entry.returnType)));
+      expandedList.add(new VariableTableEntry(identifier, new PrimitiveVariableType(entry.returnType)));
     }
     
-    var nT = new VariablesTable(l1);
+    VariablesTable expandedTable = new VariablesTable(expandedList);
     
-    currentTable.push(nT);
-    stack.push(new Memory(nT));
+    currentTable.push(expandedTable);
+    stack.push(new Memory(expandedTable));
     currentEntry.push(entry);
   }
 

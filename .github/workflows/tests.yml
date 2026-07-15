@@ -18,5 +18,8 @@ jobs:
           java-version: '25'
           distribution: 'temurin'
 
+      - name: Install Graphviz (dot) for AST tests
+        run: sudo apt-get update && sudo apt-get install -y graphviz
+
       - name: Run tests via Makefile
         run: make test

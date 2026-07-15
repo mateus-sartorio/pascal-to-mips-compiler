@@ -1,0 +1,19 @@
+ write sucessful  writeln sucessful 
+itos(123) = 123
+rtos(123.456) = 123.456001
+btos(true) = true
+abs(-3) = 3.000000
+sqr(3) = 9.000000
+sqrt(9) = 3.000000
+trunc(9.99) = 9
+round(9.99) = 10
+ord(A) = 65
+chr(65) = A
+succ(A) = B
+pred(A) = @
+upcase(a) = A
+Please enter a string:
+You entered: TesteStringUnica a
+Please enter a line:
+You entered: teste de linha completa
+

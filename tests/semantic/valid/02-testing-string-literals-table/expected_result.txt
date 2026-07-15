@@ -18,11 +18,11 @@ Parameters:
 
 Built-in procedure 'read'
 Parameters:
-0. identifier: 'str', type: string
+0. identifier: 'dummy', type: no_type
 
 Built-in procedure 'readln'
 Parameters:
-0. identifier: 'str', type: string
+0. identifier: 'dummy', type: no_type
 
 Built-in function 'abs', return type: real
 Parameters:

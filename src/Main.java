@@ -17,6 +17,7 @@ import tables.ProceduresAndFunctionsTable;
 import tables.StringLiteralsTable;
 import tables.VariablesTable;
 import checker.*;
+import codegenerator.CodeGenerator;
 import interpreter.Interpreter;
 
 public class Main {
@@ -68,7 +69,7 @@ public class Main {
     ProceduresAndFunctionsTable proceduresAndFunctionsTable = semanticChecker.getProceduresAndFunctionsTable();
 
     // Obtendo a tabela de literais de string do analisaador semântico
-    StringLiteralsTable getStringLiteralsTable = semanticChecker.getStringLiteralsTable();
+    StringLiteralsTable stringLiteralsTable = semanticChecker.getStringLiteralsTable();
 
     // Criando o construtor de AST para percorrer a parser tree e construir a AST
     AstBuilder astBuilder = new AstBuilder(programIdentifier, globalVariablesTable, builtInProceduresAndFunctionsTable, proceduresAndFunctionsTable);
@@ -87,9 +88,32 @@ public class Main {
     // Executando o interpretador caso o argumento -interpret seja passado
     if (args.length > 1 && args[1].equals("-interpret")) {
       ProgramNode programNode = astBuilder.getProgramNode();
-      Interpreter interpreter = new Interpreter(globalVariablesTable, getStringLiteralsTable, builtInProceduresAndFunctionsTable, proceduresAndFunctionsTable, programNode);
+      
+      Interpreter interpreter = new Interpreter(
+        globalVariablesTable,
+        stringLiteralsTable,
+        builtInProceduresAndFunctionsTable,
+        proceduresAndFunctionsTable,
+        programNode
+      );
+
       interpreter.execute();
     }
 
+    if (args.length > 1 && args[1].equals("-compiler")) {
+      ProgramNode programNode = astBuilder.getProgramNode();
+
+      CodeGenerator codeGenerator = new CodeGenerator(
+        programNode,
+        globalVariablesTable,
+        stringLiteralsTable,
+        builtInProceduresAndFunctionsTable,
+        proceduresAndFunctionsTable
+      );
+
+      String mipsTargetCode = codeGenerator.generate();
+      Path outputPath = Path.of(args[0]).toAbsolutePath().getParent().resolve("actual_code_result.asm");
+      Files.writeString(outputPath, mipsTargetCode, StandardCharsets.UTF_8);
+    }
   }
 }
