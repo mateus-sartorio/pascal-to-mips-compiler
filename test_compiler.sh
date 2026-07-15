@@ -19,6 +19,8 @@ if [ -z "$mars_jar" ]; then
     exit 1
 fi
 
+mkdir -p "${HOME}/.java/.userPrefs" "${HOME}/.java/.systemPrefs" 2>/dev/null
+
 if [ ! -d "$TESTS_DIR" ] || [ -z "$(ls -A "$TESTS_DIR" 2>/dev/null)" ]; then
     echo -e "${YELLOW}Diretório de testes '$TESTS_DIR' vazio ou inexistente.${NC}"
     exit 0
