@@ -650,21 +650,21 @@ public class CodeGenerator {
       }
       else {
         switch (node.variableAccessExpressionNode.type) {
-          case PrimitiveVariableType _ -> {
+        case PrimitiveVariableType _ -> {
+          emitPopTemp("$t0");
+          emit("sw $t0, %s".formatted(node.variableAccessExpressionNode.identifier.toLowerCase()));
+        }
+        case ArrayVariableType arrayType -> {
+          emit("la $t1, %s".formatted(node.variableAccessExpressionNode.identifier.toLowerCase()));
+
+          int elementCount = arrayType.size();
+          for (int i = 0; i < elementCount; i++) {
             emitPopTemp("$t0");
-            emit("sw $t0, %s".formatted(node.variableAccessExpressionNode.identifier.toLowerCase()));
+            emit("sw $t0 %d($t1)".formatted(i * Constants.WORD_SIZE));
           }
-          case ArrayVariableType arrayType -> {
-            emit("la $t1, %s".formatted(node.variableAccessExpressionNode.identifier.toLowerCase()));
-            
-            int elementCount = arrayType.size();
-            for(int i = 0; i < elementCount; i++) {
-              emitPopTemp("$t0");
-              emit("sw $t0 %d($t1)".formatted(i * Constants.WORD_SIZE));
-            }
-          }
-          default -> throw new RuntimeException("Unsupported type");
-          }
+        }
+        default -> throw new RuntimeException("Unsupported type");
+        }
       }
 
       return;
@@ -681,9 +681,9 @@ public class CodeGenerator {
     }
     case ArrayVariableType arrayType -> {
       emit("la $t1, %d($fp)".formatted(offset));
-      
+
       int elementCount = arrayType.size();
-      for(int i = 0; i < elementCount; i++) {
+      for (int i = 0; i < elementCount; i++) {
         emit("sw $t0 %d($t1)".formatted(i * Constants.WORD_SIZE));
       }
     }
@@ -723,70 +723,56 @@ public class CodeGenerator {
     visit(node.left);
     visit(node.right);
 
-    emitPopTemp("$t1");
-    emitPopTemp("$t0");
+    emitPopTemp("$t1"); // direito
+    emitPopTemp("$t0"); // esquerdo
 
-    if (node.left.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
-      if (node.right.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
-        emit("add $t0, $t0, $t1");
-        emitPushTemp("$t0");
-      }
-      else {
+    PrimitiveTypeEnum leftType = node.left.type.basePrimitiveType;
+    PrimitiveTypeEnum rightType = node.right.type.basePrimitiveType;
+
+    // INT + INT
+    if (leftType == PrimitiveTypeEnum.INTEGER && rightType == PrimitiveTypeEnum.INTEGER) {
+      emit("add $t0, $t0, $t1");
+      emitPushTemp("$t0");
+    }
+    // INT + REAL ou REAL + INT ou REAL + REAL
+    else
+      if (leftType == PrimitiveTypeEnum.REAL || rightType == PrimitiveTypeEnum.REAL) {
+
         emit("mtc1 $t0, $f0");
+        if (leftType == PrimitiveTypeEnum.INTEGER) {
+          emit("cvt.s.w $f0, $f0");
+        }
 
         emit("mtc1 $t1, $f2");
-        emit("cvt.s.w $f2, $f2");
+        if (rightType == PrimitiveTypeEnum.INTEGER) {
+          emit("cvt.s.w $f2, $f2"); 
+        }
 
         emit("add.s $f0, $f0, $f2");
+
         emit("mfc1 $t0, $f0");
         emitPushTemp("$t0");
-      }
-    }
-    else {
-      if (node.left.type.basePrimitiveType == PrimitiveTypeEnum.REAL) {
-        if (node.right.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
-          emit("mtc1 $t0, $f0");
-          emit("cvt.s.w $f0, $f0");
-
-          emit("mtc1 $t1, $f2");
-
-          emit("add.s $f0, $f0, $f2");
-          emit("mfc1 $t0, $f0");
-          emitPushTemp("$t0");
-        }
-        else {
-          emit("mtc1 $t0, $f0");
-          emit("cvt.s.w $f0, $f0");
-
-          emit("mtc1 $t1, $f2");
-          emit("cvt.s.w $f2, $f2");
-
-          emit("add.s $f0, $f0, $f2");
-          emit("mfc1 $t0, $f0");
-          emitPushTemp("$t0");
-        }
       }
       else {
         if (node.left.type.basePrimitiveType == PrimitiveTypeEnum.CHAR || (node.left.type.basePrimitiveType == PrimitiveTypeEnum.STRING && node.left instanceof IndexedVariableAccessExpressionNode)) {
           if (node.right.type.basePrimitiveType == PrimitiveTypeEnum.CHAR || (node.left.type.basePrimitiveType == PrimitiveTypeEnum.STRING && node.left instanceof IndexedVariableAccessExpressionNode)) {
-            // Aloca espaço para a string resultante
+
             emit("li $a0, 3");
             emit("li $v0, 9");
-            emit("syscall"); // o endereço da string alocada estará em $v0
+            emit("syscall"); 
 
-            // Concatena os caracteres
-            emit("sb $t0, 0($v0)"); // primeiro caractere no primeiro byte
-            emit("sb $t1, 1($v0)"); // segundo caractere no segundo byte
-            emit("sb $zero, 2($v0)"); // terminador nulo
+            emit("sb $t0, 0($v0)"); 
+            emit("sb $t1, 1($v0)"); 
+            emit("sb $zero, 2($v0)"); 
 
-            emitPushTemp("$v0"); // empurra o endereço da string resultante para a pilha
+            emitPushTemp("$v0"); 
           }
           else
             if (node.right.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
-              emit("move $a0, $t0"); // caractere da esquerda
-              emit("move $a1, $t1"); // endereço da string da direita
+              emit("move $a0, $t0"); 
+              emit("move $a1, $t1"); 
               emit("jal __concat_char_with_string");
-              emitPushTemp("$v0"); // empurra o endereço da string resultante para a pilha
+              emitPushTemp("$v0"); 
             }
             else {
               throw new RuntimeException("Unsupported primitive type");
@@ -795,17 +781,17 @@ public class CodeGenerator {
         else {
           if (node.left.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
             if (node.right.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
-              emit("move $a0, $t0"); // endereço da primeira string da esquerda
-              emit("move $a1, $t1"); // endereço da segunda string da direita
+              emit("move $a0, $t0"); 
+              emit("move $a1, $t1"); 
               emit("jal __concat_string_with_string");
-              emitPushTemp("$v0"); // empurra o endereço da string resultante para a pilha
+              emitPushTemp("$v0"); 
             }
             else {
               if (node.right.type.basePrimitiveType == PrimitiveTypeEnum.CHAR) {
-                emit("move $a0, $t0"); // endereço da string da esquerda
-                emit("move $a1, $t1"); // caractere da direita
+                emit("move $a0, $t0"); 
+                emit("move $a1, $t1"); 
                 emit("jal __concat_string_with_char");
-                emitPushTemp("$v0"); // empurra o endereço da string resultante para a pilha
+                emitPushTemp("$v0"); 
               }
               else {
                 throw new RuntimeException("Unsupported primitive type");
@@ -817,121 +803,84 @@ public class CodeGenerator {
           }
         }
       }
-    }
   }
 
   private void handleMinus(ArithmeticOperatorExpressionNode node) {
     visit(node.left);
     visit(node.right);
 
-    emitPopTemp("$t1");
-    emitPopTemp("$t0");
+    emitPopTemp("$t1"); // direito
+    emitPopTemp("$t0"); // esquerdo
 
-    // no esq = int / no dir = int
-    if (node.left.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
-      if (node.right.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
-        emit("sub $t0, $t0, $t1");
-        emitPushTemp("$t0");
-      }
-      // no esq = int / no dir = real
-      else {
+    PrimitiveTypeEnum leftType = node.left.type.basePrimitiveType;
+    PrimitiveTypeEnum rightType = node.right.type.basePrimitiveType;
+
+    // INT - INT
+    if (leftType == PrimitiveTypeEnum.INTEGER && rightType == PrimitiveTypeEnum.INTEGER) {
+      emit("sub $t0, $t0, $t1");
+      emitPushTemp("$t0");
+    }
+    // INT - REAL ou REAL - INT ou REAL - REAL
+    else
+      if (leftType == PrimitiveTypeEnum.REAL || rightType == PrimitiveTypeEnum.REAL) {
+
         emit("mtc1 $t0, $f0");
-        emit("cvt.s.w $f0, $f0");
+        if (leftType == PrimitiveTypeEnum.INTEGER) {
+          emit("cvt.s.w $f0, $f0");
+        }
 
         emit("mtc1 $t1, $f2");
+        if (rightType == PrimitiveTypeEnum.INTEGER) {
+          emit("cvt.s.w $f2, $f2");
+        }
 
         emit("sub.s $f0, $f0, $f2");
         emit("mfc1 $t0, $f0");
+
         emitPushTemp("$t0");
       }
-    }
-    else {
-      // no esq = real / no dir = int
-      if (node.left.type.basePrimitiveType == PrimitiveTypeEnum.REAL) {
-        if (node.right.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
-          emit("mtc1 $t0, $f0");
-          emit("cvt.s.w $f0, $f0");
-
-          emit("mtc1 $t1, $f2");
-
-          emit("sub.s $f0, $f0, $f2");
-          emit("mfc1 $t0, $f0");
-          emitPushTemp("$t0");
-        }
-        // no esq = real / no dir = real
-        else {
-          emit("mtc1 $t0, $f0");
-          emit("cvt.s.w $f0, $f0");
-
-          emit("mtc1 $t1, $f2");
-          emit("cvt.s.w $f2, $f2");
-
-          emit("sub.s $f0, $f0, $f2");
-          emit("mfc1 $t0, $f0");
-          emitPushTemp("$t0");
-        }
-      }
       else {
-        throw new RuntimeException("Unsupported primitive type");
+        throw new RuntimeException("Unsupported primitive type for minus operation");
       }
-    }
   }
 
   private void handleMultiplication(ArithmeticOperatorExpressionNode node) {
     visit(node.left);
     visit(node.right);
 
-    emitPopTemp("$t1");
-    emitPopTemp("$t0");
+    emitPopTemp("$t1"); // direito
+    emitPopTemp("$t0"); // esquerdo
 
-    // no esq = int / no dir = int
-    if (node.left.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
-      if (node.right.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
-        emit("mul $t0, $t0, $t1");
-        emitPushTemp("$t0");
-      }
-      // no esq = int / no dir = real
-      else {
+    PrimitiveTypeEnum leftType = node.left.type.basePrimitiveType;
+    PrimitiveTypeEnum rightType = node.right.type.basePrimitiveType;
+
+    // INT * INT
+    if (leftType == PrimitiveTypeEnum.INTEGER && rightType == PrimitiveTypeEnum.INTEGER) {
+      emit("mul $t0, $t0, $t1");
+      emitPushTemp("$t0");
+    }
+    // INT * REAL ou REAL * INT ou REAL * REAL
+    else
+      if (leftType == PrimitiveTypeEnum.REAL || rightType == PrimitiveTypeEnum.REAL) {
+
         emit("mtc1 $t0, $f0");
-        emit("cvt.s.w $f0, $f0");
+        if (leftType == PrimitiveTypeEnum.INTEGER) {
+          emit("cvt.s.w $f0, $f0");
+        }
 
         emit("mtc1 $t1, $f2");
+        if (rightType == PrimitiveTypeEnum.INTEGER) {
+          emit("cvt.s.w $f2, $f2");
+        }
 
         emit("mul.s $f0, $f0, $f2");
         emit("mfc1 $t0, $f0");
+
         emitPushTemp("$t0");
       }
-    }
-    else {
-      // no esq = real / no dir = int
-      if (node.left.type.basePrimitiveType == PrimitiveTypeEnum.REAL) {
-        if (node.right.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
-          emit("mtc1 $t0, $f0");
-
-          emit("mtc1 $t1, $f2");
-          emit("cvt.s.w $f2, $f2");
-
-          emit("mul.s $f0, $f0, $f2");
-          emit("mfc1 $t0, $f0");
-          emitPushTemp("$t0");
-        }
-        // no esq = real / no dir = real
-        else {
-          emit("mtc1 $t0, $f0");
-          emit("cvt.s.w $f0, $f0");
-
-          emit("mtc1 $t1, $f2");
-          emit("cvt.s.w $f2, $f2");
-
-          emit("mul.s $f0, $f0, $f2");
-          emit("mfc1 $t0, $f0");
-          emitPushTemp("$t0");
-        }
-      }
       else {
-        throw new RuntimeException("Unsupported primitive type");
+        throw new RuntimeException("Unsupported primitive type for multiplication operation");
       }
-    }
   }
 
   private void handleRealDivision(ArithmeticOperatorExpressionNode node) {
@@ -940,8 +889,6 @@ public class CodeGenerator {
 
     emitPopTemp("$t1");
     emitPopTemp("$t0");
-
-    // --- Check if divisor is not equal to zero
 
     int id = labelCounter++;
     String okLabel = "__real_division_ok_%d".formatted(id);
@@ -1035,19 +982,19 @@ public class CodeGenerator {
         emitPushTemp("$t0");
         return;
       }
-  
+
       // TODO: handle array out of bounds exception
-  
+
       VariableTableEntry symbol = globalVariablesTable.get(node.identifier);
       ArrayVariableType arrayType = (ArrayVariableType) symbol.type;
-  
+
       emit("la $t0, %s".formatted(node.identifier.toLowerCase()));
       emit("addi $t1, $t1, -%d".formatted(arrayType.lowerBound));
       emit("sll $t1, $t1, 2");
       emit("add $t0, $t0, $t1");
       emit("lw $t0, 0($t0)");
       emitPushTemp("$t0");
-      
+
       return;
     }
 
@@ -1065,7 +1012,7 @@ public class CodeGenerator {
 
     VariableTableEntry symbol = proceduresAndFunctionsTable.getParameterOrLocalVariableFromAnyProcedureOrFunction(node.identifier);
     ArrayVariableType arrayType = (ArrayVariableType) symbol.type;
-  
+
     emit("la $t0, %d($fp)".formatted(offset));
     emit("addi $t1, $t1, -%d".formatted(arrayType.lowerBound));
     emit("sll $t1, $t1, 2");
@@ -1083,9 +1030,9 @@ public class CodeGenerator {
       }
       case ArrayVariableType arrayType -> {
         emit("la $t1, %s".formatted(node.identifier.toLowerCase()));
-        
+
         int elementCount = arrayType.size();
-        for(int i = elementCount - 1; i >=0 ; i--) {
+        for (int i = elementCount - 1; i >= 0; i--) {
           emit("lw $t0 %d($t1)".formatted(i * Constants.WORD_SIZE));
           emitPushTemp("$t0");
         }
@@ -1106,9 +1053,9 @@ public class CodeGenerator {
     }
     case ArrayVariableType arrayType -> {
       emit("la $t1, %d($fp)".formatted(offset));
-      
+
       int elementCount = arrayType.size();
-      for(int i = elementCount - 1; i >=0 ; i--) {
+      for (int i = elementCount - 1; i >= 0; i--) {
         emit("lw $t0 %d($t1)".formatted(i * Constants.WORD_SIZE));
         emitPushTemp("$t0");
       }
@@ -1252,7 +1199,7 @@ public class CodeGenerator {
         stackFrameSize += Constants.WORD_SIZE * arrayType.size();
 
         int elementCount = arrayType.size();
-        for(int j = 0; j < elementCount; j++) {
+        for (int j = 0; j < elementCount; j++) {
           emitPushTemp("$zero");
         }
       }
@@ -1303,7 +1250,7 @@ public class CodeGenerator {
         stackFrameSize += Constants.WORD_SIZE * arrayType.size();
 
         int elementCount = arrayType.size();
-        for(int j = 0; j < elementCount; j++) {
+        for (int j = 0; j < elementCount; j++) {
           emitPushTemp("$zero");
         }
       }

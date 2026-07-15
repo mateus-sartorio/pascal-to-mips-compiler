@@ -1,2 +1,2 @@
-l
+String: [l,e,g]
 
