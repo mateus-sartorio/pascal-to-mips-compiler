@@ -92,7 +92,7 @@ begin
 
   // read test
   writeln('Please enter a string:');
-  read(sa);
+  readln(sa);
   writeln('You entered: ' + sa);
 
   // readln test

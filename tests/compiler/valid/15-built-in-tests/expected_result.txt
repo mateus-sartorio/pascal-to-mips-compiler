@@ -12,4 +12,8 @@ chr(65) = A
 succ(A) = B
 pred(A) = @
 upcase(a) = A
+Please enter a string:
+You entered: TesteStringUnica a
+Please enter a line:
+You entered: teste de linha completa
 
