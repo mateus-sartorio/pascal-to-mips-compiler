@@ -76,6 +76,7 @@ for infile in $(find "$TESTS_DIR" -name "source.pas" | sort); do
 
     if [ -s "$diff_file" ]; then
         echo -e "${RED}[FAIL] $case_name${NC}"
+        sed 's/^/         /' "$diff_file"
         FAILED=$((FAILED + 1))
     else
         echo -e "${GREEN}[PASS] $case_name${NC}"
