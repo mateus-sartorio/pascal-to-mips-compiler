@@ -96,7 +96,7 @@ run-compiler:
 	fi
 
 # Run all automated tests
-test:
+test: all
 	@chmod +x test.sh
 	@./test.sh $(ARGS)
 
