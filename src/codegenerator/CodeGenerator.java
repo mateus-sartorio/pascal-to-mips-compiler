@@ -117,10 +117,6 @@ public class CodeGenerator {
     emit("__bool_false: .asciiz \"false\"");
     emit("");
 
-    // Runtime error messages
-    emit("__div_zero_msg: .asciiz \"RUNTIME ERROR: division by zero!\"");
-    emit("");
-
     for (Integer key : stringLiteralsTable.keySet()) {
       emit("__string%d: .asciiz \"%s\"".formatted(key, stringLiteralsTable.get(key)));
     }
@@ -1014,21 +1010,6 @@ public class CodeGenerator {
       emit("cvt.s.w $f2, $f2");
     }
 
-    // 2. Verificação de divisão por zero flutuante (atende 0.0 e -0.0)
-    int id = labelCounter++;
-    String okLabel = "__real_division_ok_%d".formatted(id);
-
-    emit("mtc1 $zero, $f4");
-    emit("c.eq.s $f2, $f4");
-    emit("bc1f %s".formatted(okLabel));
-
-    emit("la $a0, __div_zero_msg");
-    emit("li $v0, 4");
-    emit("syscall");
-    emit("j __exit_program");
-
-    emit("%s:".formatted(okLabel));
-
     emit("div.s $f0, $f0, $f2");
     emit("mfc1 $t0, $f0");
     emitPushTemp("$t0");
@@ -1045,19 +1026,6 @@ public class CodeGenerator {
 
     emitPopTemp("$t1");
     emitPopTemp("$t0");
-
-    int id = labelCounter++;
-    String okLabel = "__integer_division_ok_%d".formatted(id);
-
-    // Verifica se o divisor inteiro é diferente de zero
-    emit("bnez $t1, %s".formatted(okLabel));
-
-    emit("la $a0, __div_zero_msg");
-    emit("li $v0, 4");
-    emit("syscall");
-    emit("j __exit_program");
-
-    emit("%s:".formatted(okLabel));
 
     emit("div $t0, $t1");
     emit("mflo $t0");
