@@ -40,6 +40,8 @@ public enum PrimitiveTypeEnum {
         return "boolean";
       case CHAR:
         return "char";
+      case NO_TYPE: 
+        return "no_type";
       default:
         System.err.println("ERROR: type enumaration has an invalid value.");
         System.exit(1);
