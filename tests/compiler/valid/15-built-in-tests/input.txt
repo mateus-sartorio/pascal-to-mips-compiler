@@ -1,2 +1,0 @@
-TesteStringUnica a
-teste de linha completa
