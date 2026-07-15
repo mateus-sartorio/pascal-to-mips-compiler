@@ -1726,12 +1726,9 @@ public class CodeGenerator {
         String labelSetTrue = "set_true_" + labelId;
         String labelDone = "done_read_bool_" + labelId;
 
-        // 1. O AST já colocou o endereço da variável em $t0.
-        // Salvamos ele IMEDIATAMENTE na pilha para não perdê-lo.
         emit("subu $sp, $sp, 4");
         emit("sw $t0, 0($sp)");
 
-        // 2. Aloca e lê a string (mantemos igual)
         emit("li $a0, 10");
         emit("li $v0, 9");
         emit("syscall");
@@ -1742,16 +1739,15 @@ public class CodeGenerator {
         emit("li $v0, 8");
         emit("syscall");
 
-        // 3. Limpeza Blindada (mata \n e \r)
         emit("move $t2, $t1");
         emit(labelStrip + ":");
         emit("lb $t3, 0($t2)");
         emit("beqz $t3, " + labelCompare);
 
-        emit("li $t4, 10"); // LF (\n)
+        emit("li $t4, 10"); 
         emit("beq $t3, $t4, " + labelRemove);
 
-        emit("li $t4, 13"); // CR (\r) - O matador de strings
+        emit("li $t4, 13"); 
         emit("beq $t3, $t4, " + labelRemove);
 
         emit("addi $t2, $t2, 1");
@@ -1760,17 +1756,14 @@ public class CodeGenerator {
         emit(labelRemove + ":");
         emit("sb $zero, 0($t2)");
 
-        // 4. Comparação
         emit(labelCompare + ":");
         emit("move $a0, $t1");
         emit("la $a1, __bool_true");
         emit("jal __strcmp");
 
-        // 5. Restaura o endereço agnóstico da variável de volta para $t0
         emit("lw $t0, 0($sp)");
         emit("addu $sp, $sp, 4");
 
-        // 6. Aplica o valor (0 ou 1) na variável correta
         emit("beqz $v0, " + labelSetTrue);
         emit("li $t4, 0");
         emit("sw $t4, 0($t0)");
