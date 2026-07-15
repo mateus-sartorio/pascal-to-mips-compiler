@@ -47,6 +47,15 @@ public class CodeGenerator {
   private int indentLevel;
   private String currentExitLabel;
 
+  /**
+   * Construtor da classe CodeGenerator.
+   *
+   * @param programNode                        Raiz da AST do programa.
+   * @param globalVariablesTable               A tabela contendo informações sobre variáveis globais.
+   * @param stringLiteralsTable                A tabela contendo informações sobre literais de string.
+   * @param builtInProceduresAndFunctionsTable A tabela contendo informações sobre procedimentos e funções embutidos.
+   * @param proceduresAndFunctionsTable        A tabela contendo informações sobre procedimentos e funções definidos pelo usuário.
+   */
   public CodeGenerator(ProgramNode programNode, VariablesTable globalVariablesTable, StringLiteralsTable stringLiteralsTable, BuiltInProceduresAndFunctionsTable builtInProceduresAndFunctionsTable, ProceduresAndFunctionsTable proceduresAndFunctionsTable) {
     this.mipsTargetCode = new StringBuilder();
     this.programNode = programNode;
@@ -62,6 +71,11 @@ public class CodeGenerator {
     this.indentLevel = 0;
   }
 
+  /**
+   * Gera o código MIPS a partir da AST do programa.
+   *
+   * @return Uma string contendo o código MIPS gerado.
+   */
   public String generate() {
     emitHeader();
 
@@ -82,10 +96,18 @@ public class CodeGenerator {
     return mipsTargetCode.toString();
   }
 
+  /**
+   * Emite uma linha de código MIPS com a indentação apropriada.
+   *
+   * @param line A linha de código MIPS a ser emitida.
+   */
   private void emit(String line) {
     mipsTargetCode.append("\t".repeat(indentLevel)).append(line).append("\n");
   }
 
+  /**
+   * Emite o cabeçalho do código MIPS, incluindo a seção de dados e a seção de texto.
+   */
   private void emitHeader() {
     emit(".data");
 
@@ -123,6 +145,9 @@ public class CodeGenerator {
     emit("%s:".formatted(programNode.programIdentifier.toLowerCase()));
   }
 
+  /**
+   * Emite o rodapé do código MIPS, incluindo a rotina de saída do programa.
+   */
   private void emitFooter() {
     indentLevel = 0;
 
@@ -135,6 +160,9 @@ public class CodeGenerator {
     emit("syscall");
   }
 
+  /**
+   * Emite a função auxiliar para concatenar duas strings. A função assume que os endereços das duas strings estão nos registradores $a0 e $a1. O endereço da nova string concatenada será retornado em $v0.
+   */
   private void emitConcatStringWithString() {
     emit("""
         __concat_string_with_string: #a0 = address of first string, $a1 = address of second string
@@ -201,6 +229,9 @@ public class CodeGenerator {
             """);
   }
 
+  /**
+   * Emite a função auxiliar para concatenar um caractere com uma string. A função assume que o caractere está no registrador $a0 e o endereço da string está no registrador $a1. O endereço da nova string concatenada será retornado em $v0.
+   */
   private void emitConcatCharWithString() {
     emit("""
         __concat_char_with_string: #a0 = char, $a1 = address of string
@@ -251,6 +282,9 @@ public class CodeGenerator {
             """);
   }
 
+  /**
+   * Emite a função auxiliar para concatenar uma string com um caractere. A função assume que o endereço da string está no registrador $a0 e o caractere está no registrador $a1. O endereço da nova string concatenada será retornado em $v0.
+   */
   private void emitConcatStringWithChar() {
     emit("""
         __concat_string_with_char: #a0 = address of string, $a1 = char
@@ -298,6 +332,9 @@ public class CodeGenerator {
             """);
   }
 
+  /**
+   * Emite a função auxiliar para converter um inteiro em uma string. A função assume que o inteiro está no registrador $a0. O endereço da nova string será retornado em $v0.
+   */
   private void emitIntegerToStringConversionFunction() {
     emit("""
         __itoa:                       # $a0 = integer
@@ -344,6 +381,9 @@ public class CodeGenerator {
         """);
   }
 
+  /**
+   * Emite a função auxiliar para converter um número real em uma string. A função assume que o número real está no registrador $a0 (representado como bits de ponto flutuante). O endereço da nova string será retornado em $v0.
+   */
   private void emitRealToStringConversionFunction() {
     emit("""
         __rtoa:                       # $a0 = real (float bits)
@@ -440,6 +480,9 @@ public class CodeGenerator {
         """);
   }
 
+  /**
+   * Emite a função auxiliar para converter um booleano em uma string. A função assume que o booleano está no registrador $a0 (0 para false, 1 para true). O endereço da nova string será retornado em $v0.
+   */
   private void emitBooleanToStringConversionFunction() {
     emit("""
         __btoa:                       # $a0 = boolean (0 or 1)
@@ -453,6 +496,9 @@ public class CodeGenerator {
         """);
   }
 
+  /**
+   * Emite a função auxiliar para comparar duas strings lexicograficamente. A função assume que os endereços das duas strings estão nos registradores $a0 e $a1. O resultado da comparação será retornado em $v0: -1 se a primeira string for menor que a segunda, 0 se forem iguais, 1 se a primeira string for maior que a segunda.
+   */
   private void emitStringComparisonFunction() {
     emit("""
         # ------------------------------------------------------------
@@ -489,6 +535,11 @@ public class CodeGenerator {
         """);
   }
 
+  /**
+   * Emite instruções para empurrar um valor temporário de um registrador para a pilha.
+   *
+   * @param register O registrador que contém o valor temporário a ser empurrado.
+   */
   private void emitPushTemp(String register) {
     emit("# push temp from %s into the stack".formatted(register));
 
@@ -498,6 +549,11 @@ public class CodeGenerator {
     emit("# ----------------");
   }
 
+  /**
+   * Emite instruções para remover um valor temporário da pilha para um registrador.
+   *
+   * @param register O registrador onde o valor temporário será armazenado.
+   */
   private void emitPopTemp(String register) {
     emit("# pop stack temp into %s".formatted(register));
 
@@ -507,6 +563,11 @@ public class CodeGenerator {
     emit("# ----------------");
   }
 
+  /**
+   * Visita o nó do programa e gera o código MIPS correspondente.
+   *
+   * @param node O nó do programa a ser visitado.
+   */
   private void visitProgramNode(ProgramNode node) {
     currentExitLabel = "__exit_program";
 
@@ -516,6 +577,11 @@ public class CodeGenerator {
     node.proceduresAndFunctions.ifPresent(this::visit);
   }
 
+  /**
+   * Visita o nó de declaração de procedimentos e funções e gera o código MIPS correspondente.
+   *
+   * @param node O nó de declaração de procedimentos e funções a ser visitado.
+   */
   private void visitProcedureAndFunctionDeclarationPartNode(ProcedureAndFunctionDeclarationPartNode node) {
     for (ProcedureOrFunctionDeclarationNode procedureOrFunction : node.procedureOrFunctionDeclarations) {
       int uniqueLabelId = labelCounter++;
@@ -544,12 +610,22 @@ public class CodeGenerator {
     }
   }
 
+  /**
+   * Visita o nó de statement composto e gera o código MIPS correspondente.
+   *
+   * @param node O nó de statement composto a ser visitado.
+   */
   private void visitCompoundStatementNode(CompoundStatementNode node) {
     for (StatementNode statement : node.statements) {
       visit(statement);
     }
   }
 
+  /**
+   * Visita o nó de if statement e gera o código MIPS correspondente.
+   *
+   * @param node O nó de if statement a ser visitado.
+   */
   private void visitIfStatementNode(IfStatementNode node) {
     int uniqueLabelId = labelCounter++;
     String elseLabel = "__else_label_%d".formatted(uniqueLabelId);
@@ -558,7 +634,6 @@ public class CodeGenerator {
     visit(node.condition);
     emitPopTemp("$t0");
 
-    // Se aqui for o else, então pula para o elseLabel se a condição for falsa
     if (node.elseStatement.isPresent()) {
       emit("beq $t0, $zero, %s".formatted(elseLabel));
     }
@@ -566,7 +641,6 @@ public class CodeGenerator {
       emit("beq $t0, $zero, %s".formatted(endIfLabel));
     }
 
-    // Then statement
     visit(node.thenStatement);
 
     if (node.elseStatement.isPresent()) {
@@ -579,6 +653,11 @@ public class CodeGenerator {
     emit("");
   }
 
+  /**
+   * Visita o nó de for statement e gera o código MIPS correspondente.
+   *
+   * @param node O nó de for statement a ser visitado.
+   */
   private void visitForStatementNode(ForStatementNode node) {
     int uniqueLabelId = labelCounter++;
     String loopStartLabel = "__for_start_%s".formatted(uniqueLabelId);
@@ -625,19 +704,23 @@ public class CodeGenerator {
     emitPopTemp("$t1");
   }
 
+  /**
+   * Visita o nó de assignment statement e gera o código MIPS correspondente.
+   *
+   * @param node O nó de assignment statement a ser visitado.
+   */
   private void visitAssignmentStatementNode(AssignmentStatementNode node) {
     visit(node.expression);
 
     String variableIdentifier = node.variableAccessExpressionNode.identifier.toLowerCase();
 
-    if (node instanceof ReturnStatementNode returnStatementNode) {
+    if (node instanceof ReturnStatementNode) {
       emitPopTemp("$v0");
       return;
     }
 
     if (globalVariablesTable.lookupVariable(variableIdentifier)) {
       if (node.variableAccessExpressionNode instanceof IndexedVariableAccessExpressionNode indexedVariableAccessExpressionNode) {
-        // TODO: handle index out of bounds exceptions
 
         visit(indexedVariableAccessExpressionNode.indexExpressionNode);
         emitPopTemp("$t1");
@@ -697,6 +780,11 @@ public class CodeGenerator {
     }
   }
 
+  /**
+   * Visita o nó de expressão de tipo primitivo e gera o código MIPS correspondente.
+   *
+   * @param node O nó de expressão de tipo primitivo a ser visitado.
+   */
   private void visitPrimitiveTypeExpressionNode(PrimitiveTypeExpressionNode<?> node) {
     switch (node.value) {
     case Integer value -> {
@@ -725,6 +813,11 @@ public class CodeGenerator {
     }
   }
 
+  /**
+   * Visita o nó de expressão de operador aritmético "+" e gera o código MIPS correspondente.
+   *
+   * @param node O nó de expressão de operador aritmético a ser visitado.
+   */
   private void handlePlus(ArithmeticOperatorExpressionNode node) {
     visit(node.left);
     visit(node.right);
@@ -811,6 +904,11 @@ public class CodeGenerator {
       }
   }
 
+  /**
+   * Visita o nó de expressão de operador aritmético "-" e gera o código MIPS correspondente.
+   *
+   * @param node O nó de expressão de operador aritmético a ser visitado.
+   */
   private void handleMinus(ArithmeticOperatorExpressionNode node) {
     visit(node.left);
     visit(node.right);
@@ -850,6 +948,11 @@ public class CodeGenerator {
       }
   }
 
+  /**
+   * Visita o nó de expressão de operador aritmético "*" e gera o código MIPS correspondente.
+   *
+   * @param node O nó de expressão de operador aritmético a ser visitado.
+   */
   private void handleMultiplication(ArithmeticOperatorExpressionNode node) {
     visit(node.left);
     visit(node.right);
@@ -889,30 +992,17 @@ public class CodeGenerator {
       }
   }
 
+  /**
+   * Visita o nó de expressão de operador aritmético "/" de numeros reais e gera o código MIPS correspondente.
+   *
+   * @param node O nó de expressão de operador aritmético a ser visitado.
+   */
   private void handleRealDivision(ArithmeticOperatorExpressionNode node) {
     visit(node.left);
     visit(node.right);
 
     emitPopTemp("$t1");
     emitPopTemp("$t0");
-
-    int id = labelCounter++;
-    String okLabel = "__real_division_ok_%d".formatted(id);
-
-    emit("bnez $t1, %s".formatted(okLabel));
-
-    // Print error message
-    emit("la $a0, __div_zero_msg");
-    emit("li $v0, 4");
-    emit("syscall");
-
-    // Exit program
-    emit("j __exit_program");
-
-    // Safe to continue
-    emit("%s:".formatted(okLabel));
-
-    // ------------------------------------------
 
     emit("mtc1 $t0, $f0");
     if (node.left.type.basePrimitiveType == PrimitiveTypeEnum.INTEGER) {
@@ -924,11 +1014,31 @@ public class CodeGenerator {
       emit("cvt.s.w $f2, $f2");
     }
 
+    // 2. Verificação de divisão por zero flutuante (atende 0.0 e -0.0)
+    int id = labelCounter++;
+    String okLabel = "__real_division_ok_%d".formatted(id);
+
+    emit("mtc1 $zero, $f4");
+    emit("c.eq.s $f2, $f4");
+    emit("bc1f %s".formatted(okLabel));
+
+    emit("la $a0, __div_zero_msg");
+    emit("li $v0, 4");
+    emit("syscall");
+    emit("j __exit_program");
+
+    emit("%s:".formatted(okLabel));
+
     emit("div.s $f0, $f0, $f2");
     emit("mfc1 $t0, $f0");
     emitPushTemp("$t0");
   }
 
+  /**
+   * Visita o nó de expressão de operador aritmético "div" de numeros inteiros e gera o código MIPS correspondente.
+   *
+   * @param node O nó de expressão de operador aritmético a ser visitado.
+   */
   private void handleIntegerDivision(ArithmeticOperatorExpressionNode node) {
     visit(node.left);
     visit(node.right);
@@ -936,31 +1046,29 @@ public class CodeGenerator {
     emitPopTemp("$t1");
     emitPopTemp("$t0");
 
-    // --- Check if divisor is not equal to zero
-
     int id = labelCounter++;
     String okLabel = "__integer_division_ok_%d".formatted(id);
 
+    // Verifica se o divisor inteiro é diferente de zero
     emit("bnez $t1, %s".formatted(okLabel));
 
-    // Print error message
     emit("la $a0, __div_zero_msg");
     emit("li $v0, 4");
     emit("syscall");
-
-    // Exit program
     emit("j __exit_program");
 
-    // Safe to continue
     emit("%s:".formatted(okLabel));
-
-    // ------------------------------------------
 
     emit("div $t0, $t1");
     emit("mflo $t0");
     emitPushTemp("$t0");
   }
 
+  /**
+   * Visita o nó de expressão de operador aritmético e dependendo do operador gera o código em MIPS correspondente.
+   *
+   * @param node O nó de expressão de operador aritmético a ser visitado.
+   */
   private void visitArithmeticOperatorExpressionNode(ArithmeticOperatorExpressionNode node) {
     String operator = node.operator;
 
@@ -974,22 +1082,23 @@ public class CodeGenerator {
     }
   }
 
-  // TODO: handle local variables of functions
+  /**
+   * Visita o nó de expressão de acesso a variável indexada e gera o código MIPS correspondente.
+   *
+   * @param node O nó de expressão de acesso a variável indexada a ser visitado.
+   */
   private void visitIndexedVariableAccessExpressionNode(IndexedVariableAccessExpressionNode node) {
     visit(node.indexExpressionNode);
     emitPopTemp("$t1");
 
     if (globalVariablesTable.lookupVariable(node.identifier)) {
       if (node.type instanceof PrimitiveVariableType && node.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
-        // TODO: handle string out of bounds exception
         emit("lw $t0, %s".formatted(node.identifier.toLowerCase()));
         emit("add $t0, $t0, $t1");
         emit("lbu $t0, 0($t0)");
         emitPushTemp("$t0");
         return;
       }
-
-      // TODO: handle array out of bounds exception
 
       VariableTableEntry symbol = globalVariablesTable.get(node.identifier);
       ArrayVariableType arrayType = (ArrayVariableType) symbol.type;
@@ -1008,7 +1117,6 @@ public class CodeGenerator {
     var offset = entry.offset() + 2 * Constants.WORD_SIZE;
 
     if (node.type instanceof PrimitiveVariableType && node.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
-      // TODO: handle string out of bounds exception
       emit("lw $t0, %d($fp)".formatted(offset));
       emit("add $t0, $t0, $t1");
       emit("lbu $t0, 0($t0)");
@@ -1027,6 +1135,11 @@ public class CodeGenerator {
     emitPushTemp("$t0");
   }
 
+  /**
+   * Visita o nó de expressão de acesso a variável e gera o código MIPS correspondente.
+   *
+   * @param node O nó de expressão de acesso a variável a ser visitado.
+   */
   private void visitVariableAccessExpressionNode(VariableAccessExpressionNode node) {
     if (globalVariablesTable.lookupVariable(node.identifier)) {
       switch (node.type) {
@@ -1070,6 +1183,11 @@ public class CodeGenerator {
     }
   }
 
+  /**
+   * Visita o nó de expressão de operador lógico redireciona e gera o código MIPS correspondente.
+   * 
+   * @param node O nó de expressão de operador lógico a ser visitado.
+   */
   private void visitLogicOperatorExpressionNode(LogicOperatorExpressionNode node) {
     visit(node.left);
     visit(node.right);
@@ -1086,6 +1204,13 @@ public class CodeGenerator {
     emitPushTemp("$t0");
   }
 
+  /**
+   * Visita o nó de expressão de operador lógico "not" e gera o código MIPS correspondente.
+   * 
+   * @implNote O operador "not" é implementado como uma operação XOR com 1, invertendo o valor booleano.
+   * 
+   * @param node O nó de expressão de operador lógico "not" a ser visitado.
+   */
   private void visitNotOperatorExpressionNode(NotOperatorExpressionNode node) {
     visit(node.expression);
     emitPopTemp("$t0");
@@ -1093,6 +1218,11 @@ public class CodeGenerator {
     emitPushTemp("$t0");
   }
 
+  /**
+   * Visita o nó de expressão de conversão de inteiro para real e gera o código MIPS correspondente.
+   *
+   * @param node O nó de expressão de conversão de inteiro para real a ser visitado.
+   */
   private void visitIntegerToRealExpressionNode(IntegerToRealExpressionNode node) {
     visit(node.expression);
     emitPopTemp("$t0");
@@ -1103,6 +1233,11 @@ public class CodeGenerator {
     emitPushTemp("$t0");
   }
 
+  /**
+   * Visita o nó de expressão de conversão de caractere para string e gera o código MIPS correspondente.
+   *
+   * @param node O nó de expressão de conversão de caractere para string a ser visitado.
+   */
   private void visitCharToStringExpressionNode(CharToStringExpressionNode node) {
     visit(node.expression);
     emitPopTemp("$t0");
@@ -1118,6 +1253,11 @@ public class CodeGenerator {
     emitPushTemp("$t0");
   }
 
+  /**
+   * Visita o nó de expressão de operador de comparação e gera o código MIPS correspondente.
+   *
+   * @param node O nó de expressão de operador de comparação a ser visitado.
+   */
   private void visitComparisonOperatorExpressionNode(ComparisonOperatorExpressionNode node) {
     String operator = node.operator;
 
@@ -1182,6 +1322,11 @@ public class CodeGenerator {
     emitPushTemp("$t0");
   }
 
+  /**
+   * Visita o nó de chamada de procedimento e gera o código MIPS correspondente.
+   *
+   * @param node O nó de chamada de procedimento a ser visitado.
+   */
   private void visitProcedureCallStatementNode(ProcedureCallStatementNode node) {
     String procName = node.procedureIdentifier.toLowerCase();
 
@@ -1241,6 +1386,11 @@ public class CodeGenerator {
     emit("addu $sp, $sp, %d".formatted(stackFrameSize));
   }
 
+  /**
+   * Visita o nó de chamada de função e gera o código MIPS correspondente.
+   *
+   * @param node O nó de chamada de função a ser visitado.
+   */
   private void visitFunctionCallStatementNode(FunctionCallExpressionNode node) {
     if (builtInProceduresAndFunctionsTable.lookProcedureOrFunction(node.functionIdentifier)) {
       for (ExpressionNode argument : node.arguments) {
@@ -1293,10 +1443,21 @@ public class CodeGenerator {
     emitPushTemp("$v0");
   }
 
+  /**
+   * Visita o nó de exit statement e gera o código MIPS correspondente.
+   *
+   * @param node O nó de exit statement a ser visitado.
+   */
   private void visitExitStatementNode(ExitStatementNode node) {
     emit("j %s".formatted(currentExitLabel));
   }
 
+  /**
+   * Executa um procedimento ou função embutida no MIPS.
+   *
+   * @param identifier O identificador do procedimento ou função embutida.
+   * @param argType    O tipo do argumento passado para o procedimento ou função.
+   */
   private void executeBuiltInProcedureOrFunction(String identifier, PrimitiveTypeEnum argType) {
     switch (identifier.toLowerCase()) {
     case "write" -> {
@@ -1425,7 +1586,7 @@ public class CodeGenerator {
       emitPushTemp("$t0");
     }
     case "read", "readln" -> {
-      emitPopTemp("$a0"); // $a0 = endereço de destino (ex: &x)
+      emitPopTemp("$a0");
 
       switch (argType) {
       case INTEGER -> {
@@ -1501,7 +1662,6 @@ public class CodeGenerator {
   private void handleReadCall(ProcedureCallStatementNode node) {
     String procName = node.procedureIdentifier.toLowerCase();
 
-    // 1. Caso especial: readln vazio (apenas consome o Enter/newline)
     if (node.arguments.isEmpty()) {
       if (procName.equals("readln")) {
         int uniqueId = labelCounter++;
@@ -1514,20 +1674,16 @@ public class CodeGenerator {
       return;
     }
 
-    // 2. Processa cada variável passada como argumento
     for (ExpressionNode argNode : node.arguments) {
       PrimitiveTypeEnum argType = argNode.type.basePrimitiveType;
 
-      // Resolve o endereço físico de destino e joga em $t0
       if (argNode instanceof VariableAccessExpressionNode varNode) {
         String varId = varNode.identifier.toLowerCase();
 
         if (globalVariablesTable.lookupVariable(varNode.identifier)) {
-          // Variável Global: carregamos o endereço usando a label direta
           emit("la $t0, %s".formatted(varId));
         }
         else {
-          // Variável Local: idêntico ao seu cálculo de offset com $fp
           var entry = callFrameOffsetMap.get(varId);
           int offset = entry.offset() + 2 * Constants.WORD_SIZE;
           emit("la $t0, %d($fp)".formatted(offset));
@@ -1539,7 +1695,7 @@ public class CodeGenerator {
           emitPopTemp("$t1");
 
           emit("addi $t1, $t1, -1");
-          emit("sll $t1, $t1, 2"); 
+          emit("sll $t1, $t1, 2");
 
           String varId = indexNode.identifier.toLowerCase();
           if (globalVariablesTable.lookupVariable(indexNode.identifier)) {
@@ -1550,7 +1706,7 @@ public class CodeGenerator {
             int offset = entry.offset() + 2 * Constants.WORD_SIZE;
             emit("la $t0, %d($fp)".formatted(offset));
           }
-          emit("add $t0, $t0, $t1"); 
+          emit("add $t0, $t0, $t1");
         }
         else {
           throw new RuntimeException("Argumento inválido para leitura em " + procName);
@@ -1558,33 +1714,129 @@ public class CodeGenerator {
 
       switch (argType) {
       case INTEGER -> {
-        emit("li $v0, 5"); 
+        emit("li $v0, 5");
         emit("syscall");
-        emit("sw $v0, 0($t0)"); 
+        emit("sw $v0, 0($t0)");
+      }
+      case BOOLEAN -> {
+        String labelId = Integer.toHexString(System.identityHashCode(new Object()));
+        String labelStrip = "strip_newline_" + labelId;
+        String labelCompare = "compare_bool_" + labelId;
+        String labelRemove = "remove_newline_" + labelId;
+        String labelSetTrue = "set_true_" + labelId;
+        String labelDone = "done_read_bool_" + labelId;
+
+        // 1. O AST já colocou o endereço da variável em $t0.
+        // Salvamos ele IMEDIATAMENTE na pilha para não perdê-lo.
+        emit("subu $sp, $sp, 4");
+        emit("sw $t0, 0($sp)");
+
+        // 2. Aloca e lê a string (mantemos igual)
+        emit("li $a0, 10");
+        emit("li $v0, 9");
+        emit("syscall");
+        emit("move $t1, $v0");
+
+        emit("move $a0, $t1");
+        emit("li $a1, 10");
+        emit("li $v0, 8");
+        emit("syscall");
+
+        // 3. Limpeza Blindada (mata \n e \r)
+        emit("move $t2, $t1");
+        emit(labelStrip + ":");
+        emit("lb $t3, 0($t2)");
+        emit("beqz $t3, " + labelCompare);
+
+        emit("li $t4, 10"); // LF (\n)
+        emit("beq $t3, $t4, " + labelRemove);
+
+        emit("li $t4, 13"); // CR (\r) - O matador de strings
+        emit("beq $t3, $t4, " + labelRemove);
+
+        emit("addi $t2, $t2, 1");
+        emit("j " + labelStrip);
+
+        emit(labelRemove + ":");
+        emit("sb $zero, 0($t2)");
+
+        // 4. Comparação
+        emit(labelCompare + ":");
+        emit("move $a0, $t1");
+        emit("la $a1, __bool_true");
+        emit("jal __strcmp");
+
+        // 5. Restaura o endereço agnóstico da variável de volta para $t0
+        emit("lw $t0, 0($sp)");
+        emit("addu $sp, $sp, 4");
+
+        // 6. Aplica o valor (0 ou 1) na variável correta
+        emit("beqz $v0, " + labelSetTrue);
+        emit("li $t4, 0");
+        emit("sw $t4, 0($t0)");
+        emit("j " + labelDone);
+
+        emit(labelSetTrue + ":");
+        emit("li $t4, 1");
+        emit("sw $t4, 0($t0)");
+
+        emit(labelDone + ":");
       }
       case REAL -> {
-        emit("li $v0, 6"); 
+        emit("li $v0, 6");
         emit("syscall");
-        emit("swc1 $f0, 0($t0)"); 
+        emit("swc1 $f0, 0($t0)");
       }
       case CHAR -> {
-        emit("li $v0, 12"); 
+        emit("li $a0, 3");
+        emit("li $v0, 9");
         emit("syscall");
-        emit("sb $v0, 0($t0)"); 
+        emit("move $a0, $v0");
+
+        emit("li $a1, 3");
+        emit("li $v0, 8");
+        emit("syscall");
+
+        emit("lbu $t1, 0($a0)");
+        emit("sw $zero, 0($t0)");
+        emit("sb $t1, 0($t0)");
       }
       case STRING -> {
-        
-        emit("move $t2, $t0"); 
-        emit("li $a0, 256"); 
-        emit("li $v0, 9"); 
-        emit("syscall"); 
+        String labelId = Integer.toHexString(System.identityHashCode(new Object()));
+        String labelStrip = "strip_newline_" + labelId;
+        String labelCompare = "compare_str_" + labelId;
+        String labelRemove = "remove_newline_" + labelId;
+
+        emit("move $t2, $t0");
+        emit("li $a0, 256");
+        emit("li $v0, 9");
+        emit("syscall");
+
+        emit("sw $v0, 0($t2)");
 
         emit("move $a0, $v0");
         emit("li $a1, 256");
-        emit("li $v0, 8"); 
+        emit("li $v0, 8");
         emit("syscall");
 
-        emit("sw $a0, 0($t2)"); 
+        emit("move $t1, $a0");
+        emit(labelStrip + ":");
+        emit("lb $t3, 0($t1)");
+        emit("beqz $t3, " + labelCompare);
+
+        emit("li $t4, 10"); // \n
+        emit("beq $t3, $t4, " + labelRemove);
+
+        emit("li $t4, 13"); // \r
+        emit("beq $t3, $t4, " + labelRemove);
+
+        emit("addi $t1, $t1, 1");
+        emit("j " + labelStrip);
+
+        emit(labelRemove + ":");
+        emit("sb $zero, 0($t1)");
+
+        emit(labelCompare + ":");
       }
       default -> throw new RuntimeException("Tipo não suportado para leitura: " + argType);
       }
