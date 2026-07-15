@@ -509,7 +509,7 @@ public class CodeGenerator {
 
   private void visitProgramNode(ProgramNode node) {
     currentExitLabel = "__exit_program";
-    
+
     visit(node.compoundStatement);
     emitFooter();
 
@@ -520,7 +520,7 @@ public class CodeGenerator {
     for (ProcedureOrFunctionDeclarationNode procedureOrFunction : node.procedureOrFunctionDeclarations) {
       int uniqueLabelId = labelCounter++;
       currentExitLabel = "__epilogue_%d".formatted(uniqueLabelId);
-      
+
       indentLevel = 0;
       emit("");
       emit("%s:".formatted(procedureOrFunction.identifier.toLowerCase()));
@@ -591,8 +591,6 @@ public class CodeGenerator {
     emitPopTemp("$t1"); // t1 = final value
 
     emit("sw $t0, %s".formatted(node.controlVariable.identifier.toLowerCase()));
-
-    // TODO: boundaries check
 
     emitPushTemp("$t1");
 
@@ -753,7 +751,7 @@ public class CodeGenerator {
 
         emit("mtc1 $t1, $f2");
         if (rightType == PrimitiveTypeEnum.INTEGER) {
-          emit("cvt.s.w $f2, $f2"); 
+          emit("cvt.s.w $f2, $f2");
         }
 
         emit("add.s $f0, $f0, $f2");
@@ -767,20 +765,20 @@ public class CodeGenerator {
 
             emit("li $a0, 3");
             emit("li $v0, 9");
-            emit("syscall"); 
+            emit("syscall");
 
-            emit("sb $t0, 0($v0)"); 
-            emit("sb $t1, 1($v0)"); 
-            emit("sb $zero, 2($v0)"); 
+            emit("sb $t0, 0($v0)");
+            emit("sb $t1, 1($v0)");
+            emit("sb $zero, 2($v0)");
 
-            emitPushTemp("$v0"); 
+            emitPushTemp("$v0");
           }
           else
             if (node.right.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
-              emit("move $a0, $t0"); 
-              emit("move $a1, $t1"); 
+              emit("move $a0, $t0");
+              emit("move $a1, $t1");
               emit("jal __concat_char_with_string");
-              emitPushTemp("$v0"); 
+              emitPushTemp("$v0");
             }
             else {
               throw new RuntimeException("Unsupported primitive type");
@@ -789,17 +787,17 @@ public class CodeGenerator {
         else {
           if (node.left.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
             if (node.right.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
-              emit("move $a0, $t0"); 
-              emit("move $a1, $t1"); 
+              emit("move $a0, $t0");
+              emit("move $a1, $t1");
               emit("jal __concat_string_with_string");
-              emitPushTemp("$v0"); 
+              emitPushTemp("$v0");
             }
             else {
               if (node.right.type.basePrimitiveType == PrimitiveTypeEnum.CHAR) {
-                emit("move $a0, $t0"); 
-                emit("move $a1, $t1"); 
+                emit("move $a0, $t0");
+                emit("move $a1, $t1");
                 emit("jal __concat_string_with_char");
-                emitPushTemp("$v0"); 
+                emitPushTemp("$v0");
               }
               else {
                 throw new RuntimeException("Unsupported primitive type");
@@ -1185,6 +1183,14 @@ public class CodeGenerator {
   }
 
   private void visitProcedureCallStatementNode(ProcedureCallStatementNode node) {
+    String procName = node.procedureIdentifier.toLowerCase();
+
+    // Intercepta e trata read/readln separadamente para obter referências
+    if (procName.equals("read") || procName.equals("readln")) {
+      handleReadCall(node);
+      return;
+    }
+
     if (builtInProceduresAndFunctionsTable.lookProcedureOrFunction(node.procedureIdentifier)) {
       for (ExpressionNode argument : node.arguments) {
         visit(argument);
@@ -1192,7 +1198,7 @@ public class CodeGenerator {
 
       PrimitiveTypeEnum firstArgumentType = node.arguments.isEmpty() ? null : node.arguments.get(0).type.basePrimitiveType;
 
-      executeBuiltInProcedureOrFunction(node.procedureIdentifier.toLowerCase(), firstArgumentType);
+      executeBuiltInProcedureOrFunction(procName, firstArgumentType);
       return;
     }
 
@@ -1418,6 +1424,41 @@ public class CodeGenerator {
       emit("%s:".formatted(skipLabel));
       emitPushTemp("$t0");
     }
+    case "read", "readln" -> {
+      emitPopTemp("$a0"); // $a0 = endereço de destino (ex: &x)
+
+      switch (argType) {
+      case INTEGER -> {
+        emit("li $v0, 5");
+        emit("syscall");
+        emit("sw $v0, 0($a0)");
+      }
+      case REAL -> {
+        emit("li $v0, 6");
+        emit("syscall");
+        emit("swc1 $f0, 0($a0)");
+      }
+      case CHAR -> {
+        emit("li $v0, 12");
+        emit("syscall");
+        emit("sb $v0, 0($a0)");
+      }
+      case STRING -> {
+        emit("li $a0, 256");
+        emit("li $v0, 9");
+        emit("syscall");
+
+        emit("move $a0, $v0");
+        emit("li $a1, 256");
+        emit("li $v0, 8");
+        emit("syscall");
+
+        emitPopTemp("$t0");
+        emit("sw $a0, 0($t0)");
+      }
+      default -> throw new RuntimeException("Unsupported type for read/readln operations");
+      }
+    }
     default -> throw new RuntimeException("Unsupported built-in %s".formatted(identifier));
     }
 
@@ -1454,6 +1495,99 @@ public class CodeGenerator {
       }
     }
     default -> throw new RuntimeException("Unsupported node type");
+    }
+  }
+
+  private void handleReadCall(ProcedureCallStatementNode node) {
+    String procName = node.procedureIdentifier.toLowerCase();
+
+    // 1. Caso especial: readln vazio (apenas consome o Enter/newline)
+    if (node.arguments.isEmpty()) {
+      if (procName.equals("readln")) {
+        int uniqueId = labelCounter++;
+        emit("__readln_empty_loop_%d:".formatted(uniqueId));
+        emit("li $v0, 12"); // Syscall 12: lê um único caractere do teclado
+        emit("syscall");
+        emit("li $t0, 10"); // Código ASCII de '\n' (Enter)
+        emit("bne $v0, $t0, __readln_empty_loop_%d".formatted(uniqueId));
+      }
+      return;
+    }
+
+    // 2. Processa cada variável passada como argumento
+    for (ExpressionNode argNode : node.arguments) {
+      PrimitiveTypeEnum argType = argNode.type.basePrimitiveType;
+
+      // Resolve o endereço físico de destino e joga em $t0
+      if (argNode instanceof VariableAccessExpressionNode varNode) {
+        String varId = varNode.identifier.toLowerCase();
+
+        if (globalVariablesTable.lookupVariable(varNode.identifier)) {
+          // Variável Global: carregamos o endereço usando a label direta
+          emit("la $t0, %s".formatted(varId));
+        }
+        else {
+          // Variável Local: idêntico ao seu cálculo de offset com $fp
+          var entry = callFrameOffsetMap.get(varId);
+          int offset = entry.offset() + 2 * Constants.WORD_SIZE;
+          emit("la $t0, %d($fp)".formatted(offset));
+        }
+      }
+      else
+        if (argNode instanceof IndexedVariableAccessExpressionNode indexNode) {
+          visit(indexNode.indexExpressionNode);
+          emitPopTemp("$t1");
+
+          emit("addi $t1, $t1, -1");
+          emit("sll $t1, $t1, 2"); 
+
+          String varId = indexNode.identifier.toLowerCase();
+          if (globalVariablesTable.lookupVariable(indexNode.identifier)) {
+            emit("la $t0, %s".formatted(varId));
+          }
+          else {
+            var entry = callFrameOffsetMap.get(varId);
+            int offset = entry.offset() + 2 * Constants.WORD_SIZE;
+            emit("la $t0, %d($fp)".formatted(offset));
+          }
+          emit("add $t0, $t0, $t1"); 
+        }
+        else {
+          throw new RuntimeException("Argumento inválido para leitura em " + procName);
+        }
+
+      switch (argType) {
+      case INTEGER -> {
+        emit("li $v0, 5"); 
+        emit("syscall");
+        emit("sw $v0, 0($t0)"); 
+      }
+      case REAL -> {
+        emit("li $v0, 6"); 
+        emit("syscall");
+        emit("swc1 $f0, 0($t0)"); 
+      }
+      case CHAR -> {
+        emit("li $v0, 12"); 
+        emit("syscall");
+        emit("sb $v0, 0($t0)"); 
+      }
+      case STRING -> {
+        
+        emit("move $t2, $t0"); 
+        emit("li $a0, 256"); 
+        emit("li $v0, 9"); 
+        emit("syscall"); 
+
+        emit("move $a0, $v0");
+        emit("li $a1, 256");
+        emit("li $v0, 8"); 
+        emit("syscall");
+
+        emit("sw $a0, 0($t2)"); 
+      }
+      default -> throw new RuntimeException("Tipo não suportado para leitura: " + argType);
+      }
     }
   }
 }

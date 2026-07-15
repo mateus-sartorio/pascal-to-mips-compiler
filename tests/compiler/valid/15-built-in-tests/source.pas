@@ -90,15 +90,15 @@ begin
   sa := ca;
   writeln('upcase(a) = ' + sa);
 
-  // // read test
-  // writeln('Please enter a string:');
-  // read(sa);
-  // writeln('You entered: ' + sa);
+  // read test
+  writeln('Please enter a string:');
+  read(sa);
+  writeln('You entered: ' + sa);
 
-  // // readln test
-  // writeln('Please enter a line:');
-  // readln(sa);
-  // writeln('You entered: ' + sa);
+  // readln test
+  writeln('Please enter a line:');
+  readln(sa);
+  writeln('You entered: ' + sa);
 
 
 end.
