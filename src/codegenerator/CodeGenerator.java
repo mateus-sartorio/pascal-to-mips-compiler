@@ -32,19 +32,49 @@ import types.ArrayVariableType;
 import types.PrimitiveTypeEnum;
 import types.PrimitiveVariableType;
 
+/**
+ * Classe responsável por gerar o código MIPS a partir da AST do programa.
+ */
 public class CodeGenerator {
+  /**
+   * StringBuilder que armazena o código MIPS gerado.
+   */
   private final StringBuilder mipsTargetCode;
+  /**
+   * Raiz da AST do programa.
+   */
   private final ProgramNode programNode;
-
+  /**
+   * Tabela contendo informações sobre literais de string.
+   */
   private final StringLiteralsTable stringLiteralsTable;
+  /**
+   * Tabela contendo informações sobre variáveis globais.
+   */
   private final VariablesTable globalVariablesTable;
+  /**
+   * Tabela contendo informações sobre procedimentos e funções embutidos.
+   */
   private final BuiltInProceduresAndFunctionsTable builtInProceduresAndFunctionsTable;
+  /**
+   * Tabela contendo informações sobre procedimentos e funções definidos pelo usuário.
+   */
   private final ProceduresAndFunctionsTable proceduresAndFunctionsTable;
-
+  /**
+   * Mapa que associa variáveis locais a seus deslocamentos na pilha.
+   */
   private final CallFrameOffsetMap callFrameOffsetMap;
-
+  /**
+   * Contador para gerar rótulos únicos no código MIPS.
+   */
   private int labelCounter;
+  /**
+   * Nível de indentação atual para o código MIPS gerado.
+   */
   private int indentLevel;
+  /**
+   * Rótulo de saída atual para o código MIPS gerado.
+   */
   private String currentExitLabel;
 
   /**
@@ -1593,6 +1623,11 @@ public class CodeGenerator {
 
   }
 
+  /**
+   * Visita o nó da AST e redireciona para o método de visita específico do tipo de nó.
+   *
+   * @param node O nó da AST a ser visitado.
+   */
   private void visit(AstNode node) {
     switch (node) {
     case ProgramNode concreteTypeNode -> visitProgramNode(concreteTypeNode);
@@ -1627,6 +1662,11 @@ public class CodeGenerator {
     }
   }
 
+  /**
+   * Trata chamadas de procedimentos de leitura (read/readln) e gera o código MIPS correspondente.
+   *
+   * @param node O nó de chamada de procedimento a ser tratado.
+   */
   private void handleReadCall(ProcedureCallStatementNode node) {
     String procName = node.procedureIdentifier.toLowerCase();
 
