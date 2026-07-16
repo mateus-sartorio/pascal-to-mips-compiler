@@ -92,6 +92,13 @@ public class TypeRules {
     /* LHS NO_TYPE */ { PrimitiveTypeEnum.NO_TYPE, PrimitiveTypeEnum.NO_TYPE, PrimitiveTypeEnum.NO_TYPE, PrimitiveTypeEnum.NO_TYPE, PrimitiveTypeEnum.NO_TYPE, PrimitiveTypeEnum.NO_TYPE }
   };
 
+  /**
+   * Retorna o tipo de resultado da operação entre dois tipos primitivos, usando a tabela de regras fornecida.
+   * @param table A tabela de regras de tipos primitivos.
+   * @param lhs O tipo primitivo do lado esquerdo da operação.
+   * @param rhs O tipo primitivo do lado direito da operação.
+   * @return O tipo primitivo resultante da operação, ou NO_TYPE se a operação não for válida.
+   */
   public static PrimitiveTypeEnum getResultType(PrimitiveTypeEnum[][] table, PrimitiveTypeEnum lhs, PrimitiveTypeEnum rhs) {
     return table[lhs.ordinal()][rhs.ordinal()];
   }
