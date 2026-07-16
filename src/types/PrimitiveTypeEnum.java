@@ -1,5 +1,8 @@
 package types;
 
+/**
+ * Enumeração que representa os tipos primitivos suportados pelo compilador.
+ */
 public enum PrimitiveTypeEnum {
   INTEGER,
   REAL,
@@ -8,6 +11,11 @@ public enum PrimitiveTypeEnum {
   CHAR,
   NO_TYPE;
 
+  /**
+   * Retorna o tipo primitivo correspondente a um denotador de tipo.
+   * @param typeDenoter O denotador de tipo.
+   * @return O tipo primitivo correspondente ao denotador de tipo.
+   */
   public static PrimitiveTypeEnum getType(String typeDenoter) {
     switch (typeDenoter.toLowerCase()) {
       case "integer":
@@ -27,6 +35,11 @@ public enum PrimitiveTypeEnum {
     }
   }
 
+  /**
+   * Retorna o tipo primitivo correspondente a um valor literal.
+   * @param literal O valor literal.
+   * @return O tipo primitivo correspondente ao valor literal.
+   */
   @Override
   public String toString() {
     switch (this) {

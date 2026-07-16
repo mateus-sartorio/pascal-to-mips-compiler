@@ -81,16 +81,47 @@ import tables.VariablesTable.VariableTableEntry;
 import types.PrimitiveTypeEnum;
 import types.PrimitiveVariableType;
 
+/**
+ * Classe responsável por construir a árvore de sintaxe abstrata (AST) a partir da análise sintática do código-fonte.
+ * Esta classe estende a classe base gerada pelo ANTLR para o parser Pascal, permitindo a visita dos nós da árvore de análise sintática
+ * e a construção correspondente da AST.
+ */
 public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
+  /**
+   * Contador para gerar identificadores únicos para os nós da AST.
+   */
   private int currentId = 1;
 
+  /**
+   * Nó raiz da AST, representando o programa completo.
+   */
   private ProgramNode programNode;
 
+  /**
+   * Identificador do programa, utilizado para nomear o nó raiz da AST.
+   */
   private final String programIdentifier;
+  /**
+   * Tabela de variáveis globais, utilizada para verificar a existência e os tipos das variáveis durante a construção da AST.
+   */
   private final VariablesTable globalVariablesTable;
+  /**
+   * Tabela de procedimentos e funções embutidos, utilizada para verificar a existência e os tipos das funções durante a construção da AST.
+   */
   private final BuiltInProceduresAndFunctionsTable builtInProceduresAndFunctionsTable;
+  /**
+   * Tabela de procedimentos e funções definidas pelo usuário, utilizada para verificar a existência e os tipos das funções durante a construção da AST.
+   */
   private final ProceduresAndFunctionsTable proceduresAndFunctionsTable;
 
+  /**
+   * Construtor da classe AstBuilder.
+   *
+   * @param programIdentifier Identificador do programa.
+   * @param globalVariablesTable Tabela de variáveis globais.
+   * @param builtInProceduresAndFunctionsTable Tabela de procedimentos e funções embutidos.
+   * @param proceduresAndFunctionsTable Tabela de procedimentos e funções definidas pelo usuário.
+   */
   public AstBuilder(
     String programIdentifier,
     VariablesTable globalVariablesTable,
@@ -103,11 +134,20 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     this.proceduresAndFunctionsTable = proceduresAndFunctionsTable;
   }
 
+  /**
+   * Retorna o nó raiz da AST, representando o programa completo.
+   *
+   * @return Nó raiz da AST.
+   */
   public ProgramNode getProgramNode() {
     return programNode;
   }
 
-	// Imprime a árvore toda em stderr.
+	/**
+   * Gera a representação em notação DOT da AST.
+   *
+   * @return String contendo a representação em notação DOT da AST.
+   */
 	public String toDotNotation() {
     StringBuilder sb = new StringBuilder();
 
@@ -120,6 +160,12 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     return sb.toString();
 	}
 
+  /**
+   * Visita o nó de programa na árvore de análise sintática e constrói o nó correspondente na AST.
+   *
+   * @param context Contexto do nó de programa.
+   * @return Nó de programa na AST.
+   */
   @Override
   public ProgramNode visitProgram(ProgramContext context) {
     BlockContext block = context.block();
@@ -156,6 +202,12 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     return programNode;
   }
 
+  /**
+   * Visita o nó de parte de declaração de procedimentos e funções na árvore de análise sintática e constrói o nó correspondente na AST.
+   *
+   * @param context Contexto do nó de parte de declaração de procedimentos e funções.
+   * @return Nó de parte de declaração de procedimentos e funções na AST.
+   */
   @Override
   public ProcedureAndFunctionDeclarationPartNode visitProcedure_and_function_declaration_part(Procedure_and_function_declaration_partContext context) {
     List<ProcedureOrFunctionDeclarationNode> procedureOrFunctionDeclarationNodes = new ArrayList<>();
@@ -171,6 +223,12 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     return new ProcedureAndFunctionDeclarationPartNode(currentId++, procedureOrFunctionDeclarationNodes);
   }
 
+  /**
+   * Visita o nó de acesso a variável na árvore de análise sintática e constrói o nó correspondente na AST.
+   *
+   * @param context Contexto do nó de acesso a variável.
+   * @return Nó de acesso a variável na AST.
+   */
   @Override
   public VariableAccessExpressionNode visitVariable_access(Variable_accessContext context) {
     String variableIdentifier;
@@ -211,6 +269,12 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     throw new RuntimeException("Variable " + variableIdentifier + " not found in symbol tables");
   }
 
+  /**
+   * Visita o nó de declaração de procedimento na árvore de análise sintática e constrói o nó correspondente na AST.
+   *
+   * @param context Contexto do nó de declaração de procedimento.
+   * @return Nó de declaração de procedimento na AST.
+   */
   @Override
   public ProcedureDeclarationNode visitProcedure_declaration(Procedure_declarationContext context) {
     Procedure_headingContext procedureHeading = context.procedure_heading();
@@ -260,6 +324,12 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     );
   }
 
+  /**
+   * Visita o nó de declaração de função na árvore de análise sintática e constrói o nó correspondente na AST.
+   *
+   * @param context Contexto do nó de declaração de função.
+   * @return Nó de declaração de função na AST.
+   */
   @Override
   public FunctionDeclarationNode visitFunction_declaration(Function_declarationContext context) {
     Function_headingContext procedureHeading = context.function_heading();
@@ -310,6 +380,12 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     );
   }
 
+  /**
+   * Visita o nó de expressão na árvore de análise sintática e constrói o nó correspondente na AST.
+   *
+   * @param context Contexto do nó de expressão.
+   * @return Nó de expressão na AST.
+   */
   @Override
   public ExpressionNode visitExpression(ExpressionContext context) {
     if(context.simple_expression().size() == 1) {
@@ -344,6 +420,12 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     return new ComparisonOperatorExpressionNode(currentId++, left, right, operator);
   }
 
+  /**
+   * Visita o nó de expressão simples na árvore de análise sintática e constrói o nó correspondente na AST.
+   *
+   * @param context Contexto do nó de expressão simples.
+   * @return Nó de expressão simples na AST.
+   */
   @Override
   public ExpressionNode visitSimple_expression(Simple_expressionContext context) {
     if(context.term().size() == 1) {
@@ -374,6 +456,12 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     return returnExpression;
   }
 
+  /**
+   * Visita o nó de termo na árvore de análise sintática e constrói o nó correspondente na AST.
+   *
+   * @param context Contexto do nó de termo.
+   * @return Nó de termo na AST.
+   */
   @Override
   public ExpressionNode visitTerm(TermContext context) {
     if(context.factor().size() == 1) {
@@ -407,11 +495,23 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     return returnExpression;
   }
 
+  /**
+   * Visita o nó de acesso a variável na árvore de análise sintática e constrói o nó correspondente na AST.
+   *
+   * @param context Contexto do nó de acesso a variável.
+   * @return Nó de acesso a variável na AST.
+   */
   @Override
   public ExpressionNode visitVariableAccess(VariableAccessContext context) {
     return (ExpressionNode) visit(context.variable_access());
   }
 
+  /**
+   * Visita o nó de constante string na árvore de análise sintática e constrói o nó correspondente na AST.
+   *
+   * @param context Contexto do nó de constante string.
+   * @return Nó de constante string na AST.
+   */
   @Override
   public PrimitiveTypeExpressionNode<?> visitStringConstant(StringConstantContext context) {
     String stringLiteral = context.CHARACTER_STRING().getText();
@@ -424,6 +524,12 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     return new PrimitiveTypeExpressionNode<String>(currentId++, croppedStringLiteral);
   }
 
+  /**
+   * Visita o nó de constante numérica na árvore de análise sintática e constrói o nó correspondente na AST.
+   *
+   * @param context Contexto do nó de constante numérica.
+   * @return Nó de constante numérica na AST.
+   */
   @Override
   public PrimitiveTypeExpressionNode<?> visitNumeric_constant(Numeric_constantContext context) {
     TerminalNode minus = context.MINUS();
@@ -450,12 +556,24 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     return new PrimitiveTypeExpressionNode<Double>(currentId++, value);
   }
 
+  /**
+   * Visita o nó de constante numérica na árvore de análise sintática e constrói o nó correspondente na AST.
+   *
+   * @param context Contexto do nó de constante numérica.
+   * @return Nó de constante numérica na AST.
+   */
   @Override
   public PrimitiveTypeExpressionNode<?> visitNumericConstant(NumericConstantContext context) {
     Numeric_constantContext numericConstantContext = context.numeric_constant();
     return visitNumeric_constant(numericConstantContext);
   }
 
+  /**
+   * Visita o nó de constante booleana na árvore de análise sintática e constrói o nó correspondente na AST.
+   *
+   * @param context Contexto do nó de constante booleana.
+   * @return Nó de constante booleana na AST.
+   */
   @Override
   public PrimitiveTypeExpressionNode<Boolean> visitBoolean_constant(Boolean_constantContext context) {
     if(context.FALSE() != null) {
@@ -465,12 +583,24 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     return new PrimitiveTypeExpressionNode<>(currentId++, true);
   }
 
+  /**
+   * Visita o nó de constante booleana na árvore de análise sintática e constrói o nó correspondente na AST.
+   *
+   * @param context Contexto do nó de constante booleana.
+   * @return Nó de constante booleana na AST.
+   */
   @Override
   public PrimitiveTypeExpressionNode<Boolean> visitBooleanConstant(BooleanConstantContext context) {
     var booleanConstantContext = context.boolean_constant();
     return visitBoolean_constant(booleanConstantContext);
   }
 
+  /**
+   * Visita o nó de chamada de função na árvore de análise sintática e constrói o nó correspondente na AST.
+   *
+   * @param context Contexto do nó de chamada de função.
+   * @return Nó de chamada de função na AST.
+   */
   @Override
   public FunctionCallExpressionNode visitFunctionCall(FunctionCallContext context) {
     Function_designatorContext functionDesignatorContext = context.function_designator();
@@ -496,17 +626,35 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     return new FunctionCallExpressionNode(currentId++, functionIdentifier, actualParameters, returnType);
   }
 
+  /**
+   * Visita o nó de expressão entre parênteses na árvore de análise sintática e constrói o nó correspondente na AST.
+   *
+   * @param context Contexto do nó de expressão entre parênteses.
+   * @return Nó de expressão entre parênteses na AST.
+   */
   @Override
   public ExpressionNode visitParenthesisExpression(ParenthesisExpressionContext context) {
     return (ExpressionNode) visit(context.expression());
   }
 
+  /**
+   * Visita o nó de fator negado na árvore de análise sintática e constrói o nó correspondente na AST.
+   *
+   * @param context Contexto do nó de fator negado.
+   * @return Nó de fator negado na AST.
+   */
   @Override
   public NotOperatorExpressionNode visitNotFactor(NotFactorContext context) {
     ExpressionNode expression = (ExpressionNode) visit(context.factor());
     return new NotOperatorExpressionNode(currentId++, expression);
   }
 
+  /**
+   * Visita o nó de declaração composta na árvore de análise sintática e constrói o nó correspondente na AST.
+   *
+   * @param context Contexto do nó de declaração composta.
+   * @return Nó de declaração composta na AST.
+   */
   @Override
   public CompoundStatementNode visitCompound_statement(Compound_statementContext context) {
     Statement_sequenceContext statementList = context.statement_sequence();
@@ -521,16 +669,34 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     return new CompoundStatementNode(currentId++, statements);
   }
 
+  /**
+   * Visita o nó de declaração vazia na árvore de análise sintática e constrói o nó correspondente na AST.
+   *
+   * @param context Contexto do nó de declaração vazia.
+   * @return Nó de declaração vazia na AST.
+   */
   @Override
   public StatementNode visitEmpty_statement(Empty_statementContext context) {
     return null;
   }
 
+  /**
+   * Visita o nó de declaração de saída na árvore de análise sintática e constrói o nó correspondente na AST.
+   *
+   * @param context Contexto do nó de declaração de saída.
+   * @return Nó de declaração de saída na AST.
+   */
   @Override
   public ExitStatementNode visitExit_statement(Exit_statementContext context) {
     return new ExitStatementNode(currentId++);
   }
 
+  /**
+   * Visita o nó de declaração de atribuição na árvore de análise sintática e constrói o nó correspondente na AST.
+   *
+   * @param context Contexto do nó de declaração de atribuição.
+   * @return Nó de declaração de atribuição na AST.
+   */
   @Override
   public AssignmentStatementNode visitAssignment_statement(Assignment_statementContext context) {
     Variable_accessContext variableAccessContext = context.variable_access();
@@ -554,6 +720,13 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     return new AssignmentStatementNode(currentId++, variableAccessExpressionNode, finalExpressionNode);
   }
 
+  /**
+   * Cria a lista de parâmetros reais a partir da lista de parâmetros formais e da lista de argumentos fornecida.
+   *
+   * @param actualParameterList Lista de parâmetros reais.
+   * @param argumentsList Lista de argumentos formais.
+   * @return Lista de nós de expressão representando os parâmetros reais.
+   */
   private List<ExpressionNode> createActualParameters(Actual_parameter_listContext actualParameterList, List<VariableTableEntry> argumentsList) {
     List<ExpressionNode> actualParameters = new LinkedList<>();
     
@@ -579,6 +752,12 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     return actualParameters;
   } 
 
+  /**
+   * Visita o nó de declaração de chamada de procedimento na árvore de análise sintática e constrói o nó correspondente na AST.
+   *
+   * @param context Contexto do nó de declaração de chamada de procedimento.
+   * @return Nó de declaração de chamada de procedimento na AST.
+   */
   @Override
   public ProcedureCallStatementNode visitProcedure_statement(Procedure_statementContext context) {
     String procedureIdentifier = context.IDENTIFIER().getText();
@@ -600,6 +779,12 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     return new ProcedureCallStatementNode(currentId++, procedureIdentifier, actualParameters);
   }
 
+  /**
+   * Visita o nó de declaração de instrução condicional na árvore de análise sintática e constrói o nó correspondente na AST.
+   *
+   * @param context Contexto do nó de declaração de instrução condicional.
+   * @return Nó de declaração de instrução condicional na AST.
+   */
   @Override
   public IfStatementNode visitIf_statement(If_statementContext context) {
     ExpressionNode condition = (ExpressionNode) visit(context.expression());
@@ -614,6 +799,12 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     return new IfStatementNode(currentId++, condition, thenStatement, elseStatement);
   }
 
+  /**
+   * Visita o nó de declaração de instrução de repetição (for) na árvore de análise sintática e constrói o nó correspondente na AST.
+   *
+   * @param context Contexto do nó de declaração de instrução de repetição.
+   * @return Nó de declaração de instrução de repetição na AST.
+   */
   @Override
   public ForStatementNode visitFor_statement(For_statementContext context) {
     String variableIdentifier = context.IDENTIFIER().getText();
@@ -654,6 +845,13 @@ public class AstBuilder extends PascalParserBaseVisitor<AstNode> {
     );
   }
 
+  /**
+   * Converte uma entrada da tabela de variáveis em um nó de declaração de variável na AST.
+   *
+   * @param id Identificador único para o nó de declaração de variável.
+   * @param entry Entrada da tabela de variáveis a ser convertida.
+   * @return Nó de declaração de variável na AST.
+   */
   private static VariableDeclarationNode variableTableEntryToAstNode(int id, VariablesTable.VariableTableEntry entry) {
     return new VariableDeclarationNode(id, entry.identifier, entry.type);
   }

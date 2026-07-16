@@ -7,12 +7,38 @@ import ast.types.declarations.implementations.ProcedureAndFunctionDeclarationPar
 import ast.types.declarations.implementations.VariableDeclarationPartNode;
 import ast.types.statements.implementations.CompoundStatementNode;
 
+/**
+ * Representa um nó de programa na árvore de sintaxe abstrata (AST).
+ * Este nó contém informações sobre o identificador do programa, partes de declaração de variáveis,
+ * declarações de procedimentos e funções, e a instrução composta principal.
+ */
 public class ProgramNode extends AstNode {
+  /**
+   * Identificador do programa.
+   */
   public final String programIdentifier;
+  /**
+   * Parte de declaração de variáveis (opcional).
+   */
   public final Optional<VariableDeclarationPartNode> variableDeclarationPart;
+  /**
+   * Parte de declarações de procedimentos e funções (opcional).
+   */
   public final Optional<ProcedureAndFunctionDeclarationPartNode> proceduresAndFunctions;
+  /**
+   * Instrução composta principal do programa.
+   */
   public final CompoundStatementNode compoundStatement;
 
+  /**
+   * Construtor para criar um nó de programa.
+   *
+   * @param id Identificador único para o nó.
+   * @param programIdentifier Identificador do programa.
+   * @param variableDeclarationPart Parte de declaração de variáveis (opcional).
+   * @param proceduresAndFunctions Parte de declarações de procedimentos e funções (opcional).
+   * @param compoundStatement Instrução composta principal do programa.
+   */
   public ProgramNode(
     int id,
     String programIdentifier,
@@ -27,11 +53,21 @@ public class ProgramNode extends AstNode {
     this.compoundStatement = compoundStatement;
   }
 
+  /**
+   * Retorna o identificador do nó no formato de notação DOT.
+   *
+   * @return Identificador do nó no formato de notação DOT.
+   */
   @Override
   public String getDotNotationIdentifier() {
     return "\"ProgramNode\"";
   }
 
+  /**
+   * Retorna a representação do nó em notação DOT.
+   *
+   * @return Representação do nó em notação DOT.
+   */
   @Override
   public String toDotNotation() {
     StringBuilder sb = new StringBuilder();
@@ -54,6 +90,12 @@ public class ProgramNode extends AstNode {
     return sb.toString();
   }
 
+  /**
+   * Retorna a declaração de procedimento ou função correspondente ao identificador fornecido.
+   *
+   * @param identifier Identificador do procedimento ou função.
+   * @return Nó de declaração de procedimento ou função correspondente, ou null se não encontrado.
+   */
   public ProcedureOrFunctionDeclarationNode getDeclaration(String identifier) {
     for(var p : proceduresAndFunctions.get().procedureOrFunctionDeclarations) {
       if(p.identifier.equals(identifier)) {

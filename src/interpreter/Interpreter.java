@@ -35,6 +35,10 @@ import types.ArrayVariableType;
 import types.PrimitiveTypeEnum;
 import types.PrimitiveVariableType;
 
+/**
+ * A classe Interpreter é responsável por interpretar e executar um programa representado por uma árvore de sintaxe abstrata (AST).
+ * Ela mantém o estado da execução, incluindo tabelas de variáveis, memória, pilha de dados e literais de string.
+ */
 public class Interpreter {
   private final VariablesTable globalVariablesTable;
   private final BuiltInProceduresAndFunctionsTable builtInProceduresAndFunctionsTable;
@@ -47,6 +51,14 @@ public class Interpreter {
 
   private boolean shouldExitCurrentExecutionContext;
 
+  /**
+   * Construtor da classe Interpreter.
+   * @param globalVariablesTable A tabela de variáveis globais.
+   * @param stringLiteralsTable A tabela de literais de string.
+   * @param builtInProceduresAndFunctionsTable A tabela de procedimentos e funções embutidos.
+   * @param proceduresAndFunctionsTable A tabela de procedimentos e funções definidos pelo usuário.
+   * @param programNode O nó raiz da árvore de sintaxe abstrata (AST) do programa a ser interpretado.
+   */
   public Interpreter(
     VariablesTable globalVariablesTable,
     StringLiteralsTable stringLiteralsTable,
@@ -65,20 +77,34 @@ public class Interpreter {
     this.shouldExitCurrentExecutionContext = false;
   }
 
+  /**
+   * Inicia a execução do programa interpretado.
+   */
   public void execute() {
     visit(this.programNode);
   }
 
+  /**
+   * Visita um nó da árvore de sintaxe abstrata (AST) e executa a ação correspondente.
+   * @param node O nó da AST a ser visitado.
+   */
   private void visitProgramNode(ProgramNode node) {
     visit(node.compoundStatement);
   }
 
+  /**
+   * Visita um nó de instrução composta (Compound Statement) e executa a ação correspondente.
+   */
   private void visitCompoundStatementNode(CompoundStatementNode node) {
     for (StatementNode statement : node.statements) {
       visit(statement);
     }
   }
 
+  /**
+    * Visita um nó de instrução condicional (If Statement) e executa a ação correspondente.
+    * @param node O nó de instrução condicional a ser visitado.
+   */
   private void visitIfStatementNode(IfStatementNode node) {
     visit(node.condition);
     boolean condition = dataStack.popInteger() == 1;
@@ -93,6 +119,10 @@ public class Interpreter {
     }
   }
 
+  /**
+   * Visita um nó de instrução de loop (For Statement) e executa a ação correspondente.
+   * @param node O nó de instrução de loop a ser visitado.
+   */
   private void visitForStatementNode(ForStatementNode node) {
     visit(node.finalValue);
     visit(node.initialValue);
@@ -171,6 +201,10 @@ public class Interpreter {
     } while (isConditionMet);
   }
 
+  /**
+   * Visita um nó de instrução de atribuição (Assignment Statement) e executa a ação correspondente.
+   * @param node O nó de instrução de atribuição a ser visitado.
+   */
   private void visitAssignmentStatementNode(AssignmentStatementNode node) {
     visit(node.expression);
 
@@ -231,6 +265,10 @@ public class Interpreter {
     }
   }
 
+  /**
+   * Visita um nó de expressão de tipo primitivo (Primitive Type Expression) e empilha o valor correspondente na pilha de dados.
+   * @param node O nó de expressão de tipo primitivo a ser visitado.
+   */
   private void visitPrimitiveTypeExpressionNode(PrimitiveTypeExpressionNode<?> node) {
     switch (node.value) {
       case Integer value -> dataStack.pushInteger(value);
@@ -245,6 +283,10 @@ public class Interpreter {
     }
   }
 
+  /**
+   * Visita um nó de expressão de operador aritmético ( + ) e executa a ação correspondente ao tipo.
+   * @param node O nó de expressão de operador aritmético a ser visitado.
+   */
   private void handlePlus(ArithmeticOperatorExpressionNode node) {
     visit(node.right);
     visit(node.left);
@@ -309,6 +351,10 @@ public class Interpreter {
     }
   }
 
+  /**
+   * Visita um nó de expressão de operador aritmético ( - ) e executa a ação correspondente ao tipo.
+   * @param node O nó de expressão de operador aritmético a ser visitado.
+   */
   private void handleMinus(ArithmeticOperatorExpressionNode node) {
     visit(node.right);
     visit(node.left);
@@ -353,6 +399,10 @@ public class Interpreter {
     }
   }
 
+  /**
+   * Trata a divisão real em um nó de expressão de operador aritmético ( / ) e executa a ação correspondente.
+   * @param node O nó de expressão de operador aritmético a ser visitado.
+   */
   private void handleRealDivision(ArithmeticOperatorExpressionNode node) {
     visit(node.right);
     visit(node.left);
@@ -407,6 +457,10 @@ public class Interpreter {
     }
   }
 
+  /**
+   * Trata a divisão inteira em um nó de expressão de operador aritmético (div) e executa a ação correspondente.
+   * @param node O nó de expressão de operador aritmético a ser visitado.
+   */
   private void handleIntegerDivision(ArithmeticOperatorExpressionNode node) {
     visit(node.right);
     visit(node.left);
@@ -422,6 +476,10 @@ public class Interpreter {
     dataStack.pushInteger(dividend / divisor);
   }
 
+  /**
+   * Visita um nó de expressão de operador aritmético e redireciona para o handle correspondente.
+   * @param node O nó de expressão de operador aritmético a ser visitado.
+   */
   private void visitArithmeticOperatorExpressionNode(ArithmeticOperatorExpressionNode node) {
     String operator = node.operator;
 
@@ -435,6 +493,10 @@ public class Interpreter {
     }
   }
 
+  /**
+   * Visita um nó de expressão de acesso a variável indexada (Indexed Variable Access Expression) e empilha o valor correspondente na pilha de dados.
+   * @param node O nó de expressão de acesso a variável indexada a ser visitado.
+   */
   private void visitIndexedVariableAccessExpressionNode(IndexedVariableAccessExpressionNode node) {
     Memory correctMemory;
     VariablesTable correctTable;
@@ -497,6 +559,10 @@ public class Interpreter {
     }
   }
 
+  /**
+   * Visita um nó de expressão de acesso a variável (Variable Access Expression) e empilha o valor correspondente na pilha de dados.
+   * @param node O nó de expressão de acesso a variável a ser visitado.
+   */
   private void visitVariableAccessExpressionNode(VariableAccessExpressionNode node) {
     Memory correctMemory;
 
@@ -532,6 +598,10 @@ public class Interpreter {
     }
   }
 
+  /**
+   * Visita um nó de expressão de operador lógico (Logic Operator Expression) e executa a ação correspondente.
+   * @param node O nó de expressão de operador lógico a ser visitado.
+   */
   private void visitLogicOperatorExpressionNode(LogicOperatorExpressionNode node) {
     String operator = node.operator;
 
@@ -550,23 +620,39 @@ public class Interpreter {
     }
   }
 
+  /**
+   * Visita um nó de expressão de operador lógico NOT (Not Operator Expression) e executa a ação correspondente.
+   * @param node O nó de expressão de operador lógico NOT a ser visitado.
+   */
   private void visitNotOperatorExpressionNode(NotOperatorExpressionNode node) {
     visit(node.expression);
     dataStack.pushInteger(dataStack.popInteger() == 1 ? 0 : 1);
   }
 
+  /**
+   * Visita um nó de expressão de conversão de inteiro para real (Integer To Real Expression) e executa a ação correspondente.
+   * @param node O nó de expressão de conversão a ser visitado.
+   */
   private void visitIntegerToRealExpressionNode(IntegerToRealExpressionNode node) {
     visit(node.expression);
     int value = dataStack.popInteger();
     dataStack.pushFloat((float) value);
   }
 
+  /**
+   * Visita um nó de expressão de conversão de caractere para string (Char To String Expression) e executa a ação correspondente.
+   * @param node O nó de expressão de conversão a ser visitado.
+   */
   private void visitCharToStringExpressionNode(CharToStringExpressionNode node) {
     visit(node.expression);
     char value = (char) dataStack.popInteger();
     dataStack.pushInteger(stringLiteralsMemory.addEntry(String.valueOf(value)));
   }
 
+  /**
+   * Visita um nó de expressão de operador de comparação (Comparison Operator Expression) e .
+   * @param node O nó de expressão de operador de comparação a ser visitado.
+   */
   private void visitComparisonOperatorExpressionNode(ComparisonOperatorExpressionNode node) {
     String operator = node.operator;
 
@@ -604,6 +690,10 @@ public class Interpreter {
     }
   }
 
+  /**
+   * Visita um nó de instrução de chamada de procedimento (Procedure Call Statement) e executa a ação correspondente.
+   * @param node O nó de instrução de chamada de procedimento a ser visitado.
+   */
   private void visitProcedureCallStatementNode(ProcedureCallStatementNode node) {
     if(builtInProceduresAndFunctionsTable.lookProcedureOrFunction(node.procedureIdentifier)) {
       String procName = node.procedureIdentifier.toLowerCase();
@@ -704,6 +794,10 @@ public class Interpreter {
     shouldExitCurrentExecutionContext = false;
   }
 
+  /**
+   * Visita um nó de instrução de chamada de função (Function Call Statement) e executa a ação correspondente.
+   * @param node O nó de instrução de chamada de função a ser visitado.
+   */
   private void visitFunctionCallStatementNode(FunctionCallExpressionNode node) {
     if (builtInProceduresAndFunctionsTable.lookProcedureOrFunction(node.functionIdentifier)) {
       for (ExpressionNode argument : node.arguments) {
@@ -812,6 +906,11 @@ public class Interpreter {
     }
   }
 
+  /**
+   * Executa um procedimento ou função embutida (built-in) com base no identificador fornecido.
+   * @param identifier O identificador do procedimento ou função embutida a ser executado.
+   * @param argType O tipo do argumento passado para o procedimento ou função embutida.
+   */
   private void executeBuiltInProcedureOrFunction(String identifier, PrimitiveTypeEnum argType) {
     switch (identifier.toLowerCase()) {
       case "write" -> IO.print(stringLiteralsMemory.getEntry(dataStack.popInteger()));

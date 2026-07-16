@@ -6,9 +6,24 @@ import types.PrimitiveVariableType;
 import types.TypeRules;
 import types.VariableType;
 
+/**
+ * Representa um nó de expressão de operador aritmético na árvore de sintaxe abstrata (AST).
+ * Este nó contém informações sobre a expressão à esquerda, a expressão à direita e o operador aritmético.
+ */
 public class ArithmeticOperatorExpressionNode extends BinaryOperatorExpressionNode {
+  /**
+   * Operador aritmético representado por este nó.
+   */
   public final String operator;
 
+  /**
+   * Construtor para criar um nó de expressão de operador aritmético.
+   *
+   * @param id Identificador único para o nó.
+   * @param left Expressão à esquerda da operação aritmética.
+   * @param right Expressão à direita da operação aritmética.
+   * @param operator Operador aritmético representado por este nó.
+   */
   public ArithmeticOperatorExpressionNode(int id, ExpressionNode left, ExpressionNode right, String operator) {
     VariableType resultType = left.type;
     
@@ -45,6 +60,11 @@ public class ArithmeticOperatorExpressionNode extends BinaryOperatorExpressionNo
     this.operator = operator;
   }
 
+  /**
+   * Retorna a representação do nó em notação DOT.
+   *
+   * @return Representação do nó em notação DOT.
+   */
   @Override
   public String toDotNotation() {
     StringBuilder sb = new StringBuilder();

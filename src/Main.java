@@ -100,6 +100,7 @@ public class Main {
       interpreter.execute();
     }
 
+    // Gerando o código MIPS caso o argumento -compiler seja passado
     if (args.length > 1 && args[1].equals("-compiler")) {
       ProgramNode programNode = astBuilder.getProgramNode();
 

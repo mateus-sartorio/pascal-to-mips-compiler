@@ -1,5 +1,8 @@
 package types;
 
+/**
+ * Enumeração que representa os tipos de subprogramas: PROCEDURE e FUNCTION.
+ */
 public enum ProcedureOrFunctionEnum {
   PROCEDURE,
   FUNCTION;

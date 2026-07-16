@@ -1,0 +1,10 @@
+teste_de_int:
+12
+teste_de_real:
+12.5
+teste_de_boolean:
+false
+teste_de_char:
+h
+teste_de_string:
+hello,World!

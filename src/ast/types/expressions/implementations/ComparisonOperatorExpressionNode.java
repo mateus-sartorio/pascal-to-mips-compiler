@@ -5,9 +5,21 @@ import ast.types.expressions.contracts.ExpressionNode;
 import types.PrimitiveTypeEnum;
 import types.PrimitiveVariableType;
 
+/**
+ * Representa um nó de expressão de operador de comparação na árvore de sintaxe abstrata (AST).
+ * Este nó contém informações sobre a expressão à esquerda, a expressão à direita e o operador de comparação.
+ */
 public class ComparisonOperatorExpressionNode extends BinaryOperatorExpressionNode {
   public final String operator;
   
+  /**
+   * Construtor para criar um nó de expressão de operador de comparação.
+   *
+   * @param id Identificador único para o nó.
+   * @param left Expressão à esquerda da operação de comparação.
+   * @param right Expressão à direita da operação de comparação.
+   * @param operator Operador de comparação representado por este nó.
+   */
   public ComparisonOperatorExpressionNode(
     int id,
     ExpressionNode left,
@@ -18,6 +30,11 @@ public class ComparisonOperatorExpressionNode extends BinaryOperatorExpressionNo
     this.operator = operator;
   }
 
+  /**
+   * Retorna a representação do nó em notação DOT.
+   *
+   * @return Representação do nó em notação DOT.
+   */
   @Override
   public String toDotNotation() {
     StringBuilder sb = new StringBuilder();
