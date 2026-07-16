@@ -5,11 +5,32 @@ import java.util.Optional;
 import ast.types.expressions.contracts.ExpressionNode;
 import ast.types.statements.contract.StatementNode;
 
+/**
+ * Representa um nó de instrução condicional "if" na árvore de sintaxe abstrata (AST).
+ * Este nó contém informações sobre a condição, a instrução "then" e a instrução "else" (opcional).
+ */
 public class IfStatementNode extends StatementNode {
+  /**
+   * Condição da instrução "if".
+   */
   public final ExpressionNode condition;
+  /**
+   * Instrução a ser executada se a condição for verdadeira.
+   */
   public final StatementNode thenStatement;
+  /**
+   * Instrução a ser executada se a condição for falsa (opcional).
+   */
   public final Optional<StatementNode> elseStatement;
 
+  /**
+   * Construtor para criar um nó de instrução condicional "if".
+   *
+   * @param id Identificador único para o nó.
+   * @param condition Condição da instrução "if".
+   * @param thenStatement Instrução a ser executada se a condição for verdadeira.
+   * @param elseStatement Instrução a ser executada se a condição for falsa (opcional).
+   */
   public IfStatementNode(
     int id,
     ExpressionNode condition,
@@ -22,6 +43,11 @@ public class IfStatementNode extends StatementNode {
     this.elseStatement = elseStatement;
   }
 
+  /**
+   * Retorna a representação do nó em notação DOT.
+   *
+   * @return Representação do nó em notação DOT.
+   */
   @Override
   public String toDotNotation() {
     StringBuilder sb = new StringBuilder();

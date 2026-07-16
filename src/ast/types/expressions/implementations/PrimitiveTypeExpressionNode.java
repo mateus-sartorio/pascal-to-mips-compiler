@@ -5,9 +5,21 @@ import types.PrimitiveTypeEnum;
 import types.PrimitiveVariableType;
 import types.VariableType;
 
+/**
+ * Representa um nó de expressão de tipo primitivo na árvore de sintaxe abstrata (AST).
+ * Este nó contém informações sobre o valor do tipo primitivo.
+ *
+ * @param <T> Tipo do valor primitivo (Integer, Double, String, Boolean, Character).
+ */
 public class PrimitiveTypeExpressionNode<T> extends ExpressionNode {
   public final T value;
 
+  /**
+   * Construtor para criar um nó de expressão de tipo primitivo.
+   *
+   * @param id Identificador único para o nó.
+   * @param value Valor do tipo primitivo.
+   */
   public PrimitiveTypeExpressionNode(int id, T value) {
     VariableType expressionType = switch (value) {
       case Integer _ -> new PrimitiveVariableType(PrimitiveTypeEnum.INTEGER);
@@ -22,6 +34,11 @@ public class PrimitiveTypeExpressionNode<T> extends ExpressionNode {
     this.value = value;
   }
 
+  /**
+   * Retorna a representação do nó em notação DOT.
+   *
+   * @return Representação do nó em notação DOT.
+   */
   @Override
   public String toDotNotation() {
     StringBuilder sb = new StringBuilder();
