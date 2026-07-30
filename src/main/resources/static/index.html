@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pascal to MIPS Compiler Lab</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="shell">
+    <header class="hero">
+      <h1>Pascal to MIPS Compiler</h1>
+      <p class="lede">See step by step how the code gets compiled into machine language.</p>
+    </header>
+
+    <main class="grid">
+      <section class="panel editor-panel">
+        <div class="panel-header split">
+          <div>
+            <h2>Pascal source code</h2>
+            <p>Type code, compile it, and run it.</p>
+          </div>
+          <button id="compileButton" class="primary-button">Compile and Run</button>
+        </div>
+        <div class="workbench">
+        <div class="editor">
+          <pre id="editorGutter" class="gutter" aria-hidden="true"></pre>
+          <div class="editor-code">
+          <pre id="highlightLayer" class="editor-highlight" aria-hidden="true"></pre>
+          <textarea id="sourceCode" wrap="off" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off">program sample;
+var
+  n: integer;
+begin
+  n := 3;
+  writeln(itos(n))
+end.</textarea>
+          </div>
+          </div>
+
+          <div class="run-column">
+            <label class="field-label" for="standardInput">Standard input</label>
+            <textarea id="standardInput" class="stdin" spellcheck="false" autocomplete="off"
+              placeholder="Inputs, separated by spaces or new lines"></textarea>
+            <div class="field-row">
+              <span class="field-label">Program output</span>
+              <span id="runStatus" class="run-status"></span>
+            </div>
+            <pre id="programOutput" class="output-pane"></pre>
+          </div>
+        </div>
+        <div id="issues" class="issues"></div>
+      </section>
+
+      <section class="panel architecture-panel">
+        <div class="panel-header">
+          <h2>Compiler Architecture</h2>
+          <p>The compiler building blocks.</p>
+        </div>
+        <figure class="architecture">
+          <img src="/compiler-pipeline.svg" width="1500" height="430"
+            alt="Pipeline diagram: source code enters the front-end, where the scanner, parser, semantic analyzer and AST builder run in sequence; the AST crosses to the back-end code generator, which emits MIPS assembly." />
+        </figure>
+        <div class="architecture-note">
+          <p class="architecture-note-title">The <strong>Front-End</strong>:</p>
+          <ol class="architecture-steps">
+            <li>Reads Pascal source code (a stream of characters) and injects into the scanner, which produces a stream of tokens;</li>
+            <li>This stream is processed by the parser, which produces the parse tree;</li>
+            <li>The semantic analyzer checks if the code is semantically correct and builds the symbol tables;</li>
+            <li>An abstract syntax tree (AST) is created by the AST builder.</li>
+          </ol>
+        </div>
+
+        <div class="architecture-note">
+          <p class="architecture-note-title">The <strong>Back-End</strong>:</p>
+          <p>Receives the AST and walks it to emit MIPS assembly code.</p>
+        </div>
+      </section>
+
+      <section class="panel reference-panel">
+        <div class="panel-header">
+          <h2>Reduced Syntax Rules</h2>
+          <p>The simplified syntax rules of Pascal this compiler accepts and what it doesn't.</p>
+        </div>
+        <div id="syntaxRules" class="syntax-card"></div>
+      </section>
+
+      <!-- One card per compiler stage, in the order the pipeline diagram shows them:
+           each stage pairs the source it works from with the artifact it produces. -->
+      <section class="panel stage-panel">
+        <div class="panel-header">
+          <h2>Front-End</h2>
+          <p>Reads the Pascal source code and produces the intermediate representation (Abstract Syntax Tree).</p>
+        </div>
+        <div class="stages">
+          <article class="stage">
+            <h3>Lexical Analyzer (Lexer)</h3>
+            <p class="stage-caption">Receives the bare source code (stream of characters) and produces a sequence (stream) of tokens.</p>
+            <div class="stage-split">
+              <div class="stage-part">
+                <h4 class="stage-label">Grammar reference (Regular Grammar)</h4>
+                <div class="reference-code">
+                  <div class="numbered">
+                    <pre id="lexerGutter" class="gutter" aria-hidden="true"></pre>
+                    <pre id="lexerGrammar" class="numbered-code"></pre>
+                  </div>
+                </div>
+              </div>
+              <div class="stage-part">
+                <details id="tokensFold" class="symbol-group tokens-fold" open>
+                  <summary>Tokens<span class="count" id="tokenCount"></span></summary>
+                  <p class="hover-tip">Try hovering a token to highlight it in the source code.</p>
+                  <pre id="tokens" class="code-block"></pre>
+                </details>
+              </div>
+            </div>
+          </article>
+
+          <article class="stage">
+            <h3>Syntax Analyzer (Parser)</h3>
+            <p class="stage-caption">Receives a stream of tokens and produces the parse tree.</p>
+            <div class="stage-split">
+              <div class="stage-part">
+                <h4 class="stage-label">Grammar reference (Context-Free Grammar)</h4>
+                <div class="reference-code">
+                  <div class="numbered">
+                    <pre id="parserGutter" class="gutter" aria-hidden="true"></pre>
+                    <pre id="parserGrammar" class="numbered-code"></pre>
+                  </div>
+                </div>
+              </div>
+              <div class="stage-part">
+                <h4 class="stage-label">Parse tree</h4>
+                <div class="graph-view">
+                  <img id="parseTreeImage" class="graph-image" alt="Parse tree" hidden />
+                  <pre id="parseTree" class="code-block" hidden></pre>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="stage">
+            <h3>Semantic Analyzer</h3>
+            <p class="stage-caption">Walks the parse tree, checks if the grammar rules are met, and fills the symbol tables (global variables, local variables, procedures, functions, string literals).</p>
+            <div id="tables" class="symbols"></div>
+          </article>
+
+          <article class="stage">
+            <h3>Intermediate Language Generator</h3>
+            <p class="stage-caption">Creates the intermediate representation (Abstract Syntax Tree) that the Back-End consumes. This representation contains all the information needed the Back-End needs in a lean format.</p>
+            <div class="graph-view">
+              <img id="astImage" class="graph-image" alt="Abstract syntax tree" hidden />
+              <pre id="astDot" class="code-block" hidden></pre>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel stage-panel">
+        <div class="panel-header">
+          <h2>Back-End</h2>
+          <p>Turns the intermediate representation (AST) into code for the target machine.</p>
+        </div>
+        <div class="stages">
+          <article class="stage">
+            <h3>Code Generator</h3>
+            <p class="stage-caption">Walks the AST and emits MIPS assembly target code.</p>
+            <div class="listing">
+              <div class="numbered">
+                <pre id="mipsGutter" class="gutter" aria-hidden="true"></pre>
+                <pre id="mipsCode" class="numbered-code"></pre>
+              </div>
+              <details id="mipsRuntime" class="listing-fold" hidden>
+                <summary>Runtime support routines<span class="fold-range" id="mipsRuntimeCount"></span></summary>
+                <div class="numbered">
+                  <pre id="mipsRuntimeGutter" class="gutter" aria-hidden="true"></pre>
+                  <pre id="mipsRuntimeCode" class="numbered-code"></pre>
+                </div>
+              </details>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <!-- Links open in a new tab on purpose: the editor holds unsaved Pascal, and following
+         one in place would throw it away. -->
+    <footer class="page-footer">
+      <p>
+        Created by
+        <a href="https://github.com/mateus-sartorio" target="_blank" rel="noopener noreferrer">Mateus Sartorio</a>
+        and
+        <a href="https://github.com/Gianluca-Mantovaneli" target="_blank" rel="noopener noreferrer">Gianluca Mantovaneli</a>.
+      </p>
+      <p>
+        All the source code is in the
+        <a href="https://github.com/mateus-sartorio/pascal-to-mips-compiler" target="_blank" rel="noopener noreferrer">official repository</a>,
+        and you are welcome to contribute with bug fixes and improvements.
+      </p>
+    </footer>
+  </div>
+
+  <!-- A second view of the same program, shown while the source panel is scrolled out of
+       sight. It sits outside .shell on purpose: .panel sets backdrop-filter, and a fixed
+       element inside one would be positioned against that panel instead of the viewport. -->
+  <aside id="editorDock" class="editor-dock" aria-hidden="true">
+    <div id="dockBar" class="dock-bar">
+      <span class="dock-title">Pascal source code</span>
+      <button id="dockToggle" class="dock-toggle" type="button" aria-expanded="true"
+        aria-controls="dockBody" aria-label="Minimize the floating editor"
+        title="Minimize the floating editor">
+        <span class="dock-chevron" aria-hidden="true"></span>
+      </button>
+    </div>
+    <div id="dockBody" class="dock-body">
+      <div class="editor">
+        <pre id="dockGutter" class="gutter" aria-hidden="true"></pre>
+        <div class="editor-code">
+          <pre id="dockHighlight" class="editor-highlight" aria-hidden="true"></pre>
+          <textarea id="dockSource" wrap="off" spellcheck="false" autocomplete="off"
+            autocorrect="off" autocapitalize="off" aria-label="Pascal source code"></textarea>
+        </div>
+      </div>
+      <button id="dockCompile" class="primary-button dock-run" type="button">Compile and Run</button>
+    </div>
+  </aside>
+
+  <script src="/app.js"></script>
+</body>
+</html>

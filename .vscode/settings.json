@@ -2,12 +2,11 @@
   "editor.insertSpaces": true,
   "editor.tabSize": 2,
   "editor.detectIndentation": false,
-  "java.project.referencedLibraries": [
-    "libs/antlr-4.13.2-complete.jar"
-  ],
+  "java.import.maven.enabled": true,
+  "java.configuration.updateBuildConfiguration": "automatic",
   "antlr4.generation": {
     "mode": "none"
   },
-  "java.errors.incompleteClasspath.severity": "ignore",
-  "java.format.settings.url": ".vscode/java-formatter.xml"
+  "java.format.settings.url": ".vscode/java-formatter.xml",
+  "java.compile.nullAnalysis.mode": "automatic"
 }

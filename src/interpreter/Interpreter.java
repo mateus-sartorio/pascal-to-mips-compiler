@@ -223,8 +223,6 @@ public class Interpreter {
     }
 
     if (node.variableAccessExpressionNode instanceof IndexedVariableAccessExpressionNode indexedVariableAccessExpressionNode) {
-      int size = correctMemory.entryOf(variableIdentifier).size();
-      
       visit(indexedVariableAccessExpressionNode.indexExpressionNode);
       int index = dataStack.popInteger();
 

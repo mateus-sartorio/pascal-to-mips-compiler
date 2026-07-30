@@ -1,0 +1,874 @@
+:root {
+  color-scheme: dark;
+  --bg: #0b1020;
+  --panel: rgba(13, 20, 36, 0.92);
+  --line: rgba(255, 255, 255, 0.10);
+  --text: #e9eefb;
+  --muted: #9aa7c2;
+  --accent: #f97316;
+  --accent-2: #22d3ee;
+  --danger: #ef4444;
+  --code: #d1e3ff;
+  --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+
+  /* Ligature-capable monospace first, plain monospace as the fallback. In fonts of
+     this kind a ligature still occupies one cell per character, so columns line up
+     whether or not the reader has one installed. */
+  --mono: "Lilex Nerd Font Mono", "Fira Code", "JetBrains Mono", "Cascadia Code",
+    "Victor Mono", "Iosevka", "SFMono-Regular", Consolas, monospace;
+}
+
+/* calt is what joins a run of dashes into a continuous rule; liga covers the fixed
+   pairs such as := and <> . */
+textarea,
+pre,
+code {
+  font-family: var(--mono);
+  font-variant-ligatures: common-ligatures contextual;
+  font-feature-settings: "liga" 1, "calt" 1;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top left, rgba(249, 115, 22, 0.18), transparent 30%),
+    radial-gradient(circle at top right, rgba(34, 211, 238, 0.16), transparent 28%),
+    linear-gradient(160deg, #060912 0%, #0b1020 45%, #11192e 100%);
+}
+
+.shell {
+  width: min(1440px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 32px 0 48px;
+}
+
+/* Title over one line of description: plain block flow, no columns to align. */
+.hero {
+  margin-bottom: 24px;
+}
+
+h1, h2, h3 { margin: 0; }
+
+h1 {
+  font-size: clamp(2.5rem, 4vw, 4.6rem);
+  line-height: 1;
+}
+
+.lede {
+  max-width: 62ch;
+  margin: 18px 0 0;
+  color: var(--muted);
+  font-size: 1.02rem;
+  line-height: 1.7;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(16px);
+}
+
+.panel-header p, .panel-header.split p { color: var(--muted); }
+
+.grid {
+  display: grid;
+  gap: 20px;
+}
+
+.panel {
+  border-radius: 24px;
+  padding: 22px;
+}
+
+.panel-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.panel-header.split {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* The pipeline diagram carries its own white background, so it gets a light frame of
+   its own rather than the dark surface every other panel body uses. */
+.architecture {
+  margin: 0;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 18px;
+  background: #ffffff;
+}
+
+.architecture img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.architecture-note {
+  margin: 14px 0 0;
+  max-width: 105ch;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.architecture-note p {
+  margin: 0;
+}
+
+.architecture-note strong {
+  color: var(--text);
+}
+
+.architecture-note-title {
+  margin-bottom: 6px;
+}
+
+/* Numbered front-end walkthrough: the markers carry the ordering, so the list
+   only needs room to hang them outside the text column. */
+.architecture-steps {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding-left: 1.5em;
+}
+
+.architecture-follow {
+  margin: 18px 0 0;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+/* A stage card per compiler phase, stacked inside the front-end and back-end panels. */
+.stages {
+  display: grid;
+  gap: 16px;
+}
+
+.stage {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(4, 9, 18, 0.45);
+}
+
+.stage > h3 {
+  margin-top: 0;
+}
+
+.stage-caption {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* The grammar a stage follows, then what the stage produced. Both take the full width:
+   grammar rules run long, and a narrow column turned every one of them into a
+   horizontal scroll. */
+.stage-split {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.stage-label {
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-family: var(--mono);
+}
+
+textarea, pre {
+  margin: 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background: rgba(4, 9, 18, 0.92);
+  color: var(--code);
+  font-family: var(--mono);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+textarea {
+  width: 100%;
+  min-height: 340px;
+  padding: 18px;
+  resize: vertical;
+}
+
+/* Source on the left, the program's input and output on the right. */
+.workbench {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+}
+
+.run-column {
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+  gap: 8px;
+  min-height: 340px;
+}
+
+.field-label {
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.field-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.run-status {
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
+.run-status.failed {
+  color: #fecaca;
+}
+
+.stdin {
+  min-height: 96px;
+  padding: 12px 14px;
+}
+
+.output-pane {
+  min-height: 0;
+  overflow: auto;
+  padding: 14px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.output-pane:empty::before {
+  content: "The program printed nothing.";
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* The grammar panels: the same scrolling surface as the assembly listing, but taller than
+   the .code-block artifact panes below them. Both grammars run past a hundred lines, so
+   this pane is always scrolling and every extra pixel is a rule the reader does not have
+   to scroll for. */
+.reference-code {
+  min-height: 320px;
+  max-height: 580px;
+  overflow: auto;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background: rgba(4, 9, 18, 0.92);
+  tab-size: 4;
+}
+
+/* The supported subset, as chips instead of a wall of prose. It owns a whole panel
+   now, so the two lists sit side by side and the card grows to fit instead of
+   scrolling. */
+.syntax-card {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 18px 28px;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background: rgba(4, 9, 18, 0.92);
+}
+
+.syntax-section h4 {
+  margin: 0 0 12px;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+.syntax-section.missing h4 {
+  color: var(--muted);
+}
+
+.syntax-row + .syntax-row {
+  margin-top: 10px;
+}
+
+.syntax-label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.chip {
+  padding: 3px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  color: var(--code);
+  white-space: nowrap;
+}
+
+/* Things the compiler rejects: dimmed and struck through, so the two lists never read
+   alike at a glance. */
+.chip-missing {
+  border-style: dashed;
+  background: transparent;
+  color: #7c88a3;
+  text-decoration: line-through;
+  text-decoration-color: rgba(239, 68, 68, 0.55);
+}
+
+.syntax-note {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+/* Line-number gutter, shared by the editor and the assembly listing. It is a plain
+   column of numbers rather than text prefixed to each line, so selecting the code
+   never picks the numbers up. Sticky so it survives horizontal scrolling. */
+.gutter {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  margin: 0;
+  padding: 16px 10px 16px 14px;
+  border: 0;
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.025);
+  color: #4a5a7a;
+  text-align: right;
+  white-space: pre;
+  overflow: hidden;
+  min-width: 3.5ch;
+  user-select: none;
+}
+
+/* Syntax-highlighted editor: a coloured <pre> sits behind a transparent
+   textarea, so the caret and selection stay native. Both layers must keep
+   identical metrics or the text drifts out of alignment. The box chrome lives on
+   the wrapper now, so the gutter and the code read as one surface. */
+.editor {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background: rgba(4, 9, 18, 0.92);
+  overflow: hidden;
+}
+
+.editor-code {
+  position: relative;
+}
+
+/* No soft wrapping on either layer: a wrapped line would reflow differently
+   once the textarea grows a scrollbar, and the two layers would drift apart.
+   Long lines scroll horizontally instead, and app.js keeps the offsets in sync. */
+.editor-highlight,
+.editor textarea {
+  /* Same box as .numbered-code, so the gutter's padding lines both surfaces up. */
+  padding: 16px 16px 16px 12px;
+  white-space: pre;
+  overflow-wrap: normal;
+  tab-size: 2;
+}
+
+.editor-highlight {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.editor textarea {
+  position: relative;
+  z-index: 1;
+  display: block;
+  overflow: auto;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--accent);
+}
+
+.editor textarea::selection {
+  background: rgba(34, 211, 238, 0.28);
+}
+
+/* The floating editor. It reuses .editor wholesale, so the dock only has to supply the
+   card around it and a height, and the two views cannot drift apart in appearance. */
+.editor-dock {
+  position: fixed;
+  z-index: 40;
+  top: 24px;
+  right: 20px;
+  width: min(440px, calc(100vw - 40px));
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(9, 14, 27, 0.86);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(18px);
+  /* Out of sight until the panel's editor scrolls away. visibility rather than display
+     so the card can fade, and so its textarea leaves the tab order while hidden. */
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-8px) scale(0.98);
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+}
+
+.editor-dock.is-visible {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+}
+
+/* The whole bar toggles, so the title is as good a target as the button. */
+.dock-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.dock-title {
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.dock-toggle {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.dock-toggle:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.09);
+}
+
+/* Half a square with two of its borders: pointing down it minimizes, up it maximizes. */
+.dock-chevron {
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg) translate(-1px, -1px);
+}
+
+.editor-dock.is-minimized .dock-chevron {
+  transform: rotate(-135deg) translate(-1px, -1px);
+}
+
+.dock-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Collapsed, the card shrinks to its bar: a full-width strip with nothing under it reads
+   as a panel that failed to load rather than as a minimized one. */
+.editor-dock.is-minimized {
+  width: auto;
+}
+
+.editor-dock.is-minimized .dock-body {
+  display: none;
+}
+
+/* The panel's editor is 340px tall at least; this one answers to the viewport instead,
+   and stays drag-resizable from its bottom edge. */
+.editor-dock textarea {
+  min-height: 0;
+  height: clamp(200px, 42vh, 480px);
+}
+
+.dock-run {
+  padding: 10px 18px;
+  font-size: 0.92rem;
+  box-shadow: 0 10px 22px rgba(249, 115, 22, 0.28);
+}
+
+/* The token under the pointer in the list, marked in the editor. The highlight layer sits
+   behind a transparent textarea, so a background here reads as if the code itself were
+   marked. */
+.token-hit {
+  border-radius: 4px;
+  background: rgba(249, 115, 22, 0.3);
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.65);
+}
+
+/* Its row in the token list, so it is clear which one is being pointed at. Inline on
+   purpose: a block would take a line of its own inside the <pre> and double the spacing. */
+.token-row:hover {
+  background: rgba(249, 115, 22, 0.16);
+}
+
+.tok-keyword  { color: var(--accent); font-weight: 600; }
+.tok-type     { color: var(--accent-2); }
+.tok-builtin  { color: #c792ea; }
+.tok-string   { color: #7ee787; }
+.tok-number   { color: #ffd479; }
+.tok-literal  { color: #ffd479; font-weight: 600; }
+.tok-comment  { color: #6b7a99; font-style: italic; }
+.tok-operator { color: #ff7ab2; }
+.tok-punct    { color: #8fa3c8; }
+.tok-label    { color: #ff7ab2; font-weight: 600; }
+
+.code-block {
+  tab-size: 4;
+  min-height: 240px;
+  max-height: 420px;
+  overflow: auto;
+  padding: 16px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* AST graph rendered server-side by Graphviz. It fits the panel by default;
+   clicking swaps to full size and the container scrolls, which is the only way
+   to read a large tree. */
+.graph-view {
+  display: grid;
+  place-items: center;
+  max-height: 620px;
+  overflow: auto;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background: rgba(4, 9, 18, 0.92);
+}
+
+.graph-image {
+  max-width: 100%;
+  height: auto;
+  cursor: zoom-in;
+}
+
+.graph-image.zoomed {
+  max-width: none;
+  cursor: zoom-out;
+}
+
+.graph-view .code-block {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 0;
+}
+
+/* Symbol tables: one collapsible card per table, each listing Pascal-style
+   declarations instead of the raw table dump. */
+.symbols {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  align-items: start;
+}
+
+.symbol-group {
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(4, 9, 18, 0.72);
+}
+
+.symbol-group summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #f8fbff;
+}
+
+.symbol-group .count {
+  padding: 1px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 0.75rem;
+}
+
+.symbol-list {
+  display: grid;
+  gap: 9px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.symbol-list code {
+  font-family: var(--mono);
+  font-size: 0.88rem;
+  color: var(--code);
+}
+
+.symbol-list.nested {
+  gap: 7px;
+  margin: 6px 0 0;
+  padding-left: 12px;
+  border-left: 1px solid var(--line);
+}
+
+.nested-title {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.line-badge {
+  margin-left: 9px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+
+/* The MIPS listing is one file. The program's code and the runtime routines share a
+   single scrolling surface with no border between them, and the fold sits inline the
+   way an editor folds a region, so it never reads as a separate document. */
+.listing {
+  max-height: 520px;
+  overflow: auto;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background: rgba(4, 9, 18, 0.92);
+  tab-size: 4;
+}
+
+/* Numbers and code as one grid row per half of the listing. min-width keeps the row
+   as wide as its longest line so the container, not the cell, does the scrolling. */
+.numbered {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  min-width: max-content;
+}
+
+.numbered-code {
+  margin: 0;
+  padding: 16px 16px 16px 12px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
+  /* No wrapping: a wrapped line would take two rows and every number below it
+     would point at the wrong instruction. */
+  white-space: pre;
+}
+
+.listing-fold > summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 16px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.14);
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.14);
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.listing-fold > summary::-webkit-details-marker {
+  display: none;
+}
+
+.listing-fold > summary::before {
+  content: "\25B8";
+  color: var(--accent);
+}
+
+.listing-fold[open] > summary::before {
+  content: "\25BE";
+}
+
+.fold-range {
+  color: #6b7a99;
+}
+
+/* The token list is folded away by default because it is one line per token. */
+.tokens-fold {
+  margin: 0;
+}
+
+.tokens-fold .code-block {
+  margin-top: 10px;
+}
+
+/* Nothing else on the page hints that the rows below react to the pointer. */
+.hover-tip {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-style: italic;
+}
+
+/* Per-built-in documentation, expanded on demand. */
+.doc summary {
+  cursor: pointer;
+}
+
+.doc summary::marker {
+  color: var(--muted);
+}
+
+.doc-text {
+  margin: 7px 0 0 16px;
+  color: var(--muted);
+  font-size: 0.83rem;
+  line-height: 1.55;
+}
+
+.doc-example {
+  margin: 7px 0 2px 16px;
+}
+
+.doc-example code {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 0.8rem;
+  color: var(--code);
+}
+
+.symbol-empty {
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-style: italic;
+}
+
+/* Errors sit under the editor that caused them. Hidden while empty so the panel does
+   not carry a permanent gap at its foot. */
+.issues {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.issues:empty {
+  display: none;
+}
+
+.issue {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.28);
+  color: #fecaca;
+}
+
+.primary-button {
+  border: 0;
+  border-radius: 999px;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, var(--accent), #fbbf24);
+  color: #1b1208;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 14px 30px rgba(249, 115, 22, 0.35);
+}
+
+.primary-button:hover { filter: brightness(1.05); }
+
+article h3 {
+  margin-bottom: 10px;
+  font-size: 0.98rem;
+  color: #f8fbff;
+}
+
+/* Credits and repository. The footer holds the page's only links, so the anchor styling
+   is scoped to it rather than set on every a. */
+.page-footer {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.7;
+}
+
+.page-footer p {
+  margin: 0;
+}
+
+/* Underlined by a border so the rule sits clear of the descenders. */
+.page-footer a {
+  color: var(--accent-2);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(34, 211, 238, 0.35);
+}
+
+.page-footer a:hover {
+  color: var(--text);
+  border-bottom-color: currentColor;
+}
+
+.page-footer a:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 3px;
+}
+
+@media (max-width: 1080px) {
+  .workbench { grid-template-columns: 1fr; }
+  .panel-header.split { flex-direction: column; align-items: flex-start; }
+}

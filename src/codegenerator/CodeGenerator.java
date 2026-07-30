@@ -37,6 +37,10 @@ import types.PrimitiveVariableType;
  */
 public class CodeGenerator {
   /**
+   * Comentário que fecha cada trecho emitido.
+   */
+  private static final String SEPARATOR_COMMENT = "# ----------------";
+  /**
    * StringBuilder que armazena o código MIPS gerado.
    */
   private final StringBuilder mipsTargetCode;
@@ -114,7 +118,8 @@ public class CodeGenerator {
 
     // Auxiliary functions
     indentLevel = 0;
-    emit("");
+    emitBlankLine();
+    emitRuntimeSectionHeader();
     emitIntegerToStringConversionFunction();
     emitRealToStringConversionFunction();
     emitBooleanToStringConversionFunction();
@@ -136,6 +141,64 @@ public class CodeGenerator {
   }
 
   /**
+   * Emite uma linha em branco para separar duas seções.
+   *
+   * <p>Seções como a dos literais de string podem sair vazias, e o separador que vem
+   * depois delas era emitido de qualquer jeito: o resultado eram duas ou três linhas em
+   * branco seguidas. Aqui o separador é descartado quando não há nada para separar, isto
+   * é, quando a saída ainda está vazia ou já termina em branco.
+   *
+   * <p>A linha vai sem indentação: uma linha em branco recuada é só espaço em branco no
+   * fim da linha.
+   */
+  private void emitBlankLine() {
+    // Vale tanto para a saída vazia quanto para a que já termina em branco: nos dois
+    // casos a última linha não tem conteúdo, e não há nada a separar.
+    if (lastLine().isEmpty()) {
+      return;
+    }
+
+    mipsTargetCode.append("\n");
+  }
+
+  /**
+   * Emite o comentário que fecha um trecho.
+   *
+   * <p>Os trechos se encaixam: um built-in termina empilhando o resultado, e
+   * {@link #emitPushTemp(String)} já fecha o dele com este mesmo comentário. Repetir o
+   * separador nesse ponto só duplicaria a linha, então ele é emitido apenas quando a
+   * última linha ainda não é ele.
+   */
+  private void emitSeparatorComment() {
+    if (lastLine().equals(SEPARATOR_COMMENT)) {
+      return;
+    }
+
+    emit(SEPARATOR_COMMENT);
+  }
+
+  /**
+   * Devolve a última linha emitida, sem a indentação nem o \n do fim.
+   *
+   * @return A última linha, ou uma string vazia se nada foi emitido ou se ela está em
+   *         branco.
+   */
+  private String lastLine() {
+    int end = mipsTargetCode.length();
+
+    if (end == 0) {
+      return "";
+    }
+
+    // Toda linha emitida termina em \n, então o \n final encerra a última linha e o
+    // anterior a ele marca onde ela começa.
+    int lineEnd = mipsTargetCode.charAt(end - 1) == '\n' ? end - 1 : end;
+    int lineStart = lineEnd == 0 ? 0 : mipsTargetCode.lastIndexOf("\n", lineEnd - 1) + 1;
+
+    return mipsTargetCode.substring(lineStart, lineEnd).strip();
+  }
+
+  /**
    * Emite o cabeçalho do código MIPS, incluindo a seção de dados e a seção de texto.
    */
   private void emitHeader() {
@@ -145,12 +208,12 @@ public class CodeGenerator {
 
     emit("__bool_true: .asciiz \"true\"");
     emit("__bool_false: .asciiz \"false\"");
-    emit("");
+    emitBlankLine();
 
     for (Integer key : stringLiteralsTable.keySet()) {
       emit("__string%d: .asciiz \"%s\"".formatted(key, stringLiteralsTable.get(key)));
     }
-    emit("");
+    emitBlankLine();
 
     for (VariableTableEntry variable : globalVariablesTable.toList()) {
       if (variable.type instanceof ArrayVariableType arrayVariableType) {
@@ -164,10 +227,10 @@ public class CodeGenerator {
 
     indentLevel--;
 
-    emit("");
+    emitBlankLine();
     emit(".text");
     emit(".globl %s".formatted(programNode.programIdentifier.toLowerCase()));
-    emit("");
+    emitBlankLine();
     emit("%s:".formatted(programNode.programIdentifier.toLowerCase()));
   }
 
@@ -177,7 +240,7 @@ public class CodeGenerator {
   private void emitFooter() {
     indentLevel = 0;
 
-    emit("");
+    emitBlankLine();
     emit("__exit_program:");
 
     indentLevel = 1;
@@ -187,11 +250,38 @@ public class CodeGenerator {
   }
 
   /**
+   * Emite o cabeçalho que separa o código traduzido do programa das rotinas de apoio.
+   *
+   * <p>Tudo o que vem depois é idêntico em qualquer programa compilado, então o
+   * cabeçalho avisa o leitor de que aquele trecho não veio do código Pascal.
+   */
+  private void emitRuntimeSectionHeader() {
+    emit(Constants.RUNTIME_SECTION_MARKER + " ============================================");
+    emit("# Emitted for every program; none of it is a translation of the Pascal source.");
+    emit("# These routines cover what MIPS has no single instruction for: turning numbers");
+    emit("# and booleans into text, comparing strings, and concatenating them.");
+    emit("#");
+    emit("# All of them allocate with syscall 9 (sbrk) and never free: the compiler has no");
+    emit("# garbage collector, so a long-running loop over strings will keep growing.");
+    emit("# ===========================================================================");
+    emitBlankLine();
+  }
+
+  /**
    * Emite a função auxiliar para concatenar duas strings. A função assume que os endereços das duas strings estão nos registradores $a0 e $a1. O endereço da nova string concatenada será retornado em $v0.
    */
   private void emitConcatStringWithString() {
     emit("""
-        __concat_string_with_string: #a0 = address of first string, $a1 = address of second string
+        # ------------------------------------------------------------
+        # __concat_string_with_string : joins two strings into a new one
+        #   $a0 = address of the left string
+        #   $a1 = address of the right string
+        #   returns in $v0: address of a fresh null-terminated string
+        # method  : walks both strings to measure them, allocates
+        #           len(left) + len(right) + 1 bytes, then copies each in turn
+        # clobbers: $t0, $t1, $t2, $t3, $a0, $a1  (uses 16 bytes of stack)
+        # ------------------------------------------------------------
+        __concat_string_with_string:
           subu $sp, $sp, 16
           sw $ra, 12($sp)
           sw $a0, 8($sp)
@@ -260,7 +350,17 @@ public class CodeGenerator {
    */
   private void emitConcatCharWithString() {
     emit("""
-        __concat_char_with_string: #a0 = char, $a1 = address of string
+        # ------------------------------------------------------------
+        # __concat_char_with_string : puts a character in front of a string
+        #   $a0 = the character
+        #   $a1 = address of the string
+        #   returns in $v0: address of a fresh null-terminated string
+        # method  : measures the string, allocates len + 2 bytes (one for
+        #           the character, one for the terminator), writes the
+        #           character first and copies the string after it
+        # clobbers: $t0, $t1, $t2, $a0, $a1  (uses 16 bytes of stack)
+        # ------------------------------------------------------------
+        __concat_char_with_string:
           subu $sp, $sp, 16
           sw $ra, 12($sp)
           sw $a0, 8($sp)
@@ -313,7 +413,17 @@ public class CodeGenerator {
    */
   private void emitConcatStringWithChar() {
     emit("""
-        __concat_string_with_char: #a0 = address of string, $a1 = char
+        # ------------------------------------------------------------
+        # __concat_string_with_char : appends a character to a string
+        #   $a0 = address of the string
+        #   $a1 = the character
+        #   returns in $v0: address of a fresh null-terminated string
+        # method  : measures the string, allocates len + 2 bytes, copies
+        #           the string and writes the character just before the
+        #           terminator
+        # clobbers: $t0, $t1, $t2, $a0, $a1  (uses 16 bytes of stack)
+        # ------------------------------------------------------------
+        __concat_string_with_char:
           subu $sp, $sp, 16
           sw $ra, 12($sp)
           sw $a0, 8($sp)
@@ -363,7 +473,18 @@ public class CodeGenerator {
    */
   private void emitIntegerToStringConversionFunction() {
     emit("""
-        __itoa:                       # $a0 = integer
+        # ------------------------------------------------------------
+        # __itoa : integer -> decimal text
+        #   $a0 = signed integer
+        #   returns in $v0: address of a null-terminated string
+        # method  : allocates 12 bytes, the exact room needed by the
+        #           longest result "-2147483648" plus its terminator, then
+        #           fills it right to left with n mod 10, adding the sign
+        #           last. n = 0 is special-cased, since the loop would
+        #           otherwise emit nothing
+        # clobbers: $t0, $t2, $t3, $t5, $t6, $a0
+        # ------------------------------------------------------------
+        __itoa:
           move $t0, $a0             # $t0 = n  (save it; syscall 9 needs $a0)
           li $v0, 9                 # allocate a fixed 12-byte buffer
           li $a0, 12                #   max is "-2147483648\\0" = 12 bytes exactly
@@ -412,7 +533,20 @@ public class CodeGenerator {
    */
   private void emitRealToStringConversionFunction() {
     emit("""
-        __rtoa:                       # $a0 = real (float bits)
+        # ------------------------------------------------------------
+        # __rtoa : real -> decimal text
+        #   $a0 = real, as raw single-precision bits
+        #   returns in $v0: address of a null-terminated string
+        # method  : writes the sign, splits the value into integer and
+        #           fractional parts, hands the integer part to __itoa,
+        #           then scales the fraction by 1e6 and rounds it. Always
+        #           prints exactly 6 fractional digits, padded with zeros;
+        #           a fraction that rounds up to 1.0 carries into the
+        #           integer part
+        # calls   : __itoa
+        # clobbers: $t0..$t4, $f20..$f28, $a0  (saves $ra and $s0-$s3)
+        # ------------------------------------------------------------
+        __rtoa:
           addiu $sp, $sp, -20       # frame: save $ra + $s0-$s3
           sw $ra, 0($sp)
           sw $s0, 4($sp)
@@ -511,7 +645,16 @@ public class CodeGenerator {
    */
   private void emitBooleanToStringConversionFunction() {
     emit("""
-        __btoa:                       # $a0 = boolean (0 or 1)
+        # ------------------------------------------------------------
+        # __btoa : boolean -> text
+        #   $a0 = 0 for false, anything else for true
+        #   returns in $v0: address of a null-terminated string
+        # note    : unlike the other converters this allocates nothing. It
+        #           returns __bool_true / __bool_false straight out of the
+        #           .data section, so the result must never be written to
+        # clobbers: $v0
+        # ------------------------------------------------------------
+        __btoa:
           beqz $a0, __btoa_false
           la $v0, __bool_true
           jr $ra
@@ -572,7 +715,7 @@ public class CodeGenerator {
     emit("subu $sp, $sp, 4");
     emit("sw %s, 0($sp)".formatted(register));
 
-    emit("# ----------------");
+    emitSeparatorComment();
   }
 
   /**
@@ -586,7 +729,7 @@ public class CodeGenerator {
     emit("lw %s, 0($sp)".formatted(register));
     emit("addu $sp, $sp, 4");
 
-    emit("# ----------------");
+    emitSeparatorComment();
   }
 
   /**
@@ -614,7 +757,7 @@ public class CodeGenerator {
       currentExitLabel = "__epilogue_%d".formatted(uniqueLabelId);
 
       indentLevel = 0;
-      emit("");
+      emitBlankLine();
       emit("%s:".formatted(procedureOrFunction.identifier.toLowerCase()));
 
       indentLevel = 1;
@@ -676,7 +819,7 @@ public class CodeGenerator {
     }
 
     emit("%s:".formatted(endIfLabel));
-    emit("");
+    emitBlankLine();
   }
 
   /**
@@ -1459,11 +1602,20 @@ public class CodeGenerator {
   private void executeBuiltInProcedureOrFunction(String identifier, PrimitiveTypeEnum argType) {
     switch (identifier.toLowerCase()) {
     case "write" -> {
+      emitBlankLine();
+      emit("# write");
+
       emitPopTemp("$a0");
       emit("li $v0, 4");
       emit("syscall");
+
+      emitSeparatorComment();
+      emitBlankLine();
     }
     case "writeln" -> {
+      emitBlankLine();
+      emit("# writeln");
+
       emitPopTemp("$a0");
       emit("li $v0, 4");
       emit("syscall");
@@ -1471,26 +1623,50 @@ public class CodeGenerator {
       emit("li $a0, 10");
       emit("li $v0, 11");
       emit("syscall");
+
+      emitSeparatorComment();
+      emitBlankLine();
     }
     case "itos" -> {
+      emitBlankLine();
+      emit("# itos");
+
       emitPopTemp("$a0");
       emit("jal __itoa");
       emit("move $t0, $v0");
       emitPushTemp("$t0");
+
+      emitSeparatorComment();
+      emitBlankLine();
     }
     case "rtos" -> {
+      emitBlankLine();
+      emit("# rtos");
+
       emitPopTemp("$a0");
       emit("jal __rtoa");
       emit("move $t0, $v0");
       emitPushTemp("$t0");
+
+      emitSeparatorComment();
+      emitBlankLine();
     }
     case "btos" -> {
+      emitBlankLine();
+      emit("# btos");
+
       emitPopTemp("$a0");
       emit("jal __btoa");
       emit("move $t0, $v0");
       emitPushTemp("$t0");
+
+      emitSeparatorComment();
+      emitBlankLine();
     }
     case "abs" -> {
+      emitBlankLine();
+      emit("# abs");
+
       emitPopTemp("$t0");
       if (argType == PrimitiveTypeEnum.REAL) {
         emit("mtc1 $t0, $f0");
@@ -1501,8 +1677,14 @@ public class CodeGenerator {
         emit("abs $t0, $t0");
       }
       emitPushTemp("$t0");
+
+      emitSeparatorComment();
+      emitBlankLine();
     }
     case "sqr" -> {
+      emitBlankLine();
+      emit("# sqr");
+
       emitPopTemp("$t0");
       if (argType == PrimitiveTypeEnum.REAL) {
         emit("mtc1 $t0, $f0");
@@ -1513,42 +1695,85 @@ public class CodeGenerator {
         emit("mul $t0, $t0, $t0");
       }
       emitPushTemp("$t0");
+
+      emitSeparatorComment();
+      emitBlankLine();
     }
     case "sqrt" -> {
+      emitBlankLine();
+      emit("# sqrt");
+
       emitPopTemp("$t0");
       emit("mtc1 $t0, $f0");
       emit("sqrt.s $f0, $f0");
       emit("mfc1 $t0, $f0");
       emitPushTemp("$t0");
+
+      emitSeparatorComment();
+      emitBlankLine();
     }
     case "trunc" -> {
+      emitBlankLine();
+      emit("# trunc");
+
       emitPopTemp("$t0");
       emit("mtc1 $t0, $f0");
       emit("trunc.w.s $f0, $f0");
       emit("mfc1 $t0, $f0");
       emitPushTemp("$t0");
+
+      emitSeparatorComment();
+      emitBlankLine();
     }
     case "round" -> {
+      emitBlankLine();
+      emit("# round");
+
       emitPopTemp("$t0");
       emit("mtc1 $t0, $f0");
       emit("round.w.s $f0, $f0");
       emit("mfc1 $t0, $f0");
       emitPushTemp("$t0");
+
+      emitSeparatorComment();
+      emitBlankLine();
     }
+    // Um único case para os dois: o nome vem do identificador, não do rótulo.
     case "ord", "chr" -> {
+      emitBlankLine();
+      emit("# %s".formatted(identifier.toLowerCase()));
+
       emit("# Built-in function %s is a no-op in MIPS assembly".formatted(identifier));
+
+      emitSeparatorComment();
+      emitBlankLine();
     }
     case "succ" -> {
+      emitBlankLine();
+      emit("# succ");
+
       emitPopTemp("$t0");
       emit("addi $t0, $t0, 1");
       emitPushTemp("$t0");
+
+      emitSeparatorComment();
+      emitBlankLine();
     }
     case "pred" -> {
+      emitBlankLine();
+      emit("# pred");
+
       emitPopTemp("$t0");
       emit("addi $t0, $t0, -1");
       emitPushTemp("$t0");
+
+      emitSeparatorComment();
+      emitBlankLine();
     }
     case "length" -> {
+      emitBlankLine();
+      emit("# length");
+
       int uniqueId = labelCounter++;
       String lenLoop = "__len_loop_%d".formatted(uniqueId);
       String lenEnd = "__len_end_%d".formatted(uniqueId);
@@ -1566,8 +1791,14 @@ public class CodeGenerator {
       emit("%s:".formatted(lenEnd));
       emit("sub $t0, $t0, $a0");
       emitPushTemp("$t0");
+
+      emitSeparatorComment();
+      emitBlankLine();
     }
     case "upcase" -> {
+      emitBlankLine();
+      emit("# upcase");
+
       int uniqueId = labelCounter++;
       String skipLabel = "__skip_upcase_%d".formatted(uniqueId);
 
@@ -1582,8 +1813,15 @@ public class CodeGenerator {
 
       emit("%s:".formatted(skipLabel));
       emitPushTemp("$t0");
+
+      emitSeparatorComment();
+      emitBlankLine();
     }
+    // Um único case para os dois: o nome vem do identificador, não do rótulo.
     case "read", "readln" -> {
+      emitBlankLine();
+      emit("# %s".formatted(identifier.toLowerCase()));
+
       emitPopTemp("$a0");
 
       switch (argType) {
@@ -1617,6 +1855,9 @@ public class CodeGenerator {
       }
       default -> throw new RuntimeException("Unsupported type for read/readln operations");
       }
+
+      emitSeparatorComment();
+      emitBlankLine();
     }
     default -> throw new RuntimeException("Unsupported built-in %s".formatted(identifier));
     }
@@ -1670,17 +1911,29 @@ public class CodeGenerator {
   private void handleReadCall(ProcedureCallStatementNode node) {
     String procName = node.procedureIdentifier.toLowerCase();
 
+    // Um read sem argumentos não emite nada, então nem abre um trecho para fechar em
+    // seguida: o cabeçalho só sai quando há código para envolver.
     if (node.arguments.isEmpty()) {
       if (procName.equals("readln")) {
+        emitBlankLine();
+        emit("# readln");
+
         int uniqueId = labelCounter++;
         emit("__readln_empty_loop_%d:".formatted(uniqueId));
         emit("li $v0, 12"); // Syscall 12: lê um único caractere do teclado
         emit("syscall");
         emit("li $t0, 10"); // Código ASCII de '\n' (Enter)
         emit("bne $v0, $t0, __readln_empty_loop_%d".formatted(uniqueId));
+
+        emitSeparatorComment();
+        emitBlankLine();
       }
+
       return;
     }
+
+    emitBlankLine();
+    emit("# %s".formatted(procName));
 
     for (ExpressionNode argNode : node.arguments) {
       PrimitiveTypeEnum argType = argNode.type.basePrimitiveType;
@@ -1842,5 +2095,8 @@ public class CodeGenerator {
       default -> throw new RuntimeException("Tipo não suportado para leitura: " + argType);
       }
     }
+
+    emitSeparatorComment();
+    emitBlankLine();
   }
 }
