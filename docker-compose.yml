@@ -12,8 +12,6 @@ services:
     read_only: true
     tmpfs:
       - /tmp
-    security_opt:
-      - no-new-privileges:true
     mem_limit: 1g
     cpus: 2
 
