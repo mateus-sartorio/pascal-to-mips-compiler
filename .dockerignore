@@ -1,0 +1,13 @@
+# The image builds from source; everything below is either rebuilt inside it or has no
+# business being there.
+target/
+java-bin/
+bin/
+src/parser/
+src/.antlr/
+.git/
+tests/
+docs/
+*.md
+Makefile
+test*.sh

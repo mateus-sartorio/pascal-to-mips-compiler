@@ -1,0 +1,33 @@
+services:
+  app:
+    build: .
+    image: pascal-to-mips-compiler
+    container_name: pascal-to-mips-compiler
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+    # The page compiles and runs code that strangers typed, so the container gives that
+    # code as little as it can. The application itself only ever writes temp files.
+    read_only: true
+    tmpfs:
+      - /tmp
+    mem_limit: 1g
+    cpus: 2
+
+    # No curl or wget in a JRE image, so bash speaks HTTP itself. Actuator is already a
+    # dependency, and /actuator/health answers UP only once the app is really serving.
+    healthcheck:
+      test:
+        - CMD
+        - bash
+        - -c
+        - >-
+          exec 3<>/dev/tcp/127.0.0.1/8080 &&
+          printf 'GET /actuator/health HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3 &&
+          grep -q '"status":"UP"' <&3
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      # The first check waits for the JVM to boot; failures here do not count as retries.
+      start_period: 40s
