@@ -280,7 +280,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
     if (identifier.equalsIgnoreCase(programIdentifier)) {
       System.out.printf("SEMANTIC ERROR (%d): Program heading '%s' cannot be used.\n", identifierToken.getLine(), programIdentifier);
 
-      throw new RuntimeException("SEMANTIC ERROR");
+      throw new SemanticErrorException();
     }
 
     BuiltInProceduresAndFunctionsEntry builtInProceduresAndFunctionsEntry = builtInProceduresAndFunctionsTable.get(identifier);
@@ -288,7 +288,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
     if (builtInProceduresAndFunctionsEntry != null) {
       System.out.printf("SEMANTIC ERROR (%d): '%s' is a built-in %s.\n", identifierToken.getLine(), builtInProceduresAndFunctionsEntry.identifier, builtInProceduresAndFunctionsEntry.type.toString());
 
-      throw new RuntimeException("SEMANTIC ERROR");
+      throw new SemanticErrorException();
     }
 
     VariableTableEntry globalVariableEntry = globalVariablesTable.get(identifier);
@@ -296,7 +296,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
     if (globalVariableEntry != null) {
       System.out.printf("SEMANTIC ERROR (%d): Global variable '%s' was already declared at line %d.\n", identifierToken.getLine(), globalVariableEntry.identifier, globalVariableEntry.line);
 
-      throw new RuntimeException("SEMANTIC ERROR");
+      throw new SemanticErrorException();
     }
 
     ProceduresAndFunctionsEntry proceduresAndFunctionsEntry = proceduresAndFunctionsTable.get(identifier);
@@ -304,7 +304,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
     if (proceduresAndFunctionsEntry != null) {
       System.out.printf("SEMANTIC ERROR (%d): %s '%s' was already declared at line %d.\n", identifierToken.getLine(), proceduresAndFunctionsEntry.type.toString(), proceduresAndFunctionsEntry.identifier, proceduresAndFunctionsEntry.line);
 
-      throw new RuntimeException("SEMANTIC ERROR");
+      throw new SemanticErrorException();
     }
   }
 
@@ -330,13 +330,13 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
     if (parameterEntry != null) {
       System.out.printf("SEMANTIC ERROR (%d): Parameter '%s' of %s '%s' was already declared at line %d.\n", identifierToken.getLine(), identifier, procedureOrFunctionEntry.type.toString(), procedureOrFunctionIdentifier, parameterEntry.line);
 
-      throw new RuntimeException("SEMANTIC ERROR");
+      throw new SemanticErrorException();
     }
 
     if (variableEntry != null) {
       System.out.printf("SEMANTIC ERROR (%d): Local variable '%s' of %s '%s' was already declared at line %d.\n", identifierToken.getLine(), identifier, procedureOrFunctionEntry.type.toString(), procedureOrFunctionIdentifier, variableEntry.line);
 
-      throw new RuntimeException("SEMANTIC ERROR");
+      throw new SemanticErrorException();
     }
   }
 
@@ -351,7 +351,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
   private void unaryOperationTypeError(int line, String operation, VariableType type) {
     System.out.printf("SEMANTIC ERROR (%d): incompatible type for operator '%s', type is '%s'.\n", line, operation, type.toString());
 
-    throw new RuntimeException("SEMANTIC ERROR");
+    throw new SemanticErrorException();
   }
 
   /**
@@ -366,7 +366,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
   private void binaryOperationTypeError(int line, String operation, VariableType leftType, VariableType rightType) {
     System.out.printf("SEMANTIC ERROR (%d): incompatible types for operator '%s', LHS is '%s' and RHS is '%s'.\n", line, operation, leftType.toString(), rightType.toString());
 
-    throw new RuntimeException("SEMANTIC ERROR");
+    throw new SemanticErrorException();
   }
 
   /**
@@ -458,7 +458,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
       if (upperBound <= lowerBound) {
         System.out.printf("SEMANTIC ERROR (%d): End index (%d) must be bigger than start index (%d) in declaration of array variables.\n", arrayType.ARRAY().getSymbol().getLine(), upperBound, lowerBound);
 
-        throw new RuntimeException("SEMANTIC ERROR");
+        throw new SemanticErrorException();
       }
 
       type = new ArrayVariableType(primitiveType, lowerBound, upperBound);
@@ -553,7 +553,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
     if (!(returnType instanceof PrimitiveVariableType)) {
       System.out.printf("SEMANTIC ERROR (%d): Function '%s' return type should be a primitive type.\n", line, functionIdentifier);
 
-      throw new RuntimeException("SEMANTIC ERROR");
+      throw new SemanticErrorException();
     }
 
     proceduresAndFunctionsTable.addFunction(functionIdentifier, line, returnType.basePrimitiveType);
@@ -617,7 +617,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
       if (!(expressionReturnType instanceof PrimitiveVariableType) || !(expressionReturnType.basePrimitiveType == PrimitiveTypeEnum.INTEGER)) {
         System.out.printf("SEMANTIC ERROR (%d): indexing expression must be an integer.\n", expression.start.getLine());
 
-        throw new RuntimeException("SEMANTIC ERROR");
+        throw new SemanticErrorException();
       }
 
       identifier = indexedVariable.IDENTIFIER();
@@ -635,7 +635,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
       if (!(globalVariableEntry.type instanceof ArrayVariableType || (globalVariableEntry.type instanceof PrimitiveVariableType && globalVariableEntry.type.basePrimitiveType == PrimitiveTypeEnum.STRING))) {
         System.out.printf("SEMANTIC ERROR (%d): expression must be indexable.\n", context.start.getLine());
 
-        throw new RuntimeException("SEMANTIC ERROR");
+        throw new SemanticErrorException();
       }
 
       if (globalVariableEntry.type instanceof PrimitiveVariableType && globalVariableEntry.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
@@ -668,7 +668,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
           if (!(parameterEntry.type instanceof ArrayVariableType || (parameterEntry.type instanceof PrimitiveVariableType && parameterEntry.type.basePrimitiveType == PrimitiveTypeEnum.STRING))) {
             System.out.printf("SEMANTIC ERROR (%d): expression must be indexable.\n", context.start.getLine());
 
-            throw new RuntimeException("SEMANTIC ERROR");
+            throw new SemanticErrorException();
           }
 
           if (parameterEntry.type instanceof PrimitiveVariableType && parameterEntry.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
@@ -688,7 +688,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
           if (!(localEntry.type instanceof ArrayVariableType || (localEntry.type instanceof PrimitiveVariableType && localEntry.type.basePrimitiveType == PrimitiveTypeEnum.STRING))) {
             System.out.printf("SEMANTIC ERROR (%d): expression must be indexable.\n", context.start.getLine());
 
-            throw new RuntimeException("SEMANTIC ERROR");
+            throw new SemanticErrorException();
           }
 
           if (localEntry.type instanceof PrimitiveVariableType && localEntry.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
@@ -717,7 +717,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
             if (!(parameterEntry.type instanceof ArrayVariableType || (parameterEntry.type instanceof PrimitiveVariableType && parameterEntry.type.basePrimitiveType == PrimitiveTypeEnum.STRING))) {
               System.out.printf("SEMANTIC ERROR (%d): expression must be indexable.\n", context.start.getLine());
 
-              throw new RuntimeException("SEMANTIC ERROR");
+              throw new SemanticErrorException();
             }
 
             if (parameterEntry.type instanceof PrimitiveVariableType && parameterEntry.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
@@ -737,7 +737,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
             if (!(localEntry.type instanceof ArrayVariableType || (localEntry.type instanceof PrimitiveVariableType && localEntry.type.basePrimitiveType == PrimitiveTypeEnum.STRING))) {
               System.out.printf("SEMANTIC ERROR (%d): expression must be indexable.\n", context.start.getLine());
 
-              throw new RuntimeException("SEMANTIC ERROR");
+              throw new SemanticErrorException();
             }
 
             if (localEntry.type instanceof PrimitiveVariableType && localEntry.type.basePrimitiveType == PrimitiveTypeEnum.STRING) {
@@ -755,7 +755,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
     System.out.printf("SEMANTIC ERROR (%d): Variable '%s' was not declared.\n", identifier.getSymbol().getLine(), variableIdentifier);
 
-    throw new RuntimeException("SEMANTIC ERROR");
+    throw new SemanticErrorException();
   }
 
   /**
@@ -798,7 +798,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
     if (!variableType.isOrdinal()) {
       System.out.printf("SEMANTIC ERROR (%d): Variable '%s' should be an ordinal type.\n", identifierToken.getLine(), identifierToken.getText());
 
-      throw new RuntimeException("SEMANTIC ERROR");
+      throw new SemanticErrorException();
     }
   }
 
@@ -813,7 +813,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
     if (leftType.basePrimitiveType != rightType.basePrimitiveType) {
       System.out.printf("SEMANTIC ERROR (%d): control variable type is '%s' and loop bounds types are '%s'.\n", line, leftType.toString(), rightType.toString());
 
-      throw new RuntimeException("SEMANTIC ERROR");
+      throw new SemanticErrorException();
     }
   }
 
@@ -838,7 +838,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
     if (!(beginExpression instanceof PrimitiveVariableType) || (beginExpression.basePrimitiveType != endExpression.basePrimitiveType)) {
       System.out.printf("SEMANTIC ERROR (%d): incompatible begin and end variable types: %s and %s.\n", context.FOR().getSymbol().getLine(), beginExpression.toString(), endExpression.toString());
 
-      throw new RuntimeException("SEMANTIC ERROR");
+      throw new SemanticErrorException();
     }
 
     boolean isDownTo = context.DOWNTO() != null;
@@ -863,13 +863,13 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
       if (isDownTo && !isBeginBiggerThanEnd) {
         System.out.printf("SEMANTIC ERROR (%d): incompatible begin and end variable values: %s downto %s.\n", context.FOR().getSymbol().getLine(), beginExpressionWithValue.value.toString(), endExpressionWithValue.value.toString());
 
-        throw new RuntimeException("SEMANTIC ERROR");
+        throw new SemanticErrorException();
       }
       else
         if (!isDownTo && !isBeginSmallerThanEnd) {
           System.out.printf("SEMANTIC ERROR (%d): incompatible begin and end variable values: %s to %s.\n", context.FOR().getSymbol().getLine(), beginExpressionWithValue.value.toString(), endExpressionWithValue.value.toString());
 
-          throw new RuntimeException("SEMANTIC ERROR");
+          throw new SemanticErrorException();
         }
     }
 
@@ -924,7 +924,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
 
     System.out.printf("SEMANTIC ERROR (%d): Variable '%s' was not declared.\n", identifier.getSymbol().getLine(), variableIdentifier);
 
-    throw new RuntimeException("SEMANTIC ERROR");
+    throw new SemanticErrorException();
   }
 
   /**
@@ -942,14 +942,14 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
     if (leftType instanceof PrimitiveVariableType && leftType.basePrimitiveType == PrimitiveTypeEnum.CHAR && leftType.isIndexed) {
       System.out.printf("SEMANTIC ERROR (%d): string cannot be indexed in lhs expression!\n", context.ASSIGNMENT().getSymbol().getLine());
 
-      throw new RuntimeException("SEMANTIC ERROR");
+      throw new SemanticErrorException();
     }
 
     if (leftType instanceof ArrayVariableType || rightType instanceof ArrayVariableType) {
       if (!rightType.isEquivalent(leftType)) {
         System.out.printf("SEMANTIC ERROR (%d): incompatible type: type expected is %s, and the type is %s!\n", context.ASSIGNMENT().getSymbol().getLine(), leftType.toString(), rightType.toString());
 
-        throw new RuntimeException("SEMANTIC ERROR");
+        throw new SemanticErrorException();
       }
 
       return leftType;
@@ -960,7 +960,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
     if (returnType == PrimitiveTypeEnum.NO_TYPE) {
       System.out.printf("SEMANTIC ERROR (%d): Assignment statement has incompatible types.\n", context.ASSIGNMENT().getSymbol().getLine());
 
-      throw new RuntimeException("SEMANTIC ERROR");
+      throw new SemanticErrorException();
     }
 
     return new PrimitiveVariableType(returnType);
@@ -979,7 +979,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
    * @return Um objeto PrimitiveVariableType representando o tipo de retorno da função ou procedimento.
    */
   private PrimitiveVariableType checkParameterList(Actual_parameter_listContext actualParameterList, List<VariableTableEntry> parametersList, PrimitiveTypeEnum returnType, String entryIdentifier, int line, ProcedureOrFunctionEnum type) {
-    if (actualParameterList == null && parametersList.isEmpty()) {
+    if (parametersList.isEmpty()) {
       return new PrimitiveVariableType(returnType);
     }
 
@@ -988,7 +988,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
     if (actualParameters.size() != parametersList.size()) {
       System.out.printf("SEMANTIC ERROR (%d): Invalid number of arguments to procedure '%s'.\n", line, entryIdentifier);
 
-      throw new RuntimeException("SEMANTIC ERROR");
+      throw new SemanticErrorException();
     }
 
     int i = 0;
@@ -999,7 +999,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
       if (!actualParameterType.isEquivalent(parameter.type)) {
         System.out.printf("SEMANTIC ERROR (%d): Invalid type '%s' for parameter '%s' of %s '%s'.\n", line, actualParameterType.toString(), parameter.identifier, type.toString(), entryIdentifier);
 
-        throw new RuntimeException("SEMANTIC ERROR");
+        throw new SemanticErrorException();
       }
 
       i++;
@@ -1029,19 +1029,19 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
           Variable_accessContext varAccess = getVariableAccess(actualParameter);
           if (varAccess == null) {
             System.out.printf("SEMANTIC ERROR (%d): Arguments of '%s' must be variables (L-Value).\n", actualParameter.start.getLine(), procedureName);
-            throw new RuntimeException("SEMANTIC ERROR");
+            throw new SemanticErrorException();
           }
 
           if (!(actualParameterType instanceof PrimitiveVariableType)) {
             System.out.printf("SEMANTIC ERROR (%d): Invalid type '%s' for argument of procedure '%s'. Only primitive types are allowed.\n", actualParameter.start.getLine(), actualParameterType.toString(), procedureName);
-            throw new RuntimeException("SEMANTIC ERROR");
+            throw new SemanticErrorException();
           }
 
           PrimitiveTypeEnum type = actualParameterType.basePrimitiveType;
           if (type != PrimitiveTypeEnum.INTEGER && type != PrimitiveTypeEnum.REAL && type != PrimitiveTypeEnum.CHAR && type != PrimitiveTypeEnum.STRING && type != PrimitiveTypeEnum.BOOLEAN) {
 
             System.out.printf("SEMANTIC ERROR (%d): Invalid type '%s' for '%s' argument.\n", actualParameter.start.getLine(), actualParameterType.toString(), procedureName);
-            throw new RuntimeException("SEMANTIC ERROR");
+            throw new SemanticErrorException();
           }
         }
       }
@@ -1059,7 +1059,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
     if (procedureEntry == null) {
       System.out.printf("SEMANTIC ERROR (%d): Procedure '%s' is not defined.\n", identifier.getSymbol().getLine(), identifier.getText());
 
-      throw new RuntimeException("SEMANTIC ERROR");
+      throw new SemanticErrorException();
     }
 
     return checkParameterList(actualParameterList, procedureEntry.parameters.toList(), procedureEntry.returnType, procedureEntry.identifier, identifier.getSymbol().getLine(), ProcedureOrFunctionEnum.PROCEDURE);
@@ -1083,7 +1083,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
       if (builtInFunctionEntry.type == ProcedureOrFunctionEnum.PROCEDURE) {
         System.out.printf("SEMANTIC ERROR (%d): Built-in procedure '%s' is not an expression.\n", identifier.getSymbol().getLine(), identifier.getText());
 
-        throw new RuntimeException("SEMANTIC ERROR");
+        throw new SemanticErrorException();
       }
 
       return checkParameterList(actualParameterList, builtInFunctionEntry.parameters.toList(), builtInFunctionEntry.returnType, builtInFunctionEntry.identifier, identifier.getSymbol().getLine(), ProcedureOrFunctionEnum.FUNCTION);
@@ -1094,13 +1094,13 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
     if (functionEntry == null) {
       System.out.printf("SEMANTIC ERROR (%d): Function '%s' is not defined.\n", identifier.getSymbol().getLine(), identifier.getText());
 
-      throw new RuntimeException("SEMANTIC ERROR");
+      throw new SemanticErrorException();
     }
     else
       if (functionEntry.type == ProcedureOrFunctionEnum.PROCEDURE) {
         System.out.printf("SEMANTIC ERROR (%d): Procedure '%s' is not an expression.\n", identifier.getSymbol().getLine(), identifier.getText());
 
-        throw new RuntimeException("SEMANTIC ERROR");
+        throw new SemanticErrorException();
       }
 
     return checkParameterList(actualParameterList, functionEntry.parameters.toList(), functionEntry.returnType, functionEntry.identifier, identifier.getSymbol().getLine(), ProcedureOrFunctionEnum.FUNCTION);
@@ -1126,7 +1126,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
     if (leftType instanceof ArrayVariableType || rightType instanceof ArrayVariableType) {
       System.out.printf("SEMANTIC ERROR (%d): Array types are not compatible with comparison operations.\n", context.relational_operator().start.getLine());
 
-      throw new RuntimeException("SEMANTIC ERROR");
+      throw new SemanticErrorException();
     }
 
     if (leftType.basePrimitiveType == PrimitiveTypeEnum.NO_TYPE || rightType.basePrimitiveType == PrimitiveTypeEnum.NO_TYPE) {
@@ -1414,7 +1414,7 @@ public class SemanticChecker extends PascalParserBaseVisitor<VariableType> {
     if (!(expressionType instanceof PrimitiveVariableType && expressionType.basePrimitiveType == PrimitiveTypeEnum.BOOLEAN)) {
       System.out.printf("SEMANTIC ERROR (%d): if expression must be boolean.\n", context.IF().getSymbol().getLine());
 
-      throw new RuntimeException("SEMANTIC ERROR");
+      throw new SemanticErrorException();
     }
 
     return new PrimitiveVariableType(PrimitiveTypeEnum.NO_TYPE);

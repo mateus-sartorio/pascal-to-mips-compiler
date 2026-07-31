@@ -420,9 +420,10 @@ function routineItem(routine) {
   return `<li><code>${routineSignature(routine)}</code>${lineBadge(routine.line)}${locals}</li>`;
 }
 
+// Just the literal as it was written. The label it answers to in the .data section is the
+// code generator's business, and this stage knows nothing about MIPS yet.
 function literalItem(literal) {
-  return `<li><code><span class="tok-label">${escapeHtml(literal.label)}</span> `
-    + `<span class="tok-string">'${escapeHtml(literal.value)}'</span></code></li>`;
+  return `<li><code><span class="tok-string">'${escapeHtml(literal.value)}'</span></code></li>`;
 }
 
 // Each built-in expands to a one-line explanation, so the list stays scannable but
@@ -529,7 +530,7 @@ function renderGutter(element, lineCount, from) {
 const editors = [
   { textarea: sourceCode, highlight: highlightLayer, gutter: editorGutter },
   { textarea: dockSource, highlight: dockHighlight, gutter: dockGutter }
-];
+].map((editor) => ({ ...editor, box: editor.textarea.closest('.editor') }));
 
 // The source the tokens on screen were produced from, and the token being hovered in
 // that list. The range only means anything against that exact text, so an edit after a
@@ -564,6 +565,13 @@ function highlightPascalAround(code, range) {
 }
 
 function syncEditorScroll(editor) {
+  // Only the textarea gives up height to a horizontal scrollbar, so it can scroll that
+  // much further than the layers behind it. They match its range by padding their own
+  // bottom by the same amount, which is nothing at all when there is no scrollbar.
+  const scrollbarHeight = editor.textarea.offsetHeight - editor.textarea.clientHeight;
+
+  editor.box.style.setProperty('--scrollbar-height', `${scrollbarHeight}px`);
+
   editor.highlight.scrollTop = editor.textarea.scrollTop;
   editor.highlight.scrollLeft = editor.textarea.scrollLeft;
   // The gutter follows vertically only; it sits outside the horizontal scroll.

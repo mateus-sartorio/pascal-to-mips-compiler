@@ -175,8 +175,7 @@ public class CompilerService {
     List<StringLiteralDto> stringLiterals = new ArrayList<>();
 
     for (Integer key : stringLiteralsTable.keySet()) {
-      // O mesmo rótulo emitido na seção .data do MIPS, para ligar as duas visões.
-      stringLiterals.add(new StringLiteralDto("__string" + key, stringLiteralsTable.get(key)));
+      stringLiterals.add(new StringLiteralDto(stringLiteralsTable.get(key)));
     }
 
     List<RoutineDto> builtInRoutines = new ArrayList<>();

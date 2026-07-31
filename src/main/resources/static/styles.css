@@ -380,10 +380,27 @@ textarea {
 .editor {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
+  /* One row, and it may not outgrow the box. Left to size itself the row would take the
+     height of its tallest content — the gutter, which draws every line — while the
+     textarea stopped at its own height and scrolled on its own. The highlight layer fills
+     the row, so the code the reader saw and the code the caret moved through were two
+     different scroll positions. The height lives here, and both layers inherit it. */
+  grid-template-rows: minmax(0, 1fr);
+  height: 340px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 18px;
   background: rgba(4, 9, 18, 0.92);
   overflow: hidden;
+  /* Dragged from the wrapper rather than the textarea, so the layers resize together. */
+  resize: vertical;
+}
+
+/* Grid items default to a content-based minimum height, which is the same trick the row
+   would use to outgrow the box. */
+.editor > .gutter,
+.editor-code {
+  min-height: 0;
+  height: 100%;
 }
 
 .editor-code {
@@ -412,11 +429,24 @@ textarea {
   background: transparent;
 }
 
+/* A horizontal scrollbar takes its height from the textarea alone: the layers behind it
+   have none, so they would hit the end of their scroll a scrollbar early and hold the
+   last line that much too high. app.js measures the bar and they borrow the slack here. */
+.editor-highlight,
+.editor > .gutter {
+  padding-bottom: calc(16px + var(--scrollbar-height, 0px));
+}
+
+/* Exactly the box the highlight layer covers: same height, same origin, one scrollbar
+   between them, which app.js mirrors onto the other two layers. */
 .editor textarea {
   position: relative;
   z-index: 1;
   display: block;
+  height: 100%;
+  min-height: 0;
   overflow: auto;
+  resize: none;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -525,10 +555,10 @@ textarea {
   display: none;
 }
 
-/* The panel's editor is 340px tall at least; this one answers to the viewport instead,
-   and stays drag-resizable from its bottom edge. */
-.editor-dock textarea {
-  min-height: 0;
+/* The panel's editor is a fixed 340px; this one answers to the viewport instead. The
+   height goes on the wrapper, the same place the panel's does, so the textarea keeps
+   filling it exactly. */
+.editor-dock .editor {
   height: clamp(200px, 42vh, 480px);
 }
 
