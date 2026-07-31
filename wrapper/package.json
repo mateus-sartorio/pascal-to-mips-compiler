@@ -1,0 +1,16 @@
+{
+  "name": "pascal-to-mips-wrapper",
+  "version": "1.0.0",
+  "private": true,
+  "description": "HTTPS front for the Pascal to MIPS compiler running on EC2.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "^15.4.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  }
+}
