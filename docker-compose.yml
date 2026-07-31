@@ -7,10 +7,10 @@ services:
       - "8080:8080"
     restart: unless-stopped
 
-    environment:
-      # The server's own heap. Each program the page runs is a separate JVM, capped at
-      # 256 MB by InterpreterService, so this leaves room for one or two beside it.
-      JAVA_OPTS: -XX:MaxRAMPercentage=60
+    # The server's heap is sized by -XX:MaxRAMPercentage in the Dockerfile's entrypoint.
+    # It is not passed as an environment variable: JAVA_TOOL_OPTIONS would be inherited
+    # by the child JVM that runs each submitted program, and its "Picked up ..." notice
+    # would land in that program's stderr, which InterpreterService shows to the user.
 
     # The page compiles and runs code that strangers typed, so the container gives that
     # code as little as it can. The application itself only ever writes temp files.

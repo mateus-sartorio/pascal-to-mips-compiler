@@ -44,8 +44,9 @@ COPY --from=build --chown=compiler:compiler \
 
 EXPOSE 8080
 
-# The heap of the server itself. Every program the page runs is a separate JVM, capped
-# at 256 MB by InterpreterService, so leave room for one or two of those alongside.
-ENV JAVA_OPTS="-XX:MaxRAMPercentage=60"
-
-ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar app.jar"]
+# Exec form, with no shell in between: java is PID 1, so it receives SIGTERM directly,
+# and startup does not depend on /usr/bin/sh surviving the host's AppArmor or seccomp
+# policy. MaxRAMPercentage sizes the heap of the server itself; every program the page
+# runs is a separate JVM, capped at 256 MB by InterpreterService, so this leaves room
+# for one or two of those alongside. Override by giving the container its own command.
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=60", "-jar", "app.jar"]
