@@ -3,10 +3,21 @@
   "configurations": [
     {
       "type": "java",
-      "name": "Main",
+      "name": "Web Application (Launch)",
       "request": "launch",
-      "mainClass": "Main",
-      "args": ["${workspaceFolder}/tests/compiler/valid/23-string-parameter/source.pas", "-compiler"]
+      "mainClass": "webapp.WebApplication",
+      "projectName": "pascal-to-mips-compiler",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "java",
+      "name": "Web Application (Attach)",
+      "request": "attach",
+      "hostName": "127.0.0.1",
+      "port": 5005,
+      "timeout": 30000,
+      "projectName": "pascal-to-mips-compiler",
+      "preLaunchTask": "Start Web Application (Debug Port)"
     }
   ]
 }

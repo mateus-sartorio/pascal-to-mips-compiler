@@ -1,0 +1,11 @@
+# Supported
+Types: integer, real, boolean, char, string, array [1..n] of T, packed
+Declarations: program, var, procedure, function
+Statements: :=, if / then / else, for / to / downto, begin / end, exit, calls
+Operators: + - * / div, = <> < <= > >=, and, or, not
+Built-ins: write, writeln, read, readln, abs, sqr, sqrt, trunc, round, ord, chr, succ, pred, length, upcase, itos, rtos, btos
+
+# Not supported
+Statements: while, repeat / until, case, goto, with
+Declarations: const, type, record, set, pointer, file, nested routines
+Other: mod, var parameters, arrays of arrays

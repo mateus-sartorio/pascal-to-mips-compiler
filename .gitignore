@@ -13,7 +13,7 @@ tests/**/**/**/*.png
 
 # Compiled binaries
 bin/**/*
-src/target
+target/
 
 # Fragments
 **.png

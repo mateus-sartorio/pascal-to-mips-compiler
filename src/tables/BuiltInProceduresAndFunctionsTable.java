@@ -1,5 +1,6 @@
 package tables;
 
+import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -70,6 +71,15 @@ public final class BuiltInProceduresAndFunctionsTable {
    * @param identifier O identificador do procedimento ou função a ser obtido.
    * @return A entrada correspondente, ou null se não existir.
    */
+  /**
+   * Retorna todas as entradas da tabela, na ordem em que foram registradas.
+   *
+   * @return a lista de procedimentos e funções embutidos.
+   */
+  public List<BuiltInProceduresAndFunctionsEntry> getAll() {
+    return new ArrayList<>(table.values());
+  }
+
   public BuiltInProceduresAndFunctionsEntry get(String identifier) {
     return table.get(identifier.toLowerCase());
   }

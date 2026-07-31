@@ -1,0 +1,40 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build Jar",
+      "type": "shell",
+      "command": "mvn",
+      "args": ["-q", "-DskipTests", "package"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Start Web Application (Debug Port)",
+      "type": "shell",
+      "command": "java",
+      "args": [
+        "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=127.0.0.1:5005",
+        "-jar",
+        "${workspaceFolder}/target/pascal-to-mips-compiler-1.0.0-SNAPSHOT.jar"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "dependsOn": "Build Jar",
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": {
+        "owner": "jdwp",
+        "pattern": [{ "regexp": ".", "file": 1, "location": 2, "message": 3 }],
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^\\s*Listening for transport",
+          "endsPattern": "Started WebApplication in .* seconds"
+        }
+      }
+    }
+  ]
+}

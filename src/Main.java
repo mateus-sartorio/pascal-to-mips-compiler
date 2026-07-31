@@ -46,7 +46,15 @@ public class Main {
     SemanticChecker semanticChecker = new SemanticChecker();
 
     // Percorrendo a parser tree para fazer as verificações semânticas
-    semanticChecker.visit(tree);
+    try {
+      semanticChecker.visit(tree);
+    }
+    // O checker já imprimiu a mensagem do erro. O rastro de pilha só mostraria o caminho
+    // interno do compilador, que não diz nada a quem escreveu o programa, então a execução
+    // termina aqui — com status de erro, para quem chamou o compilador saber que falhou.
+    catch (SemanticErrorException exception) {
+      System.exit(1);
+    }
 
     // Imprimindo as tabelas de símbolos caso o argumento -print-tables seja passado
     if (args.length > 1 && args[1].equals("-print-tables")) {

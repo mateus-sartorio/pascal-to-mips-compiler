@@ -30,8 +30,7 @@ public enum PrimitiveTypeEnum {
         return PrimitiveTypeEnum.CHAR;
       default:
         System.err.println("ERROR: invalid lexer token type for variable declaration.");
-        System.exit(1);
-        return PrimitiveTypeEnum.NO_TYPE;
+        throw new IllegalArgumentException("ERROR: invalid lexer token type for variable declaration.");
     }
   }
 
@@ -57,8 +56,7 @@ public enum PrimitiveTypeEnum {
         return "no_type";
       default:
         System.err.println("ERROR: type enumaration has an invalid value.");
-        System.exit(1);
-        return "";
+        throw new IllegalArgumentException("ERROR: type enumaration has an invalid value.");
     }
   }
 }
